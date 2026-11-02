@@ -3492,6 +3492,7 @@
       "drill_one": "Drill the {{count}} card again",
       "drill_other": "Drill the {{count}} again",
       "askFamily": "Ask about the {{label}} family",
+      "askPrompt": "These cards share {{label}} and I keep missing them: {{titles}}. What connects them, and how do I tell them apart?",
       "show": "Show",
       "hide": "Hide",
       "loadFailed": "The breakdown could not be loaded."

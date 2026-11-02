@@ -92,6 +92,7 @@
       "drill_one": "Die Karte noch einmal üben",
       "drill_other": "Die {{count}} noch einmal üben",
       "askFamily": "Nach der Familie {{label}} fragen",
+      "askPrompt": "Diese Karten teilen {{label}} und ich verfehle sie immer wieder: {{titles}}. Was verbindet sie, und wie halte ich sie auseinander?",
       "show": "Zeigen",
       "hide": "Ausblenden",
       "loadFailed": "Die Aufschlüsselung konnte nicht geladen werden."

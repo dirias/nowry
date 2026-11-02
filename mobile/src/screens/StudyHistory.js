@@ -23,9 +23,14 @@ import { View } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { studySessionsService } from '@nowry/core/api/services'
-import { sessionCardLine, sessionLine, sessionTitle } from '@nowry/core/domain/sessionLog'
+import { evaluationOf, sessionCardLine, sessionLine, sessionTitle } from '@nowry/core/domain/sessionLog'
+import { familySignal, sessionBreakdown } from '@nowry/core/domain/attemptSignals'
+import { deckContext } from '@nowry/core/domain/screenContext'
+import { useSessionAttempts } from '@nowry/core/hooks/useSessionAttempts'
 import { useTheme } from '../theme'
 import { Button, Divider, Icon, Readout, SectionHeader, SessionRow, Screen, Skeleton, Stack, Typography } from '../ui'
+import { setAskContext } from './askContext'
+import { DAILY_REVIEW } from './StudySession'
 
 /** What the web loads, and what its "Load more" adds. */
 const PAGE_SIZE = 20
@@ -120,7 +125,7 @@ export function StudyHistory() {
                   score={line.score}
                   onPress={() => setExpanded(open ? null : key)}
                 />
-                {open ? <Breakdown cards={session.cards ?? []} t={t} theme={theme} /> : null}
+                {open ? <SessionBreakdown session={session} t={t} theme={theme} router={router} /> : null}
               </View>
             )
           })
@@ -136,7 +141,143 @@ export function StudyHistory() {
   )
 }
 
-/** What one past session asked, card by card. */
+/**
+ * One past session as a reading (ADR-059 §3, Direction A): a sentence, what
+ * slipped grouped into families with their signals, what held folded, and the
+ * moves. Fetched when the row opens; a session logged before the ledger
+ * existed has no rows and keeps the flat card list below.
+ */
+function SessionBreakdown({ session, t, theme, router }) {
+  const { attempts, medianThinkMs, daysSincePrevious, loading, error } = useSessionAttempts(session.id)
+  const [heldOpen, setHeldOpen] = useState(false)
+
+  if (loading) return <Skeleton width='100%' height={72} />
+  if (error) {
+    return (
+      <Typography level='body-xs' color='danger.plainColor' style={{ paddingBottom: theme.spacing[1.5] }}>
+        {t('sessions.breakdown.loadFailed')}
+      </Typography>
+    )
+  }
+
+  const reading = sessionBreakdown({ session, attempts, medianThinkMs, daysSincePrevious })
+  if (!reading.fromLedger) return <Breakdown cards={session.cards ?? []} t={t} theme={theme} />
+
+  const deckRoute = session.deck_id ?? DAILY_REVIEW
+  const drill = reading.moves.find((m) => m.kind === 'drill')
+  const ask = reading.moves.find((m) => m.kind === 'askFamily')
+
+  const openDrill = () =>
+    router.push({ pathname: '/study/[deckId]', params: { deckId: deckRoute, scope: 'drill', cards: drill.cardIds.join(',') } })
+  const askFamily = () => {
+    setAskContext(
+      deckContext({ id: session.deck_id ?? null, name: sessionTitle(t, sessionLine(session)) }),
+      '/study/history',
+      t('sessions.breakdown.askPrompt', { label: ask.label, titles: ask.titles.filter(Boolean).join(', ') })
+    )
+    router.push('/agent')
+  }
+
+  return (
+    <Stack spacing={1.5} style={{ paddingBottom: theme.spacing[1.5] }}>
+      {reading.reading ? (
+        <Typography level='body-sm' color='text.secondary'>
+          {t(reading.reading.key, reading.reading.params)}
+        </Typography>
+      ) : null}
+
+      {reading.slippedCount > 0 ? (
+        <Stack spacing={1}>
+          <Stack direction='row' spacing={1} style={{ alignItems: 'baseline' }}>
+            <Typography level='title-sm'>{t('sessions.breakdown.slipped')}</Typography>
+            <Readout>{t('sessions.cardCount', { count: reading.slippedCount })}</Readout>
+          </Stack>
+          {reading.slipped.map((family, index) => (
+            <Family key={`${family.kind}-${family.label ?? index}`} family={family} t={t} theme={theme} />
+          ))}
+        </Stack>
+      ) : null}
+
+      {reading.held.count > 0 ? (
+        <Stack spacing={1}>
+          <Stack direction='row' spacing={1} style={{ alignItems: 'center' }}>
+            <Typography level='title-sm'>{t('sessions.breakdown.held')}</Typography>
+            <Readout>{t('sessions.cardCount', { count: reading.held.count })}</Readout>
+            {reading.held.fluent + reading.held.fragile > 0 ? (
+              <Readout>{t('sessions.breakdown.heldCounts', { fluent: reading.held.fluent, fragile: reading.held.fragile })}</Readout>
+            ) : null}
+            <View style={{ flex: 1 }} />
+            <Button size='sm' variant='tertiary' onPress={() => setHeldOpen((v) => !v)}>
+              {t(heldOpen ? 'sessions.breakdown.hide' : 'sessions.breakdown.show')}
+            </Button>
+          </Stack>
+          {heldOpen ? reading.held.cards.map((line, index) => <CardLine key={line.cardId ?? index} line={line} t={t} />) : null}
+        </Stack>
+      ) : null}
+
+      {drill || ask ? (
+        <Stack spacing={1}>
+          <Typography level='title-sm'>{t('sessions.breakdown.next')}</Typography>
+          {drill ? (
+            <Button onPress={openDrill} accessibilityLabel={t('sessions.breakdown.drill', { count: drill.cardIds.length })}>
+              {t('sessions.breakdown.drill', { count: drill.cardIds.length })}
+            </Button>
+          ) : null}
+          {ask ? (
+            <Button variant='secondary' onPress={askFamily} accessibilityLabel={t('sessions.breakdown.askFamily', { label: ask.label })}>
+              {t('sessions.breakdown.askFamily', { label: ask.label })}
+            </Button>
+          ) : null}
+        </Stack>
+      ) : null}
+    </Stack>
+  )
+}
+
+/** A family of misses: its label line, then its cards. Singles share one "on their own" head. */
+function Family({ family, t, theme }) {
+  const signal = familySignal(family)
+  const head =
+    family.kind === 'character'
+      ? t('sessions.breakdown.family', { label: family.label, count: family.cards.length })
+      : family.kind === 'tag'
+        ? t('sessions.breakdown.tagFamily', { label: family.label, count: family.cards.length })
+        : t('sessions.breakdown.others')
+  return (
+    <View style={{ gap: theme.spacing[0.5] }}>
+      <Stack direction='row' spacing={1} style={{ alignItems: 'center' }}>
+        <Typography level='body-sm' color='text.primary'>
+          {head}
+        </Typography>
+        {signal ? <Readout>{t(`sessions.signal.${signal}`)}</Readout> : null}
+      </Stack>
+      {family.cards.map((line, index) => (
+        <CardLine key={line.cardId ?? index} line={line} t={t} />
+      ))}
+    </View>
+  )
+}
+
+/** One attempt as a row: the judgement glyph, the card, its signals. */
+function CardLine({ line, t }) {
+  const glyph = evaluationOf(line)
+  const marks = [
+    line.signals?.speed ? t(`sessions.signal.${line.signals.speed}`) : null,
+    line.signals?.helped ? t('sessions.signal.asked') : null,
+    line.signals?.lapse === 'lapse' || line.signals?.lapse === 'relearning' ? t(`sessions.signal.${line.signals.lapse}`) : null
+  ].filter(Boolean)
+  return (
+    <Stack direction='row' spacing={1.5} style={{ alignItems: 'center', paddingLeft: 4 }}>
+      <Icon name={glyph.iconKey} size='sm' color={glyph.color} />
+      <Typography level='body-xs' color='text.primary' style={{ flexShrink: 1 }}>
+        {line.title || t('sessions.cardRef', { id: String(line.cardId ?? '').slice(-6) })}
+      </Typography>
+      {marks.length > 0 ? <Readout>{marks.join(' · ')}</Readout> : null}
+    </Stack>
+  )
+}
+
+/** What one past session asked, card by card — the flat list, for sessions without ledger rows. */
 function Breakdown({ cards, t, theme }) {
   if (cards.length === 0) {
     return (

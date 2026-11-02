@@ -83,6 +83,7 @@
       "drill_one": "この 1 枚をもう一度",
       "drill_other": "この {{count}} 枚をもう一度",
       "askFamily": "{{label}} のグループについて聞く",
+      "askPrompt": "これらのカードは {{label}} を共有していて、何度もミスします: {{titles}}。共通点は何で、どう見分ければいいですか？",
       "show": "表示",
       "hide": "隠す",
       "loadFailed": "内訳を読み込めませんでした。"

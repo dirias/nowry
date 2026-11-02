@@ -92,6 +92,7 @@
       "drill_one": "Revoir la carte",
       "drill_other": "Revoir les {{count}}",
       "askFamily": "Demander sur la famille {{label}}",
+      "askPrompt": "Ces cartes partagent {{label}} et je les rate sans cesse : {{titles}}. Qu’est-ce qui les relie, et comment les distinguer ?",
       "show": "Afficher",
       "hide": "Masquer",
       "loadFailed": "Le détail n’a pas pu être chargé."

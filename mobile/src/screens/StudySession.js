@@ -54,6 +54,7 @@ import { cardKey, narrowQueue, positionAfter, useSessionQueue } from '../hooks/u
 import { localDay, practiceFor, resumeIndex, withPractice } from '@nowry/core/domain/sessionOrder'
 import { newClientId } from '@nowry/core/utils/clientId'
 import { attemptPayload, attemptTimings, emptyHelp, HELP_KINDS, SHOWING } from '@nowry/core/domain/attempt'
+import { drillIdsOf, useDrillCards } from '@nowry/core/hooks/useDrillCards'
 import { SessionQueueSheet } from './SessionQueueSheet'
 import { flushOutbox, queueReview, queueSession } from '../platform/outbox'
 import { BUTTON_SIZES, EDGE, GRADE_VARIANTS } from '../ui/buttonSpec'
@@ -178,12 +179,16 @@ function CardFace({ label, labelColor, level, text, source = null }) {
 }
 
 export function StudySession() {
-  const { deckId, tags, group, limit, scope: scopeParam, card: cardParam } = useLocalSearchParams()
+  const { deckId, tags, group, limit, scope: scopeParam, card: cardParam, cards: cardsParam } = useLocalSearchParams()
   const timer = usePomodoro()
   const timerRef = useRef(timer)
   timerRef.current = timer
   const id = String(deckId)
   const isDaily = id === DAILY_REVIEW
+  // A drill (ADR-059 §4): named cards, graded as practice showings, the
+  // schedule untouched. Opened from a session's breakdown.
+  const isDrill = scopeParam === 'drill' && Boolean(cardsParam)
+  const drillIds = useMemo(() => (isDrill ? drillIdsOf(cardsParam) : []), [isDrill, cardsParam])
   const { t, i18n } = useTranslation()
   const router = useRouter()
 
@@ -284,8 +289,9 @@ export function StudySession() {
   const baseDueQueue = useSessionCards({ ...sessionParams, scope: 'due' })
   const allQueue = useSessionCards({ ...sessionParams, scope: 'all', enabled: scope === 'all' })
   const queue = scope === 'all' ? allQueue : dueQueue
-  const allCards = queue.cards
-  const error = Boolean(queue.error)
+  const drill = useDrillCards(drillIds, { enabled: isDrill })
+  const allCards = isDrill ? drill.cards : queue.cards
+  const error = Boolean(queue.error) || Boolean(drill.error)
   // What the day said on arrival (SR-002): a pile spread forward, if one was.
   const landing = spreadOf(dueQueue)
   const [landingSeen, setLandingSeen] = useState(false)
@@ -349,7 +355,7 @@ export function StudySession() {
   const resumed = useRef(Boolean(cardParam))
 
   useEffect(() => {
-    if (!allCards || resumed.current || scope !== 'due') return
+    if (!allCards || resumed.current || scope !== 'due' || isDrill) return
     resumed.current = true
     // Read while a card is in hand: the summary logs after the last one is
     // gone, and the deck's name is only ever carried by a card.
@@ -371,7 +377,7 @@ export function StudySession() {
     setGraded(saved.graded)
     startedAt.current = new Date(saved.startedAt)
     if (saved.clientSessionId) clientSessionId.current = saved.clientSessionId
-  }, [allCards, id, scope])
+  }, [allCards, id, scope, isDrill])
 
   const total = cards?.length ?? 0
 
@@ -481,7 +487,8 @@ export function StudySession() {
       deckName: isDaily ? null : (deckName.current ?? deckNames[id] ?? null),
       startedAt: startedAt.current,
       cards: answers,
-      clientSessionId: clientSessionId.current
+      clientSessionId: clientSessionId.current,
+      sessionType: isDrill ? 'drill' : 'srs_review'
     }
     studySessionsService
       .log(payload)
@@ -510,9 +517,10 @@ export function StudySession() {
      * settled rather than awaited — XP is a reward, and a reward that can
      * block the summary screen is a punishment.
      */
+    // A drill is practice (ADR-059 §4): it earns no XP and no streak.
     Promise.allSettled([
-      agentService.awardSessionXp(Math.min(500, answers.length), id === DAILY_REVIEW ? null : id),
-      agentService.awardStreakXp()
+      isDrill ? Promise.resolve(null) : agentService.awardSessionXp(Math.min(500, answers.length), id === DAILY_REVIEW ? null : id),
+      isDrill ? Promise.resolve(null) : agentService.awardStreakXp()
     ]).then((results) => {
       // The panel on Home reads a cached level; a level earned here is a level
       // it is now wrong about.
@@ -552,7 +560,7 @@ export function StudySession() {
         deckName: deckName.current
       })
     )
-  }, [complete, id, isDaily, deckNames, graded, askCompanion])
+  }, [complete, id, isDaily, isDrill, deckNames, graded, askCompanion])
 
   const grade = useCallback(
     (value) => {
@@ -566,12 +574,12 @@ export function StudySession() {
       // moves on, so the next card's clock cannot leak into this one.
       const attempt = attemptPayload({
         clientSessionId: clientSessionId.current,
-        showing: card.practice ? SHOWING.practice : SHOWING.scheduled,
+        showing: card.practice || isDrill ? SHOWING.practice : SHOWING.scheduled,
         ...attemptTimings({ shownAt: shownAt.current, flippedAt: flippedAt.current, gradedAt: Date.now() }),
         help: help.current,
         position: index + 1,
         total,
-        scope: isDaily ? 'daily' : scope,
+        scope: isDrill ? 'drill' : isDaily ? 'daily' : scope,
         client: 'phone'
       })
 
@@ -607,7 +615,9 @@ export function StudySession() {
       setRevealed(false)
       setHinted(true)
       setLandingSeen(true)
-      writeResume(id, { day: localDay(), graded: answers, startedAt: startedAt.current, clientSessionId: clientSessionId.current })
+      // A drill is not the deck's session: it never leaves a resume record under its key.
+      if (!isDrill)
+        writeResume(id, { day: localDay(), graded: answers, startedAt: startedAt.current, clientSessionId: clientSessionId.current })
 
       /*
        * A grade that cannot be sent is not lost and is not retried in a loop
@@ -632,7 +642,7 @@ export function StudySession() {
        * offered a way out, in the notice band, once per card per session. Any
        * other grade takes an open offer away — nothing is forced.
        */
-      const offer = leechOffer(card, { grade: value, sessionAgains: 1, offered: leechOffered.current })
+      const offer = isDrill ? null : leechOffer(card, { grade: value, sessionAgains: 1, offered: leechOffered.current })
       if (offer) leechOffered.current.add(cardId)
       setLeech(offer ? { card, offer, rested: null } : null)
 
@@ -650,7 +660,7 @@ export function StudySession() {
         NUDGE_DELAY + Math.random() * NUDGE_JITTER
       )
     },
-    [cards, index, total, id, isDaily, graded, askCompanion, scope]
+    [cards, index, total, id, isDaily, isDrill, graded, askCompanion, scope]
   )
 
   /**

@@ -3014,6 +3014,7 @@
       "drill_one": "Repasar la tarjeta otra vez",
       "drill_other": "Repasar las {{count}} otra vez",
       "askFamily": "Preguntar por la familia {{label}}",
+      "askPrompt": "Estas tarjetas comparten {{label}} y sigo fallándolas: {{titles}}. ¿Qué las conecta y cómo las distingo?",
       "show": "Mostrar",
       "hide": "Ocultar",
       "loadFailed": "No se pudo cargar el desglose."

@@ -53,6 +53,7 @@ import { isResting } from '@nowry/core/domain/cardRest'
 import { filterCardsByTags } from '@nowry/core/utils/tagFilter'
 import { newClientId } from '@nowry/core/utils/clientId'
 import { attemptPayload, attemptTimings, emptyHelp, HELP_KINDS, SHOWING } from '@nowry/core/domain/attempt'
+import { drillIdsOf } from '@nowry/core/hooks/useDrillCards'
 import { leechOffer, leechRestUntil, splitDraft } from '@nowry/core/domain/leech'
 import { queryClient } from '@nowry/core/api/queryClient'
 import { useAuth } from '@nowry/core/context/AuthContext'
@@ -337,6 +338,10 @@ export default function StudySession() {
   timerRef.current = timer
   const mode = searchParams.get('mode') || 'study'
   const isReadOnlyMode = mode === 'browse'
+  // A drill (ADR-059 §4): named cards from a session's breakdown, graded as
+  // practice showings; the schedule, the XP and the streak are untouched.
+  const isDrill = mode === 'drill'
+  const drillIds = React.useMemo(() => (isDrill ? drillIdsOf(searchParams.get('cards')) : []), [isDrill, searchParams])
   const modeChipColor = { study: 'neutral', browse: 'primary' }[mode]
 
   const [cards, setCards] = useState([])
@@ -553,7 +558,11 @@ export default function StudySession() {
       setLoadError(false)
       let reviewCards = []
 
-      if (deckId === 'daily-review') {
+      if (isDrill) {
+        // The misses of one session, by id; a card that is gone is skipped.
+        const results = await Promise.allSettled(drillIds.map((cid) => cardsService.getById(cid)))
+        reviewCards = results.filter((r) => r.status === 'fulfilled' && r.value).map((r) => r.value)
+      } else if (deckId === 'daily-review') {
         // STUDY-002: Quick 10, a tag group or the struggling group ride the URL.
         reviewCards = await cardsService.getDailyReviewCards(dailyReviewParams(searchParams))
       } else if (isReadOnlyMode) {
@@ -589,7 +598,7 @@ export default function StudySession() {
     } finally {
       setLoading(false)
     }
-  }, [deckId, isReadOnlyMode, mode, tagsKey])
+  }, [deckId, isReadOnlyMode, isDrill, drillIds, mode, tagsKey])
 
   useEffect(() => {
     if (cardsLoading) return
@@ -771,7 +780,8 @@ export default function StudySession() {
           deckName: null,
           startedAt: sessionStartTime.current,
           cards: gradedCards.current,
-          clientSessionId: clientSessionId.current
+          clientSessionId: clientSessionId.current,
+          sessionType: isDrill ? 'drill' : 'srs_review'
         })
         .then((logged) => {
           // The block's work is done (PRD D8): the study block that opened this
@@ -792,6 +802,7 @@ export default function StudySession() {
     visibleCards,
     deckId,
     mode,
+    isDrill,
     revealPet,
     hasBeenRevealed,
     awardSessionXp,
@@ -949,21 +960,23 @@ export default function StudySession() {
       // The row behind this grade (ADR-059 §1), measured before the screen moves on.
       const attempt = attemptPayload({
         clientSessionId: clientSessionId.current,
-        showing: currentCard.practice ? SHOWING.practice : SHOWING.scheduled,
+        showing: currentCard.practice || isDrill ? SHOWING.practice : SHOWING.scheduled,
         ...attemptTimings({ shownAt: shownAt.current, flippedAt: flippedAt.current, gradedAt: Date.now() }),
         help: help.current,
         position: latestIndex + 1,
         total: latestCards.length,
-        scope: deckId === 'daily-review' ? 'daily' : mode,
+        scope: isDrill ? 'drill' : deckId === 'daily-review' ? 'daily' : mode,
         client: 'web'
       })
+      // The server knows study and browse; a drill is study whose rows are practice.
+      const reviewMode = isDrill ? 'study' : mode
 
       // A practice showing is the learner's, not the schedule's: the first
       // answer set when the card returns, so this one is not a second answer in
       // the summary and not another miss toward the leech. It IS a row in the
       // ledger (ADR-059 §1): the server records it and moves nothing.
       if (currentCard.practice) {
-        cardsService.review(cardId, grade, mode, attempt).catch(() => {
+        cardsService.review(cardId, grade, reviewMode, attempt).catch(() => {
           // A lost practice row is a lost row, never a retried grade.
         })
         setLeech(null)
@@ -1057,11 +1070,13 @@ export default function StudySession() {
       // THE LEECH (SR-004): the fourth Again inside the Struggling window is
       // offered a way out in the footer, once per card per session. Any other
       // grade takes an open offer away — nothing is forced.
-      const offer = leechOffer(currentCard, {
-        grade,
-        sessionAgains: againCountPerCardId.current[cardId] || 1,
-        offered: leechOffered.current
-      })
+      const offer = isDrill
+        ? null
+        : leechOffer(currentCard, {
+            grade,
+            sessionAgains: againCountPerCardId.current[cardId] || 1,
+            offered: leechOffered.current
+          })
       if (offer) leechOffered.current.add(cardId)
       setLeech(offer ? { card: currentCard, offer, rested: null } : null)
 
@@ -1096,7 +1111,7 @@ export default function StudySession() {
 
       // BACKGROUND SYNC: Send to backend (fire-and-forget)
       try {
-        const response = await cardsService.review(cardId, grade, mode, attempt)
+        const response = await cardsService.review(cardId, grade, reviewMode, attempt)
 
         // If backend returns different values, update silently.
         // Re-read cards from latestStateRef (not the `cards` closure captured
@@ -1139,7 +1154,7 @@ export default function StudySession() {
           {
             cardId,
             grade,
-            mode,
+            mode: reviewMode,
             attempt,
             timestamp: Date.now(),
             retryCount: 0
@@ -1153,7 +1168,7 @@ export default function StudySession() {
     // No `cards` here: every read goes through latestStateRef and every write
     // is a functional setCards patch, so the handler holds no closure over the
     // deck that could go stale.
-    [handleNext, goTo, mode, deckId, queueIntervention, applyReviewXp, cheer]
+    [handleNext, goTo, mode, isDrill, deckId, queueIntervention, applyReviewXp, cheer]
   )
 
   const handlePrev = React.useCallback(() => {
