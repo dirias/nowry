@@ -22,7 +22,7 @@ import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { deckCounts } from '@nowry/core/domain/deckTypes'
 import { studySummary } from '@nowry/core/domain/studySummary'
-import { sessionLine } from '@nowry/core/domain/sessionLog'
+import { sessionLine, sessionTitle } from '@nowry/core/domain/sessionLog'
 import { studySessionsService } from '@nowry/core/api/services'
 import { useForecast } from '@nowry/core/hooks/useForecast'
 import { useToday } from '@nowry/core/hooks/useToday'
@@ -332,7 +332,9 @@ export function StudyDashboard() {
           title={t('study.sections.recent')}
           count={sessions && sessions.length > 0 ? t('sessions.ofTotal', { shown: sessions.length, total: sessionTotal }) : null}
           action={
-            sessionTotal > RECENT_COUNT ? (
+            /* Whenever there is one session, as the web does: with two, the
+               breakdown was unreachable from anywhere (ADR-058 §3). */
+            sessionTotal > 0 ? (
               <Button size='sm' variant='tertiary' onPress={() => router.push('/study/history')}>
                 {t('sessions.history')}
               </Button>
@@ -349,8 +351,9 @@ export function StudyDashboard() {
           sessions.map(sessionLine).map((session, index) => (
             <View key={session.id ?? index}>
               <Divider />
+              {/* A door to History with this session open (ADR-058 §3). */}
               <SessionRow
-                title={session.title || t('sessions.unknownTopic')}
+                title={sessionTitle(t, session)}
                 meta={[
                   t(session.kindKey),
                   t('sessions.cardCount', { count: session.cards }),
@@ -358,6 +361,7 @@ export function StudyDashboard() {
                 ].join(' · ')}
                 when={relativeDay(t, session.completedAt)}
                 score={session.score}
+                onPress={session.id ? () => router.push({ pathname: '/study/history', params: { session: session.id } }) : undefined}
               />
             </View>
           ))

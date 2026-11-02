@@ -52,6 +52,7 @@ import { useCardSpeech, useSpeech } from '../hooks/useCardSpeech'
 import { useInterventions } from '../hooks/useInterventions'
 import { cardKey, narrowQueue, positionAfter, useSessionQueue } from '../hooks/useSessionQueue'
 import { localDay, practiceFor, resumeIndex, withPractice } from '@nowry/core/domain/sessionOrder'
+import { newClientId } from '@nowry/core/utils/clientId'
 import { SessionQueueSheet } from './SessionQueueSheet'
 import { flushOutbox, queueReview, queueSession } from '../platform/outbox'
 import { BUTTON_SIZES, EDGE, GRADE_VARIANTS } from '../ui/buttonSpec'
@@ -220,6 +221,9 @@ export function StudySession() {
   // session that has not reached the server yet is a fact the user should have.
   const [queued, setQueued] = useState(0)
   const startedAt = useRef(new Date())
+  // Minted when the session starts and kept across a resume, so the outbox
+  // re-sending a log the server already wrote names the same session (ADR-058 §2).
+  const clientSessionId = useRef(newClientId())
   const logged = useRef(false)
 
   /*
@@ -359,6 +363,7 @@ export function StudySession() {
     setIndex(at)
     setGraded(saved.graded)
     startedAt.current = new Date(saved.startedAt)
+    if (saved.clientSessionId) clientSessionId.current = saved.clientSessionId
   }, [allCards, id, scope])
 
   const total = cards?.length ?? 0
@@ -442,11 +447,14 @@ export function StudySession() {
     // An all-caught-up deck lands here too, with nothing to log.
     const answers = Object.values(graded)
     if (answers.length === 0) return
+    // The server names the record (ADR-058 §1); the name sent here is a
+    // courtesy from the deck list the library already holds, never a card's.
     const payload = {
-      deckId: id,
-      deckName: deckName.current,
+      deckId: isDaily ? null : id,
+      deckName: isDaily ? null : (deckName.current ?? deckNames[id] ?? null),
       startedAt: startedAt.current,
-      cards: answers
+      cards: answers,
+      clientSessionId: clientSessionId.current
     }
     studySessionsService
       .log(payload)
@@ -517,7 +525,7 @@ export function StudySession() {
         deckName: deckName.current
       })
     )
-  }, [complete, id, graded, askCompanion])
+  }, [complete, id, isDaily, deckNames, graded, askCompanion])
 
   const grade = useCallback(
     (value) => {
@@ -557,7 +565,7 @@ export function StudySession() {
       setRevealed(false)
       setHinted(true)
       setLandingSeen(true)
-      writeResume(id, { day: localDay(), graded: answers, startedAt: startedAt.current })
+      writeResume(id, { day: localDay(), graded: answers, startedAt: startedAt.current, clientSessionId: clientSessionId.current })
 
       /*
        * A grade that cannot be sent is not lost and is not retried in a loop

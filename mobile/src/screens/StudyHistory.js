@@ -20,10 +20,10 @@
  */
 import { useCallback, useEffect, useState } from 'react'
 import { View } from 'react-native'
-import { useRouter } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { studySessionsService } from '@nowry/core/api/services'
-import { sessionCardLine, sessionLine } from '@nowry/core/domain/sessionLog'
+import { sessionCardLine, sessionLine, sessionTitle } from '@nowry/core/domain/sessionLog'
 import { useTheme } from '../theme'
 import { Button, Divider, Icon, Readout, SectionHeader, SessionRow, Screen, Skeleton, Stack, Typography } from '../ui'
 
@@ -34,13 +34,15 @@ export function StudyHistory() {
   const { t, i18n } = useTranslation()
   const router = useRouter()
   const theme = useTheme()
+  // A Recent row arrives here with its own session named; it opens expanded (ADR-058 §3).
+  const { session: openSession } = useLocalSearchParams()
 
   const [sessions, setSessions] = useState(null)
   const [total, setTotal] = useState(0)
   const [limit, setLimit] = useState(PAGE_SIZE)
   const [loadingMore, setLoadingMore] = useState(false)
   const [failed, setFailed] = useState(false)
-  const [expanded, setExpanded] = useState(null)
+  const [expanded, setExpanded] = useState(openSession ? String(openSession) : null)
 
   const load = useCallback(async (fetchLimit, more = false) => {
     if (more) setLoadingMore(true)
@@ -108,7 +110,7 @@ export function StudyHistory() {
               <View key={key}>
                 <Divider />
                 <SessionRow
-                  title={line.title || t('sessions.unknownTopic')}
+                  title={sessionTitle(t, line)}
                   meta={[
                     t(line.kindKey),
                     t('sessions.cardCount', { count: line.cards }),
