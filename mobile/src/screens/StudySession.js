@@ -1112,11 +1112,13 @@ export function StudySession() {
             ]}
             leech={leechBand}
             note={
+              // The session's own word, not a nudge left over from the last card:
+              // the object's note is the reading's (ADR-060 §4), as on the web.
               <CompanionNote
                 stage={pet.stage}
                 avatarUrl={pet.avatarUrl}
                 isDefaultCompanion={pet.isDefaultCompanion}
-                text={buddy.message?.message}
+                text={buddy.message?.type === 'session_summary' ? buddy.message.message : null}
                 speech={buddySpeech}
                 onDismiss={buddy.dismiss}
               />
