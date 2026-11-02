@@ -42,3 +42,10 @@ it("keys the cache by user and days, so invalidating ['forecast', user] catches 
 
   expect(client.getQueryCache().findAll({ queryKey: ['forecast', 'user-1', 14] })).toHaveLength(1)
 })
+
+it('holds the request while a screen does not need it yet (END-005)', async () => {
+  const { wrapper } = makeWrapper()
+  renderHook(() => useForecast(7, { enabled: false }), { wrapper })
+  await new Promise((resolve) => setTimeout(resolve, 20))
+  expect(mockGet).not.toHaveBeenCalled()
+})

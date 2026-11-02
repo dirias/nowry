@@ -134,6 +134,9 @@ jest.mock('@nowry/core/hooks/useDeckData', () => ({
 jest.mock('@nowry/core/hooks/useStatistics', () => ({
   useStatistics: () => ({ statistics: null, loading: false, error: null, reload: jest.fn() })
 }))
+jest.mock('@nowry/core/hooks/useForecast', () => ({
+  useForecast: () => ({ forecast: null, loading: false, error: null, reload: jest.fn() })
+}))
 jest.mock('@nowry/core/hooks/useSessionAttempts', () => ({
   useSessionAttempts: () => ({ attempts: null, medianThinkMs: null, daysSincePrevious: null, loading: false, error: null })
 }))

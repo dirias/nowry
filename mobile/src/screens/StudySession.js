@@ -57,6 +57,7 @@ import { attemptPayload, attemptTimings, emptyHelp, HELP_KINDS, SHOWING } from '
 import { drillIdsOf, useDrillCards } from '@nowry/core/hooks/useDrillCards'
 import { useSessionAttempts } from '@nowry/core/hooks/useSessionAttempts'
 import { useStatistics } from '@nowry/core/hooks/useStatistics'
+import { useForecast } from '@nowry/core/hooks/useForecast'
 import { studySummary } from '@nowry/core/domain/studySummary'
 import { END_KEY, endHasSomethingToSay, endSignalLines, sessionEnd } from '@nowry/core/domain/sessionEnd'
 import { SessionEnd } from './SessionEnd'
@@ -490,6 +491,10 @@ export function StudySession() {
     logged.current = true
     storage.remove(resumeKey(id))
     setEndedAt(Date.now())
+    // The ending reads what is left today and what tomorrow holds (END-005);
+    // every count this session changed is refetched now, not on blur.
+    invalidateCardCounts()
+    queryClient.invalidateQueries({ queryKey: ['forecast'] })
 
     // An all-caught-up deck lands here too, with nothing to log.
     const answers = Object.values(graded)
@@ -920,6 +925,9 @@ export function StudySession() {
    * and what is left today are the summary's own numbers (one owner each).
    */
   const { statistics } = useStatistics()
+  // Tomorrow's due count, for the object's last line (END-005). Read only
+  // once the session has ended; the forecast is Home's number, not a session's.
+  const { forecast } = useForecast(7, { enabled: complete })
   const ledger = useSessionAttempts(sessionId, { enabled: complete && Boolean(sessionId) })
   const gradedDeckCount = useMemo(() => {
     if (!isDaily || !allCards) return null
@@ -942,9 +950,11 @@ export function StudySession() {
       daysSincePrevious: ledger.daysSincePrevious,
       grants,
       streak: today.streak,
-      dueLeft: today.due
+      dueLeft: today.due,
+      dueTomorrow: forecast?.days?.[0]?.due ?? null
     })
   }, [
+    forecast,
     complete,
     graded,
     isDrill,

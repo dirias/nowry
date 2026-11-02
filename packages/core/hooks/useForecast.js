@@ -15,15 +15,18 @@ export const FORECAST_STALE_TIME = 60000 // same window as statistics — the tw
  *
  * Key: ['forecast', userId, days] per api/queryClient.js. Invalidated beside
  * ['statistics', userId] when a review is graded (StudySession).
+ *
+ * `enabled` lets a screen that needs the forecast only at one moment (the
+ * session's end, END-005) hold the request until then.
  */
-export function useForecast(days = 7) {
+export function useForecast(days = 7, { enabled = true } = {}) {
   const { user } = useAuth()
   const userId = user?.id ?? null
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['forecast', userId, days],
     queryFn: () => cardsService.getForecast(days),
-    enabled: !!userId,
+    enabled: Boolean(userId && enabled),
     staleTime: FORECAST_STALE_TIME
   })
 

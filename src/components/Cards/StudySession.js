@@ -56,6 +56,7 @@ import { attemptPayload, attemptTimings, emptyHelp, HELP_KINDS, SHOWING } from '
 import { drillIdsOf } from '@nowry/core/hooks/useDrillCards'
 import { useDeckData } from '@nowry/core/hooks/useDeckData'
 import { useStatistics } from '@nowry/core/hooks/useStatistics'
+import { useForecast } from '@nowry/core/hooks/useForecast'
 import { useSessionAttempts } from '@nowry/core/hooks/useSessionAttempts'
 import { studySummary } from '@nowry/core/domain/studySummary'
 import { END_KEY, endHasSomethingToSay, endSignalLines, sessionEnd } from '@nowry/core/domain/sessionEnd'
@@ -1359,6 +1360,8 @@ export default function StudySession() {
    * all-caught-up deck is the same object with nothing in it.
    */
   const { statistics } = useStatistics()
+  // Tomorrow's due count, for the object's last line (END-005); read at the end only.
+  const { forecast } = useForecast(7, { enabled: sessionComplete })
   const deckList = useDeckData(null)
   const ledger = useSessionAttempts(sessionId, { enabled: sessionComplete && Boolean(sessionId) })
   const isDaily = deckId === 'daily-review'
@@ -1386,9 +1389,11 @@ export default function StudySession() {
       daysSincePrevious: ledger.daysSincePrevious,
       grants,
       streak: today.streak,
-      dueLeft: today.due
+      dueLeft: today.due,
+      dueTomorrow: forecast?.days?.[0]?.due ?? null
     })
   }, [
+    forecast,
     sessionComplete,
     cards,
     deckList.decks,
