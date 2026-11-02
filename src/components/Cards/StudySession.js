@@ -54,6 +54,12 @@ import { filterCardsByTags } from '@nowry/core/utils/tagFilter'
 import { newClientId } from '@nowry/core/utils/clientId'
 import { attemptPayload, attemptTimings, emptyHelp, HELP_KINDS, SHOWING } from '@nowry/core/domain/attempt'
 import { drillIdsOf } from '@nowry/core/hooks/useDrillCards'
+import { useDeckData } from '@nowry/core/hooks/useDeckData'
+import { useStatistics } from '@nowry/core/hooks/useStatistics'
+import { useSessionAttempts } from '@nowry/core/hooks/useSessionAttempts'
+import { studySummary } from '@nowry/core/domain/studySummary'
+import { END_KEY, sessionEnd } from '@nowry/core/domain/sessionEnd'
+import SessionEnd from './SessionEnd'
 import { leechOffer, leechRestUntil, splitDraft } from '@nowry/core/domain/leech'
 import { queryClient } from '@nowry/core/api/queryClient'
 import { useAuth } from '@nowry/core/context/AuthContext'
@@ -389,6 +395,12 @@ export default function StudySession() {
   // so consecutive grades restart the animation instead of merging into one.
   const [xpFloater, setXpFloater] = useState(null)
   const [mostAttentionCardFront, setMostAttentionCardFront] = useState(null)
+  // The ending (ADR-060 §1): the grants the two XP calls returned, read into
+  // the state line; the record's id once the log is written, which is how the
+  // ledger is read; when the last card was graded.
+  const [grants, setGrants] = useState(null)
+  const [sessionId, setSessionId] = useState(null)
+  const [endedAt, setEndedAt] = useState(null)
 
   // Inline view filters over the loaded card list. Two gates, one per
   // dimension (ADR-014):
@@ -711,6 +723,7 @@ export default function StudySession() {
     // resets when a new one begins.
     if (sessionCompleteHandledRef.current) return
     sessionCompleteHandledRef.current = true
+    setEndedAt(Date.now())
 
     const wrongCounts = wrongCountPerCardId.current
     const againCounts = againCountPerCardId.current
@@ -760,7 +773,10 @@ export default function StudySession() {
       // with sessionComplete=true) cannot farm the bonus by opening and
       // closing. Fire-and-forget inside AgentContext — XP never gates the UI.
       if (gradedCards.current.length > 0) {
-        awardSessionXp(gradedCards.current.length, deckId)
+        // The grants come back so the ending can say what was earned (ADR-060 §2).
+        Promise.resolve(awardSessionXp(gradedCards.current.length, deckId))
+          .then((granted) => setGrants(granted ?? null))
+          .catch(() => {})
       }
 
       // Release any level-up banked mid-session. The user has stopped
@@ -784,6 +800,8 @@ export default function StudySession() {
           sessionType: isDrill ? 'drill' : 'srs_review'
         })
         .then((logged) => {
+          // The record exists now; its rows are the ending's reading.
+          setSessionId(logged?.sessionId ?? null)
           // The block's work is done (PRD D8): the study block that opened this
           // review is kept, with the session it produced on its record.
           const timer = timerRef.current
@@ -1361,6 +1379,82 @@ export default function StudySession() {
     }
   }, [handleNext, handlePrev, handleFlip])
 
+  /*
+   * The ending (ADR-060 §1): built from the device's grades the moment the
+   * last card is graded, upgraded when the ledger answers. The ledger is read
+   * only once the record exists, by the id the log reply named; the streak and
+   * what is left today are the summary's own numbers (one owner each). An
+   * all-caught-up deck is the same object with nothing in it.
+   */
+  const { statistics } = useStatistics()
+  const deckList = useDeckData(null)
+  const ledger = useSessionAttempts(sessionId, { enabled: sessionComplete && Boolean(sessionId) })
+  const isDaily = deckId === 'daily-review'
+  const deckNameOf = React.useMemo(
+    () => Object.fromEntries((deckList.decks ?? []).map((deck) => [String(deck._id ?? deck.id), deck.name || deck.title || ''])),
+    [deckList.decks]
+  )
+  const end = React.useMemo(() => {
+    if (!sessionComplete) return null
+    const answers = gradedCards.current
+    const graded = new Set(answers.map((answer) => answer.cardId))
+    const decksSeen = new Set(
+      cards.filter((card) => graded.has(card._id || card.id)).map((card) => String(card.deck_id?._id ?? card.deck_id))
+    )
+    const today = studySummary({ decks: deckList.decks, statistics })
+    return sessionEnd({
+      answers,
+      kind: isDrill ? 'drill' : isDaily ? 'daily' : 'deck',
+      deckName: isDaily ? null : (deckNameOf[String(deckId)] ?? null),
+      deckCount: isDaily ? decksSeen.size : null,
+      startedAt: sessionStartTime.current,
+      endedAt,
+      attempts: ledger.attempts,
+      medianThinkMs: ledger.medianThinkMs,
+      daysSincePrevious: ledger.daysSincePrevious,
+      grants,
+      streak: today.streak,
+      dueLeft: today.due
+    })
+  }, [
+    sessionComplete,
+    cards,
+    deckList.decks,
+    statistics,
+    isDrill,
+    isDaily,
+    deckNameOf,
+    deckId,
+    endedAt,
+    ledger.attempts,
+    ledger.medianThinkMs,
+    ledger.daysSincePrevious,
+    grants
+  ])
+
+  /*
+   * A new session in the same screen: the end's drill key stays on this route
+   * with a drill scope, so the session's own record starts over here. Keyed
+   * on what names a session, never on a tag filter, which narrows one.
+   */
+  const sessionKey = `${deckId}|${mode}|${isDrill ? drillIds.join(',') : ''}`
+  const previousSessionKey = useRef(sessionKey)
+  useEffect(() => {
+    if (previousSessionKey.current === sessionKey) return
+    previousSessionKey.current = sessionKey
+    gradedCards.current = []
+    wrongCountPerCardId.current = {}
+    againCountPerCardId.current = {}
+    gradesByCardId.current = {}
+    clientSessionId.current = newClientId()
+    sessionStartTime.current = new Date()
+    setCurrentIndex(0)
+    setSessionComplete(false)
+    setSessionId(null)
+    setGrants(null)
+    setEndedAt(null)
+  }, [sessionKey])
+
   // §7: Use Skeleton placeholders, not a full-page loading gate
   if (loading) {
     return (
@@ -1385,7 +1479,7 @@ export default function StudySession() {
   // Deck-empty / load-error gate reads the FULL deck on purpose: "this deck has
   // no cards" and "your filter matched nothing" are different problems with
   // different exits, and the second is handled inside the session layout below.
-  if (loadError || cards.length === 0) {
+  if (loadError || (cards.length === 0 && !sessionComplete)) {
     const emptyTitleKey = loadError
       ? 'cards.session.error'
       : mode === 'study'
@@ -1420,93 +1514,54 @@ export default function StudySession() {
   const dueOutsideFilter =
     mode === 'study' && isFiltering ? baseCards.current.length - filterCardsByTags(baseCards.current, selectedTags).length : 0
 
-  if (sessionComplete) {
+  if (sessionComplete && end) {
+    const openKey = (key) => {
+      if (!key) return
+      if (key.kind === END_KEY.drill) {
+        navigate(`/study/${deckId}?mode=drill&cards=${encodeURIComponent(key.cardIds.join(','))}`)
+      } else if (key.kind === END_KEY.dueToday) {
+        navigate('/study/daily-review')
+      } else {
+        navigate('/study')
+      }
+    }
     return (
-      <Container maxWidth='sm' sx={{ py: 4 }}>
-        <Card variant='outlined' sx={{ borderRadius: 'xl', boxShadow: 'md', overflow: 'hidden' }}>
-          {/* Icon zone */}
-          <Box sx={{ display: 'flex', justifyContent: 'center', pt: 5, pb: 3 }}>
-            <Box
-              sx={{
-                width: 80,
-                height: 80,
-                borderRadius: 'full',
-                bgcolor: 'success.softBg',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
+      <Container maxWidth='xl' sx={{ py: 4, px: 2 }}>
+        {/* The session's header stays above the object (Board 7): the exit,
+            the count as the row's title, and the seam, full. */}
+        <Box data-testid='session-end-header' sx={{ mb: 3 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1.5 } }}>
+            <IconButton
+              onClick={() => navigate('/study')}
+              variant='plain'
+              color='neutral'
+              aria-label={t('cards.session.goBack')}
+              sx={{ minHeight: { xs: 44, md: 36 }, minWidth: { xs: 44, md: 36 }, ml: { xs: -1, sm: 0 } }}
             >
-              <CheckCircle sx={{ fontSize: 'xl5', color: 'success.plainColor' }} />
-            </Box>
-          </Box>
-
-          {/* Stat block */}
-          <Box sx={{ bgcolor: 'background.level1', mx: 3, borderRadius: 'lg', py: 2.5, px: 3, mb: 3 }}>
-            <Stack direction='row' justifyContent='center' spacing={4}>
-              <Stack alignItems='center'>
-                <Typography level='h2' fontWeight={700}>
-                  {countCards(visibleCards)}
-                </Typography>
-                <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                  {t('cards.session.complete.cardsReviewed')}
-                </Typography>
-              </Stack>
-              {needsAttentionCount > 0 && (
-                <Stack alignItems='center'>
-                  <Typography level='h2' fontWeight={700} sx={{ color: 'warning.plainColor' }}>
-                    {needsAttentionCount}
-                  </Typography>
-                  <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-                    {t('cards.session.complete.needsAttentionLabel')}
-                  </Typography>
-                </Stack>
-              )}
-            </Stack>
-            {needsAttentionCount > 0 && (
-              <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid', borderColor: 'divider', textAlign: 'center' }}>
-                <Typography
-                  level='body-sm'
-                  sx={{
-                    color: 'text.secondary',
-                    display: '-webkit-box',
-                    WebkitBoxOrient: 'vertical',
-                    WebkitLineClamp: 2,
-                    overflow: 'hidden'
-                  }}
-                >
-                  {t('cards.session.complete.topCardCallout', { card: mostAttentionCardFront })}
-                </Typography>
-              </Box>
-            )}
-            {needsAttentionCount === 0 && (
-              <Typography level='body-sm' fontWeight={600} sx={{ color: 'success.plainColor', textAlign: 'center', mt: 2 }}>
-                {t('cards.session.complete.perfectSession')}
-              </Typography>
-            )}
-          </Box>
-
-          {/* Text + CTA */}
-          <Box sx={{ textAlign: 'center', px: 3, pb: 5 }}>
-            <Typography level='h3' fontWeight={700} sx={{ mb: 1 }}>
-              {t('cards.session.complete.title')}
+              <ArrowBack />
+            </IconButton>
+            <Typography level='title-sm' sx={{ color: 'text.primary', whiteSpace: 'nowrap', ...tabularNums }}>
+              {end.cards > 0 ? t('cards.session.card', { current: end.cards, total: end.cards }) : t('cards.session.allCaughtUp')}
             </Typography>
-            <Typography level='body-md' sx={{ mb: dueOutsideFilter > 0 ? 1 : 4, color: 'text.secondary' }}>
-              {t('cards.session.complete.body', { count: countCards(visibleCards) })}
-            </Typography>
-            {dueOutsideFilter > 0 && (
-              <Typography level='body-sm' data-testid='complete-outside-filter' sx={{ mb: 4, color: 'text.tertiary' }}>
-                {t('cards.session.complete.outsideFilter', { count: dueOutsideFilter })}
-              </Typography>
-            )}
-            {/* The fourth Again on the LAST card lands here, not in the footer
-                (SR-004): an offer lost to the summary is no offer. */}
-            {leechNotice}
-            <Button size='lg' variant='solid' color='primary' onClick={() => navigate('/study')}>
-              {t('cards.session.complete.backToLibrary')}
-            </Button>
           </Box>
-        </Card>
+          <LinearProgress
+            determinate
+            value={end.cards > 0 ? 100 : 0}
+            color='primary'
+            sx={{ mt: 2, borderRadius: 'xs', bgcolor: 'background.level2', boxShadow: 'none', '--LinearProgress-thickness': '3px' }}
+          />
+        </Box>
+        <SessionEnd
+          end={end}
+          onKey={openKey}
+          onBack={() => navigate('/study')}
+          lines={[
+            dueOutsideFilter > 0
+              ? { id: 'complete-outside-filter', text: t('cards.session.complete.outsideFilter', { count: dueOutsideFilter }) }
+              : null
+          ]}
+          leech={leechNotice}
+        />
       </Container>
     )
   }

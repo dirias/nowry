@@ -605,13 +605,14 @@ export const AgentProvider = ({ children }) => {
    *
    * @param {number} cardsReviewed - Cards graded this session.
    * @param {string} deckId - The deck studied, or 'daily-review'.
+   * @returns {Promise<Array>} The grants that succeeded, for the ending's state line.
    */
   const awardSessionXp = useCallback(
     async (cardsReviewed, deckId) => {
       // Reject rather than round up: a zero-card session must not earn the
       // daily bonus. Clamp only the upper bound, which the backend caps at 500.
       const cards = Math.floor(cardsReviewed)
-      if (!Number.isFinite(cards) || cards < 1 || !deckId) return
+      if (!Number.isFinite(cards) || cards < 1 || !deckId) return []
 
       const results = await Promise.allSettled([agentService.awardSessionXp(Math.min(500, cards), deckId), agentService.awardStreakXp()])
       const granted = results.filter((result) => result.status === 'fulfilled').map((result) => result.value)
@@ -620,7 +621,7 @@ export const AgentProvider = ({ children }) => {
       // Applying each in turn would let the lower level win and show a stale
       // number, so collapse to the highest — that's the true final state.
       const highest = granted.reduce((best, current) => (!best || current?.new_level > best.new_level ? current : best), null)
-      if (!highest) return
+      if (!highest) return granted
 
       // defer:false is essential here. This resolves *after* StudySession has
       // already called flushPendingLevelUp(), and isInStudySession is still
@@ -635,6 +636,8 @@ export const AgentProvider = ({ children }) => {
         },
         { defer: false }
       )
+      // The ending reads what was earned from these (ADR-060 §2).
+      return granted
     },
     [applyXpResult]
   )

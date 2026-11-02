@@ -43,6 +43,18 @@ export const scoreRole = (pct) => {
   return 'danger'
 }
 
+/**
+ * One answer per card: a re-grade replaces the earlier answer in place rather
+ * than counting the card twice. The phone keeps its answers keyed already; the
+ * web appends, and its old summary counted the cards rather than the grades
+ * to hide that. Here the rule is the model's, so both read the same session.
+ */
+export const latestAnswers = (answers) => {
+  const byCard = new Map()
+  answers.forEach((answer, index) => byCard.set(answer.cardId ?? `#${index}`, answer))
+  return Array.from(byCard.values())
+}
+
 /** The device's answers in the shape the breakdown's ledger-less branch reads. */
 const recordOf = (answers) => ({
   cards: answers.map((answer) => ({
@@ -141,8 +153,9 @@ export function sessionEnd({
   dueLeft = null,
   dueTomorrow = null
 } = {}) {
-  const cards = answers.length
-  const breakdown = sessionBreakdown({ session: recordOf(answers), attempts, medianThinkMs, daysSincePrevious })
+  const graded = latestAnswers(answers)
+  const cards = graded.length
+  const breakdown = sessionBreakdown({ session: recordOf(graded), attempts, medianThinkMs, daysSincePrevious })
   const held = cards > 0 ? breakdown.held.count : 0
   const drillIds = breakdown.moves.find((move) => move.kind === 'drill')?.cardIds ?? []
 

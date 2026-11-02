@@ -123,6 +123,19 @@ jest.mock('@nowry/core/hooks/useCardData', () => ({
   useCardData: () => ({ cards: [], loading: false, reload: jest.fn() })
 }))
 
+// The session's end (ADR-060) reads the deck list, the statistics summary and
+// the ledger through React Query hooks; here they answer with nothing, so the
+// ending is read from the device's grades alone — the first thing it shows.
+jest.mock('@nowry/core/hooks/useDeckData', () => ({
+  useDeckData: () => ({ decks: [], loading: false, error: null })
+}))
+jest.mock('@nowry/core/hooks/useStatistics', () => ({
+  useStatistics: () => ({ statistics: null, loading: false, error: null, reload: jest.fn() })
+}))
+jest.mock('@nowry/core/hooks/useSessionAttempts', () => ({
+  useSessionAttempts: () => ({ attempts: null, medianThinkMs: null, daysSincePrevious: null, loading: false, error: null })
+}))
+
 // CACHE-004: StudySession now invalidates the React Query 'cards' cache
 // directly (via useAuth()'s userId) on unmount, replacing the old
 // apiCache.invalidate('cards:all') call — mirrors the established
@@ -412,7 +425,7 @@ describe('session completion XP', () => {
     fireEvent.click(await screen.findByText('cards.session.grading.good'))
     fireEvent.click(await screen.findByText('cards.session.grading.good'))
 
-    await screen.findByText('cards.session.complete.cardsReviewed')
+    await screen.findByTestId('session-end')
     expect(mockAwardSessionXp).toHaveBeenCalledWith(2, 'deck-1')
   })
 
@@ -429,7 +442,7 @@ describe('session completion XP', () => {
     fireEvent.click(await screen.findByText('cards.session.grading.good'))
     fireEvent.click(await screen.findByText('cards.session.grading.good')) // the missed card's practice showing (ADR-057)
 
-    await screen.findByText('cards.session.complete.cardsReviewed')
+    await screen.findByTestId('session-end')
     expect(mockAwardSessionXp).toHaveBeenCalledTimes(1)
   })
 
@@ -453,7 +466,7 @@ describe('session completion XP', () => {
 
     fireEvent.click(await screen.findByText('cards.session.grading.good'))
 
-    await screen.findByText('cards.session.complete.cardsReviewed')
+    await screen.findByTestId('session-end')
     expect(mockFlushPendingLevelUp).toHaveBeenCalled()
   })
 
@@ -482,7 +495,7 @@ describe('session completion XP', () => {
 
     fireEvent.click(await screen.findByText('cards.session.grading.good'))
 
-    await screen.findByText('cards.session.complete.cardsReviewed')
+    await screen.findByTestId('session-end')
     expect(mockApplyReviewXp).not.toHaveBeenCalled()
   })
 
@@ -513,7 +526,7 @@ describe('session completion XP', () => {
 
     fireEvent.click(await screen.findByText('cards.session.grading.good'))
     fireEvent.click(await screen.findByText('cards.session.grading.good'))
-    await screen.findByText('cards.session.complete.cardsReviewed')
+    await screen.findByTestId('session-end')
 
     expect(mockAwardSessionXp).toHaveBeenCalledTimes(1)
 
@@ -571,9 +584,10 @@ describe('needs attention tracking', () => {
     fireEvent.click(await screen.findByText('cards.session.grading.good')) // Needs 3 -> good
     fireEvent.click(await screen.findByText('cards.session.grading.good')) // the missed card's practice showing (ADR-057)
 
-    await screen.findByText('cards.session.complete.cardsReviewed')
-    expect(screen.getByText('cards.session.complete.needsAttentionLabel')).toBeInTheDocument()
-    expect(screen.getByText('2')).toBeInTheDocument()
+    await screen.findByTestId('session-end')
+    // Two slipped (Again and Hard), read as "What slipped · 2 cards" (ADR-060).
+    expect(screen.getByText('sessions.breakdown.slipped')).toBeInTheDocument()
+    expect(screen.getByText('sessions.cardCount:{"count":2}')).toBeInTheDocument()
   })
 })
 
@@ -595,7 +609,7 @@ describe('needs attention tie-break', () => {
     fireEvent.click(await screen.findByText('cards.session.grading.again')) // Tie 2 -> again, missed second
     fireEvent.click(await screen.findByText('cards.session.grading.good')) // the missed card's practice showing (ADR-057)
 
-    await screen.findByText('cards.session.complete.cardsReviewed')
+    await screen.findByTestId('session-end')
 
     const summaryCall = mockQueueIntervention.mock.calls.find(([payload]) => payload?.type === 'session_summary')
     expect(summaryCall).toBeTruthy()
@@ -693,7 +707,7 @@ async function completeSessionWithMixedResults() {
   fireEvent.click(screen.getByText('cards.session.grading.hard')) // Beta -> hard
   fireEvent.click(await screen.findByText('cards.session.grading.good')) // Gamma -> good
   fireEvent.click(await screen.findByText('cards.session.grading.good')) // Alpha's practice showing (ADR-057)
-  await screen.findByText('cards.session.complete.cardsReviewed')
+  await screen.findByTestId('session-end')
 }
 
 // Answer-spoiler regression. The flashcard is one 3D-rotated container holding a
@@ -742,27 +756,33 @@ describe('answer spoiler on card advance', () => {
 })
 
 // MODE-06/D-07. Un-skipped by 31-03.
-describe('session summary — needs attention', () => {
-  it('shows the needs-attention label + top-card callout, and hides the celebratory line, when count > 0', async () => {
+describe("the session's end — the reading (ADR-060)", () => {
+  it('reads what slipped as rows with the score, and never cheers, when something slipped', async () => {
     await completeSessionWithMixedResults()
 
-    expect(screen.getByText('cards.session.complete.needsAttentionLabel')).toBeInTheDocument()
-    // topCardCallout is ALWAYS called with { card: mostAttentionCardFront } — the mock
-    // serializes options into the string, so only a substring/regex match is valid here.
-    expect(screen.getByText(/cards\.session\.complete\.topCardCallout/)).toBeInTheDocument()
-    expect(screen.queryByText('cards.session.complete.perfectSession')).not.toBeInTheDocument()
+    // Alpha (again) and Beta (hard) slipped; Gamma held: 1 of 3, 33%.
+    expect(screen.getByText('sessions.breakdown.slipped')).toBeInTheDocument()
+    expect(screen.getByText('sessions.reading.plain:{"held":1,"total":3,"missed":2}')).toBeInTheDocument()
+    expect(screen.getByText('33%')).toBeInTheDocument()
+    expect(screen.queryByText(/sessions\.reading\.allHeld/)).not.toBeInTheDocument()
+    // The solid key is the drill of the two misses; the secondary goes to Study.
+    expect(screen.getByText('sessions.breakdown.drill:{"count":2}')).toBeInTheDocument()
+    expect(screen.getByText('sessions.end.study')).toBeInTheDocument()
   })
 
-  it('shows the celebratory line and hides needs-attention UI when count === 0 (D-07)', async () => {
+  it('reads a perfect run as "all held" with no slipped section and no drill (D-07)', async () => {
     renderSession({ cards: buildMixedResultCards() })
     fireEvent.click(await screen.findByText('cards.session.grading.good')) // Alpha -> good
     fireEvent.click(await screen.findByText('cards.session.grading.easy')) // Beta -> easy
     fireEvent.click(await screen.findByText('cards.session.grading.good')) // Gamma -> good, session complete
-    await screen.findByText('cards.session.complete.cardsReviewed')
+    await screen.findByTestId('session-end')
 
-    expect(screen.getByText('cards.session.complete.perfectSession')).toBeInTheDocument()
-    expect(screen.queryByText('cards.session.complete.needsAttentionLabel')).not.toBeInTheDocument()
-    expect(screen.queryByText(/cards\.session\.complete\.topCardCallout/)).not.toBeInTheDocument()
+    expect(screen.getByText('sessions.reading.allHeld:{"count":3}')).toBeInTheDocument()
+    expect(screen.getByText('100%')).toBeInTheDocument()
+    expect(screen.queryByText('sessions.breakdown.slipped')).not.toBeInTheDocument()
+    expect(screen.queryByText(/sessions\.breakdown\.drill/)).not.toBeInTheDocument()
+    // Nothing left today in this test's world, so the one key says the day is done.
+    expect(screen.getByText('sessions.end.done')).toBeInTheDocument()
   })
 })
 
@@ -801,7 +821,7 @@ describe('rapid grading race guard', () => {
     })
     // Wait for settle after the batched double-dispatch (session completes
     // after both cards are graded in this two-card fixture).
-    await screen.findByText('cards.session.complete.cardsReviewed')
+    await screen.findByTestId('session-end')
 
     expect(cardsService.review.mock.calls[0][0]).toBe('c1')
     expect(cardsService.review.mock.calls[1]?.[0]).toBe('c2')
@@ -992,7 +1012,7 @@ describe('browse tag filter — position handling', () => {
 
     await selectTag('nouns')
 
-    expect(screen.queryByText('cards.session.complete.cardsReviewed')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('session-end')).not.toBeInTheDocument()
     expect(await screen.findByTestId('session-footer')).toBeInTheDocument()
   })
 })
@@ -1202,7 +1222,7 @@ describe('browse mark filter — the list shrinking underneath the user', () => 
     // A filter narrowing to zero is an empty result, never a completed session —
     // the invariant the re-anchor effect's own comment states.
     expect(await screen.findByTestId('tag-filter-empty')).toBeInTheDocument()
-    expect(screen.queryByText('cards.session.complete.title')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('session-end')).not.toBeInTheDocument()
   })
 })
 
@@ -1396,9 +1416,9 @@ describe('study mode tag filter (ADR-014)', () => {
 
     fireEvent.click(await screen.findByText('cards.session.grading.good')) // tc1
     fireEvent.click(await screen.findByText('cards.session.grading.good')) // tc3 -> complete
-    await screen.findByText('cards.session.complete.cardsReviewed')
+    await screen.findByTestId('session-end')
 
-    expect(screen.getByText('cards.session.complete.body:{"count":2}')).toBeInTheDocument()
+    expect(screen.getByTestId('session-end-count')).toHaveTextContent('sessions.cardCount:{"count":2}')
     expect(screen.getByTestId('complete-outside-filter')).toHaveTextContent('cards.session.complete.outsideFilter:{"count":1}')
     // The session bonus and the summary fired once, for the two cards seen.
     expect(mockAwardSessionXp).toHaveBeenCalledTimes(1)
@@ -1413,9 +1433,9 @@ describe('study mode tag filter (ADR-014)', () => {
     fireEvent.click(await screen.findByText('cards.session.grading.good'))
     fireEvent.click(await screen.findByText('cards.session.grading.good'))
     fireEvent.click(await screen.findByText('cards.session.grading.good'))
-    await screen.findByText('cards.session.complete.cardsReviewed')
+    await screen.findByTestId('session-end')
 
-    expect(screen.getByText('cards.session.complete.body:{"count":3}')).toBeInTheDocument()
+    expect(screen.getByTestId('session-end-count')).toHaveTextContent('sessions.cardCount:{"count":3}')
     expect(screen.queryByTestId('complete-outside-filter')).not.toBeInTheDocument()
   })
 })
@@ -1533,12 +1553,12 @@ describe('a missed card comes back as practice (STUDY-011, ADR-057)', () => {
     expect((await screen.findAllByText('Miss 1')).length).toBeGreaterThan(0) // back as practice
     fireEvent.click(await screen.findByText('cards.session.grading.good')) // the practice showing
 
-    await screen.findByText('cards.session.complete.cardsReviewed')
+    await screen.findByTestId('session-end')
     await waitFor(() => expect(cardsService.review).toHaveBeenCalledTimes(3))
     expect(cardsService.review.mock.calls.map(([id]) => id)).toEqual(['m1', 'm2', 'm1'])
     // The first two are grades; the third is the practice showing's row in the ledger.
     expect(cardsService.review.mock.calls.map(([, , , attempt]) => attempt.showing)).toEqual(['scheduled', 'scheduled', 'practice'])
     // Two cards reviewed, not three: the practice showing is not counted again.
-    expect(screen.getByText(/cards\.session\.complete\.body.*"count":2/)).toBeInTheDocument()
+    expect(screen.getByTestId('session-end-count')).toHaveTextContent('sessions.cardCount:{"count":2}')
   })
 })

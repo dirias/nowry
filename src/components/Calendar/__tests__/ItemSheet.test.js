@@ -272,4 +272,3 @@ describe('a task’s list (PLAN-021)', () => {
     expect(screen.queryByTestId('row-list')).toBeNull()
   })
 })
-

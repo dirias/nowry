@@ -2536,11 +2536,7 @@
       },
       "complete": {
         "outsideFilter_one": "{{count}} autre carte à revoir se trouve hors de votre filtre par tag.",
-        "outsideFilter_other": "{{count}} autres cartes à revoir se trouvent hors de votre filtre par tag.",
-        "title": "Session terminée !",
-        "body_one": "Vous avez révisé {{count}} carte. Bravo !",
-        "body_other": "Vous avez révisé {{count}} cartes. Bravo !",
-        "backToLibrary": "Retour à la bibliothèque"
+        "outsideFilter_other": "{{count}} autres cartes à revoir se trouvent hors de votre filtre par tag."
       },
       "labels": {
         "visual": "Diagramme visuel",

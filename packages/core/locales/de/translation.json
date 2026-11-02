@@ -2525,11 +2525,7 @@
       },
       "complete": {
         "outsideFilter_one": "{{count}} weitere fällige Karte liegt außerhalb deines Tag-Filters.",
-        "outsideFilter_other": "{{count}} weitere fällige Karten liegen außerhalb deines Tag-Filters.",
-        "title": "Sitzung abgeschlossen!",
-        "body_one": "Du hast {{count}} Karte wiederholt. Gut gemacht!",
-        "body_other": "Du hast {{count}} Karten wiederholt. Gut gemacht!",
-        "backToLibrary": "Zurück zur Bibliothek"
+        "outsideFilter_other": "{{count}} weitere fällige Karten liegen außerhalb deines Tag-Filters."
       },
       "labels": {
         "visual": "Visuelles Diagramm",

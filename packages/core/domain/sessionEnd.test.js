@@ -2,7 +2,7 @@
  * The ending's model (ADR-060 §1): the same object in four states, the keys
  * each state earns, and the state line read from the grants.
  */
-import { END_KEY, END_STATE, endKeyLabel, FAMILY_CAP, scoreRole, sessionEnd, sessionEndTitle } from './sessionEnd'
+import { END_KEY, END_STATE, endKeyLabel, FAMILY_CAP, latestAnswers, scoreRole, sessionEnd, sessionEndTitle } from './sessionEnd'
 
 const t = (key, params) => (params ? `${key}:${JSON.stringify(params)}` : key)
 
@@ -47,6 +47,14 @@ describe('sessionEnd · state', () => {
     expect(end.slipped[0]).toMatchObject({ kind: 'character', label: '験' })
     expect(end.held.count).toBe(2)
     expect(end.fromLedger).toBe(false)
+  })
+
+  it('counts a re-graded card once, with its latest grade, in its first position', () => {
+    const answers = [answer('a', 'again'), answer('b', 'good'), answer('a', 'good')]
+    expect(latestAnswers(answers).map((a) => `${a.cardId}:${a.grade}`)).toEqual(['a:good', 'b:good'])
+    const end = sessionEnd({ answers })
+    expect(end.cards).toBe(2)
+    expect(end.state).toBe(END_STATE.perfect)
   })
 
   it('is a drill when the session was one: no state line, the drill note, no tomorrow', () => {
