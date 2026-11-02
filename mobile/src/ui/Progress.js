@@ -5,6 +5,9 @@
  * ground, filled with the accent, and **empty for an item with nothing learned**
  * rather than showing a full grey bar. A grey bar under a deck with no progress
  * reads as a broken control, which is exactly what §15.11 set out to stop.
+ *
+ * `color` is the fill's token. The accent by default; a score's measure fills
+ * in the score's own role (ADR-060 §2), the one place a measure is not blue.
  */
 import { View } from 'react-native'
 import { useTheme } from '../theme'
@@ -12,7 +15,7 @@ import { resolveColor } from './Typography'
 
 const clamp = (pct) => Math.min(100, Math.max(0, Number(pct) || 0))
 
-export function Progress({ value = 0, width = '100%', height = 3, accessibilityLabel, style }) {
+export function Progress({ value = 0, width = '100%', height = 3, color = 'primary.solidBg', accessibilityLabel, style }) {
   const theme = useTheme()
   const pct = clamp(value)
 
@@ -26,7 +29,7 @@ export function Progress({ value = 0, width = '100%', height = 3, accessibilityL
         style
       ]}
     >
-      <View style={{ width: `${pct}%`, height: '100%', borderRadius: height, backgroundColor: resolveColor(theme, 'primary.solidBg') }} />
+      <View style={{ width: `${pct}%`, height: '100%', borderRadius: height, backgroundColor: resolveColor(theme, color) }} />
     </View>
   )
 }

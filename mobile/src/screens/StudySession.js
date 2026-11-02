@@ -55,6 +55,11 @@ import { localDay, practiceFor, resumeIndex, withPractice } from '@nowry/core/do
 import { newClientId } from '@nowry/core/utils/clientId'
 import { attemptPayload, attemptTimings, emptyHelp, HELP_KINDS, SHOWING } from '@nowry/core/domain/attempt'
 import { drillIdsOf, useDrillCards } from '@nowry/core/hooks/useDrillCards'
+import { useSessionAttempts } from '@nowry/core/hooks/useSessionAttempts'
+import { useStatistics } from '@nowry/core/hooks/useStatistics'
+import { studySummary } from '@nowry/core/domain/studySummary'
+import { END_KEY, sessionEnd } from '@nowry/core/domain/sessionEnd'
+import { SessionEnd } from './SessionEnd'
 import { SessionQueueSheet } from './SessionQueueSheet'
 import { flushOutbox, queueReview, queueSession } from '../platform/outbox'
 import { BUTTON_SIZES, EDGE, GRADE_VARIANTS } from '../ui/buttonSpec'
@@ -200,6 +205,11 @@ export function StudySession() {
   const [hinted, setHinted] = useState(false)
   // What the two XP grants at the end of the session reached, if anything.
   const [levelUp, setLevelUp] = useState(null)
+  // The grants themselves, read into the ending's state line (ADR-060 §2).
+  const [grants, setGrants] = useState(null)
+  // The record's id once the log is written: how the ledger is read (ADR-060 §1).
+  const [sessionId, setSessionId] = useState(null)
+  const [endedAt, setEndedAt] = useState(null)
   // The account's colour, already resolved for the whole app — the companion
   // is the colour of the app it lives in (MOB-050).
   const { accent } = useAppearance()
@@ -476,6 +486,7 @@ export function StudySession() {
     if (!complete || logged.current) return
     logged.current = true
     storage.remove(resumeKey(id))
+    setEndedAt(Date.now())
 
     // An all-caught-up deck lands here too, with nothing to log.
     const answers = Object.values(graded)
@@ -493,6 +504,8 @@ export function StudySession() {
     studySessionsService
       .log(payload)
       .then((logged) => {
+        // The record exists now; its rows are the ending's reading.
+        setSessionId(logged?.sessionId ?? null)
         // The block's work is done (PRD D8): the study block that opened this
         // review is kept, with the session it produced on its record.
         const timer = timerRef.current
@@ -523,8 +536,11 @@ export function StudySession() {
       isDrill ? Promise.resolve(null) : agentService.awardStreakXp()
     ]).then((results) => {
       // The panel on Home reads a cached level; a level earned here is a level
-      // it is now wrong about.
+      // it is now wrong about. The streak moved too, and the ending reads it.
       queryClient.invalidateQueries({ queryKey: ['pet'] })
+      queryClient.invalidateQueries({ queryKey: ['statistics'] })
+      const replies = results.map((result) => (result.status === 'fulfilled' ? result.value : null))
+      setGrants(replies)
 
       /*
        * The reply is the only place a level-up is ever announced — the server
@@ -533,7 +549,7 @@ export function StudySession() {
        * phone was silent (PEND-001). Either grant can cross the line and only
        * the furthest one is shown: two celebrations for one session is a bug.
        */
-      setLevelUp(bestLevelUp(results.map((result) => (result.status === 'fulfilled' ? result.value : null))))
+      setLevelUp(bestLevelUp(replies))
     })
 
     /*
@@ -917,6 +933,54 @@ export function StudySession() {
     return Math.max(0, hiddenByTags) + Math.max(0, served.length - total)
   }, [scope, served, baseDueQueue.cards, tagChoice, total])
 
+  /*
+   * The ending (ADR-060 §1): built from the device's grades the moment the
+   * last card is graded, upgraded when the ledger answers. The ledger is read
+   * only once the record exists, by the id the log reply named; the streak
+   * and what is left today are the summary's own numbers (one owner each).
+   */
+  const { statistics } = useStatistics()
+  const ledger = useSessionAttempts(sessionId, { enabled: complete && Boolean(sessionId) })
+  const gradedDeckCount = useMemo(() => {
+    if (!isDaily || !allCards) return null
+    const ids = new Set(Object.keys(graded))
+    const decks = allCards.filter((card) => ids.has(String(card._id ?? card.id))).map((card) => String(card.deck_id?._id ?? card.deck_id))
+    return new Set(decks).size
+  }, [isDaily, allCards, graded])
+  const end = useMemo(() => {
+    if (!complete) return null
+    const today = studySummary({ decks: deckList.decks, statistics })
+    return sessionEnd({
+      answers: Object.values(graded),
+      kind: isDrill ? 'drill' : isDaily ? 'daily' : 'deck',
+      deckName: isDaily ? null : (deckName.current ?? deckNames[id] ?? null),
+      deckCount: gradedDeckCount,
+      startedAt: startedAt.current,
+      endedAt,
+      attempts: ledger.attempts,
+      medianThinkMs: ledger.medianThinkMs,
+      daysSincePrevious: ledger.daysSincePrevious,
+      grants,
+      streak: today.streak,
+      dueLeft: today.due
+    })
+  }, [
+    complete,
+    graded,
+    isDrill,
+    isDaily,
+    deckNames,
+    id,
+    gradedDeckCount,
+    endedAt,
+    ledger.attempts,
+    ledger.medianThinkMs,
+    ledger.daysSincePrevious,
+    grants,
+    deckList.decks,
+    statistics
+  ])
+
   const counter = useMemo(() => t('cards.session.cardShort', { current: index + 1, total }), [t, index, total])
   const counterSaid = useMemo(() => t('cards.session.card', { current: index + 1, total }), [t, index, total])
 
@@ -963,23 +1027,6 @@ export function StudySession() {
     )
   }
 
-  if (total === 0) {
-    return (
-      <Screen>
-        <Stack spacing={2}>
-          <Typography level='h4'>{t('cards.session.allCaughtUp')}</Typography>
-          <Typography level='body-md' color='text.secondary'>
-            {t('cards.session.noDue')}
-          </Typography>
-          {/* Back to the Study tab root, never to a cards route. */}
-          <Button variant='secondary' onPress={() => router.replace('/study')}>
-            {t('cards.session.goBack')}
-          </Button>
-        </Stack>
-      </Screen>
-    )
-  }
-
   /*
    * The leech's offer (SR-004) as one element, because it has two homes: the
    * notice band under the card, and the summary — the fourth Again on the
@@ -1010,46 +1057,49 @@ export function StudySession() {
     </Stack>
   ) : null
 
-  if (complete) {
+  /*
+   * The ending (ADR-060): all caught up and the summary are the same object
+   * in two states. `end` is null for one render while completion settles.
+   */
+  if (complete && end) {
+    const openKey = (key) => {
+      if (!key) return
+      if (key.kind === END_KEY.drill) {
+        // Replace, not push: the summary is done, and a drill of its misses is
+        // the next session rather than a screen inside this one.
+        router.replace({ pathname: '/study/[deckId]', params: { deckId: id, scope: 'drill', cards: key.cardIds.join(',') } })
+      } else if (key.kind === END_KEY.dueToday) {
+        router.replace(`/study/${DAILY_REVIEW}`)
+      } else {
+        router.replace('/study')
+      }
+    }
     return (
       <Screen>
         <Stack spacing={2}>
-          <Typography level='h4'>{t('cards.session.complete.title')}</Typography>
-          <Typography level='body-md' color='text.secondary'>
-            {t('cards.session.complete.body', { count: Object.keys(graded).length })}
-          </Typography>
-          {dueOutsideFilter > 0 ? (
-            <Typography level='body-sm' color='text.tertiary'>
-              {t('cards.session.complete.outsideFilter', { count: dueOutsideFilter })}
-            </Typography>
-          ) : null}
-          {leechBand}
-          {queued > 0 ? (
-            <Typography level='body-sm' color='text.tertiary' accessibilityLiveRegion='polite'>
-              {t('cards.session.syncing', { count: queued })}
-            </Typography>
-          ) : null}
-
-          {/* The companion, at the stage this session reached. It arrives a
-              moment after the summary does, because the grants are settled
-              rather than awaited — XP is a reward, and a reward that can hold
-              up the summary is a punishment. */}
+          {/* The companion, at the stage this session reached: its own moment,
+              before the object (ADR-060). It arrives a moment after the summary
+              does, because the grants are settled rather than awaited. */}
           {levelUp ? <PetLevelUp level={levelUp.level} stage={levelUp.stage} accent={accent} /> : null}
-
-          {/* The companion's word on the session, inside the summary rather
-              than over it (ADR-022). It arrives a few seconds after the screen
-              does, which is why it is placed below what the screen already
-              said rather than above it. */}
-          <CompanionNote
-            stage={pet.stage}
-            avatarUrl={pet.avatarUrl}
-            isDefaultCompanion={pet.isDefaultCompanion}
-            text={buddy.message?.message}
-            speech={buddySpeech}
-            onDismiss={buddy.dismiss}
+          <SessionEnd
+            end={end}
+            onKey={openKey}
+            lines={[
+              dueOutsideFilter > 0 ? t('cards.session.complete.outsideFilter', { count: dueOutsideFilter }) : null,
+              queued > 0 ? t('cards.session.syncing', { count: queued }) : null
+            ]}
+            leech={leechBand}
+            note={
+              <CompanionNote
+                stage={pet.stage}
+                avatarUrl={pet.avatarUrl}
+                isDefaultCompanion={pet.isDefaultCompanion}
+                text={buddy.message?.message}
+                speech={buddySpeech}
+                onDismiss={buddy.dismiss}
+              />
+            }
           />
-
-          <Button onPress={() => router.replace('/study')}>{t('cards.session.complete.backToLibrary')}</Button>
         </Stack>
       </Screen>
     )
