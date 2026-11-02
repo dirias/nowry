@@ -52,7 +52,7 @@ import CreateCardModal from './CreateCardModal'
 import { isResting } from '@nowry/core/domain/cardRest'
 import { filterCardsByTags } from '@nowry/core/utils/tagFilter'
 import { newClientId } from '@nowry/core/utils/clientId'
-import { attemptPayload, attemptTimings, SHOWING } from '@nowry/core/domain/attempt'
+import { attemptPayload, attemptTimings, emptyHelp, HELP_KINDS, SHOWING } from '@nowry/core/domain/attempt'
 import { leechOffer, leechRestUntil, splitDraft } from '@nowry/core/domain/leech'
 import { queryClient } from '@nowry/core/api/queryClient'
 import { useAuth } from '@nowry/core/context/AuthContext'
@@ -446,6 +446,7 @@ export default function StudySession() {
     setViewContext,
     queueIntervention,
     open: openCompanion,
+    isOpen: companionOpen,
     sendMessage,
     resetCompanionSession,
     setStudySession,
@@ -530,6 +531,8 @@ export default function StudySession() {
   // when it was turned over. Reset as each card arrives.
   const shownAt = useRef(Date.now())
   const flippedAt = useRef(null)
+  // What the learner reached for on this card before grading (ADR-059 §2).
+  const help = useRef(emptyHelp())
   const gradedCards = useRef([]) // accumulates { cardId, cardTitle, grade, evaluation } per card
   // Guards the session-complete block against re-running when visibleCards'
   // identity changes after completion. See that effect for the full reasoning.
@@ -795,6 +798,11 @@ export default function StudySession() {
     flushPendingLevelUp
   ])
 
+  /** Playing the card is help on the attempt (ADR-059 §2). */
+  const markAudio = React.useCallback(() => {
+    help.current.audio += 1
+  }, [])
+
   const handleFlip = React.useCallback(() => {
     // Think time ends at the first turn; turning back does not restart it.
     if (flippedAt.current == null) flippedAt.current = Date.now()
@@ -804,7 +812,14 @@ export default function StudySession() {
   useEffect(() => {
     shownAt.current = Date.now()
     flippedAt.current = null
+    help.current = emptyHelp()
   }, [currentIndex])
+
+  // The companion opened while this card was in hand: asking is a fact about
+  // the attempt, whatever was asked.
+  useEffect(() => {
+    if (companionOpen) help.current.companion = HELP_KINDS.chat
+  }, [companionOpen])
 
   const handleQuizAnswer = React.useCallback((option) => {
     setSelectedAnswer(option)
@@ -936,6 +951,7 @@ export default function StudySession() {
         clientSessionId: clientSessionId.current,
         showing: currentCard.practice ? SHOWING.practice : SHOWING.scheduled,
         ...attemptTimings({ shownAt: shownAt.current, flippedAt: flippedAt.current, gradedAt: Date.now() }),
+        help: help.current,
         position: latestIndex + 1,
         total: latestCards.length,
         scope: deckId === 'daily-review' ? 'daily' : mode,
@@ -1737,6 +1753,7 @@ export default function StudySession() {
                  the same cards and had to agree with this line exactly. */
               text={speechTextFor(currentCard, { flipped: isFlipped })}
               langHint={speechHintFor(currentCard, activeVoiceSettings, { flipped: isFlipped })}
+              onPlay={markAudio}
             />
             {isQuiz ? (
               // Quiz Card

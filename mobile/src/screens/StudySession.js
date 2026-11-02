@@ -53,7 +53,7 @@ import { useInterventions } from '../hooks/useInterventions'
 import { cardKey, narrowQueue, positionAfter, useSessionQueue } from '../hooks/useSessionQueue'
 import { localDay, practiceFor, resumeIndex, withPractice } from '@nowry/core/domain/sessionOrder'
 import { newClientId } from '@nowry/core/utils/clientId'
-import { attemptPayload, attemptTimings, SHOWING } from '@nowry/core/domain/attempt'
+import { attemptPayload, attemptTimings, emptyHelp, HELP_KINDS, SHOWING } from '@nowry/core/domain/attempt'
 import { SessionQueueSheet } from './SessionQueueSheet'
 import { flushOutbox, queueReview, queueSession } from '../platform/outbox'
 import { BUTTON_SIZES, EDGE, GRADE_VARIANTS } from '../ui/buttonSpec'
@@ -229,6 +229,8 @@ export function StudySession() {
   // when it was turned over. Reset as each card arrives.
   const shownAt = useRef(Date.now())
   const flippedAt = useRef(null)
+  // What the learner reached for on this card before grading (ADR-059 §2).
+  const help = useRef(emptyHelp())
   const logged = useRef(false)
 
   /*
@@ -386,6 +388,7 @@ export function StudySession() {
   useEffect(() => {
     shownAt.current = Date.now()
     flippedAt.current = null
+    help.current = emptyHelp()
   }, [index, scope])
 
   /** Turn the card over, and remember when: think time ends here. */
@@ -411,6 +414,12 @@ export function StudySession() {
     settings: revealed ? deckVoices?.back : deckVoices?.front,
     sides: deckVoices
   })
+
+  /** The speak key: a start counts as help on the attempt, a stop does not. */
+  const playOrStop = useCallback(() => {
+    if (!speech.speaking) help.current.audio += 1
+    speech.toggle()
+  }, [speech])
 
   /*
    * The companion, speaking unasked (MOB-088).
@@ -447,6 +456,8 @@ export function StudySession() {
 
   /** Open the companion with the card in hand as what it is being asked about. */
   const openChat = useCallback(() => {
+    // Asking is a fact about the attempt: "right after asking" is not "right".
+    help.current.companion = HELP_KINDS.chat
     setAskContext(
       studyCardContext(current, { deckId: id, index, total, flipped: revealed, mode: 'study', voiceSettings: deckVoices }),
       `/study/${id}`
@@ -557,6 +568,7 @@ export function StudySession() {
         clientSessionId: clientSessionId.current,
         showing: card.practice ? SHOWING.practice : SHOWING.scheduled,
         ...attemptTimings({ shownAt: shownAt.current, flippedAt: flippedAt.current, gradedAt: Date.now() }),
+        help: help.current,
         position: index + 1,
         total,
         scope: isDaily ? 'daily' : scope,
@@ -1071,7 +1083,7 @@ export function StudySession() {
              * Only when there is something to say — a card whose face is empty
              * would otherwise offer a control that does nothing.
              */}
-            {speech.canSpeak ? <SpeakToggle speaking={speech.speaking} onPress={speech.toggle} /> : null}
+            {speech.canSpeak ? <SpeakToggle speaking={speech.speaking} onPress={playOrStop} /> : null}
             <MarkToggle card={current} />
             {/*
              * Ask about THIS card (MOB-086). The context is handed over rather

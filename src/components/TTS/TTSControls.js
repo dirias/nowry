@@ -55,7 +55,8 @@ export default function TTSControls({
   onSettingsChange,
   voiceSettings,
   onVoiceSettingsChange,
-  langHint = null // the card's language for kanji alone (ADR-050)
+  langHint = null, // the card's language for kanji alone (ADR-050)
+  onPlay = null // told when the learner starts playback (ADR-059 §2)
 }) {
   const { t } = useTranslation()
   const { getSegments, speakSegments } = useSegmentedSpeech()
@@ -170,8 +171,9 @@ export default function TTSControls({
   const handlePlay = React.useCallback(() => {
     // Mark that the user has initiated playback – this satisfies the user‑gesture requirement on mobile
     setUserInitiated(true)
+    onPlay?.()
     return playText()
-  }, [playText])
+  }, [playText, onPlay])
 
   const handlePause = () => {
     ttsService.pause()
