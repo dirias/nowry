@@ -107,6 +107,7 @@ jest.mock('@nowry/core/api/services', () => ({
     getDueCards: jest.fn(),
     getAllCards: jest.fn(), // Phase 30 — Browse fetch
     review: jest.fn().mockResolvedValue({}),
+    getById: jest.fn(), // a drill loads its cards by id (ADR-059 §4)
     // MARK-002 — the header's MarkToggle reaches for these on click.
     mark: jest.fn().mockResolvedValue({}),
     unmark: jest.fn().mockResolvedValue({})
@@ -559,6 +560,28 @@ describe('session completion XP', () => {
 
     fireEvent.click(await screen.findByText('cards.session.grading.good'))
     expect(mockCheer).toHaveBeenCalledTimes(1)
+  })
+
+  it('awards nothing for a drill, whose grades are practice showings (ADR-059 §4)', async () => {
+    // The drill key on the ending re-opens the session with the slipped cards.
+    // Each grade goes up as a practice showing, which the server records
+    // without moving the schedule; the ending then pays no session or streak XP.
+    mockSearchParams = new URLSearchParams('mode=drill&cards=alpha,beta')
+    const [alpha, beta] = buildMixedResultCards()
+    cardsService.getById.mockImplementation((id) => Promise.resolve(id === 'alpha' ? alpha : beta))
+    renderSession({ cards: [] })
+
+    fireEvent.click(await screen.findByText('cards.session.grading.good'))
+    fireEvent.click(await screen.findByText('cards.session.grading.good'))
+    await screen.findByTestId('session-end')
+
+    expect(cardsService.review).toHaveBeenCalledTimes(2)
+    for (const [, , reviewMode, attempt] of cardsService.review.mock.calls) {
+      expect(reviewMode).toBe('study')
+      expect(attempt).toMatchObject({ showing: 'practice', scope: 'drill' })
+    }
+    expect(mockAwardSessionXp).not.toHaveBeenCalled()
+    expect(studySessionsService.log).toHaveBeenCalledWith(expect.objectContaining({ sessionType: 'drill' }))
   })
 
   it('awards nothing for a deck with no cards to study', async () => {

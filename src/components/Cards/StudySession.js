@@ -734,6 +734,8 @@ export default function StudySession() {
     // grades above refreshed every other count, the decks refresh here.
     if (userId) queryClient.invalidateQueries({ queryKey: ['decks', userId] })
 
+    // A drill runs as `mode=drill`, so it reaches none of this: it is practice
+    // and earns no XP and no streak (ADR-059 §4), like the phone.
     if (mode === 'study' && visibleCards.length > 0) {
       // Contextual first-reveal — fires once, the first time a new account
       // completes a real study session with graded cards. Non-fatal on
