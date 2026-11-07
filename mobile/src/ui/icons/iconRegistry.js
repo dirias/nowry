@@ -46,6 +46,8 @@ import Diamond from 'lucide-react-native/icons/diamond'
 import Crown from 'lucide-react-native/icons/crown'
 import Download from 'lucide-react-native/icons/download'
 import EllipsisVertical from 'lucide-react-native/icons/ellipsis-vertical'
+import Eye from 'lucide-react-native/icons/eye'
+import EyeOff from 'lucide-react-native/icons/eye-off'
 import FilePlus from 'lucide-react-native/icons/file-plus'
 import Flag from 'lucide-react-native/icons/flag'
 import Flame from 'lucide-react-native/icons/flame'
@@ -55,6 +57,7 @@ import GraduationCap from 'lucide-react-native/icons/graduation-cap'
 import House from 'lucide-react-native/icons/house'
 import Image from 'lucide-react-native/icons/image'
 import Info from 'lucide-react-native/icons/info'
+import KeyRound from 'lucide-react-native/icons/key-round'
 import Languages from 'lucide-react-native/icons/languages'
 import Layers from 'lucide-react-native/icons/layers'
 import Leaf from 'lucide-react-native/icons/leaf'
@@ -63,6 +66,7 @@ import Library from 'lucide-react-native/icons/library'
 import List from 'lucide-react-native/icons/list'
 import Lock from 'lucide-react-native/icons/lock'
 import LogOut from 'lucide-react-native/icons/log-out'
+import Mail from 'lucide-react-native/icons/mail'
 import Menu from 'lucide-react-native/icons/menu'
 import Merge from 'lucide-react-native/icons/merge'
 import MessageSquareText from 'lucide-react-native/icons/message-square-text'
@@ -88,6 +92,7 @@ import Timer from 'lucide-react-native/icons/timer'
 import Trash from 'lucide-react-native/icons/trash'
 import TriangleAlert from 'lucide-react-native/icons/triangle-alert'
 import Upload from 'lucide-react-native/icons/upload'
+import User from 'lucide-react-native/icons/user'
 import Volume2 from 'lucide-react-native/icons/volume-2'
 import X from 'lucide-react-native/icons/x'
 
@@ -122,6 +127,8 @@ export const ICONS = {
   Diamond,
   Download,
   EllipsisVertical,
+  Eye,
+  EyeOff,
   FilePlus,
   Flag,
   Flame,
@@ -131,6 +138,7 @@ export const ICONS = {
   House,
   Image,
   Info,
+  KeyRound,
   Languages,
   Layers,
   Leaf,
@@ -139,6 +147,7 @@ export const ICONS = {
   List,
   Lock,
   LogOut,
+  Mail,
   Menu,
   Merge,
   MessageSquareText,
@@ -164,6 +173,7 @@ export const ICONS = {
   Trash,
   TriangleAlert,
   Upload,
+  User,
   Volume2,
   X
 }

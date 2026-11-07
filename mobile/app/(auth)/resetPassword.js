@@ -69,6 +69,7 @@ export default function ResetPassword() {
 
           <FormField labelKey='auth.email' errorKey={errors.email}>
             <Input
+              startGlyph='Mail'
               value={email}
               onChangeText={setEmail}
               placeholder={t('auth.emailPlaceholder')}

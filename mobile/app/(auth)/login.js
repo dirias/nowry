@@ -88,6 +88,7 @@ export default function Login() {
       <Stack spacing={2}>
         <FormField labelKey='auth.email' errorKey={errors.email}>
           <Input
+            startGlyph='Mail'
             value={email}
             onChangeText={setEmail}
             placeholder={t('auth.emailPlaceholder')}
@@ -103,11 +104,12 @@ export default function Login() {
 
         <FormField labelKey='auth.password' errorKey={errors.password}>
           <Input
+            startGlyph='Lock'
             value={password}
             onChangeText={setPassword}
             accessibilityLabel={t('auth.password')}
             invalid={Boolean(errors.password)}
-            secureTextEntry
+            secure
             autoCapitalize='none'
             autoComplete='current-password'
             textContentType='password'
@@ -131,7 +133,18 @@ export default function Login() {
 
       <AuthDivider />
 
-      <Button variant='secondary' size='lg' onPress={submitGoogle} loading={googleBusy} accessibilityLabel={t('auth.signInGoogle')}>
+      <Button
+        variant='secondary'
+        size='lg'
+        onPress={submitGoogle}
+        loading={googleBusy}
+        startGlyph={
+          <Typography level='title-md' weight='xl'>
+            G
+          </Typography>
+        }
+        accessibilityLabel={t('auth.signInGoogle')}
+      >
         {t('auth.signInGoogle')}
       </Button>
 

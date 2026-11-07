@@ -75,6 +75,12 @@ export const MATERIAL_TO_LUCIDE = {
   InfoOutlined: 'Info',
   VerifiedRounded: 'BadgeCheck',
   LockRounded: 'Lock',
+  // The auth forms' field glyphs and the show-password toggle (MOB-126).
+  EmailRounded: 'Mail',
+  PersonRounded: 'User',
+  KeyRounded: 'KeyRound',
+  VisibilityRounded: 'Eye',
+  VisibilityOffRounded: 'EyeOff',
 
   // Content and domain
   BookRounded: 'Book',

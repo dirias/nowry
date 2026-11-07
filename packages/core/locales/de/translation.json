@@ -403,6 +403,8 @@
     "usernamePlaceholder": "maxmustermann",
     "confirmPassword": "Passwort bestätigen",
     "forgotPassword": "Passwort vergessen?",
+    "showPassword": "Passwort anzeigen",
+    "hidePassword": "Passwort verbergen",
     "signIn": "Anmelden",
     "signUp": "Konto erstellen",
     "orContinueWith": "oder weiter mit",

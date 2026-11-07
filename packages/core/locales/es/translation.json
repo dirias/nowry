@@ -320,6 +320,8 @@
     "usernamePlaceholder": "juanlopez",
     "confirmPassword": "Confirmar Contraseña",
     "forgotPassword": "¿Olvidaste tu contraseña?",
+    "showPassword": "Mostrar contraseña",
+    "hidePassword": "Ocultar contraseña",
     "signIn": "Iniciar sesión",
     "signUp": "Crear cuenta",
     "orContinueWith": "o continuar con",

@@ -367,6 +367,8 @@
     "usernamePlaceholder": "yamadataro",
     "confirmPassword": "パスワード確認",
     "forgotPassword": "パスワードをお忘れですか？",
+    "showPassword": "パスワードを表示",
+    "hidePassword": "パスワードを非表示",
     "signIn": "サインイン",
     "signUp": "アカウントを作成",
     "orContinueWith": "または以下で続行",

@@ -110,6 +110,7 @@ export default function Register() {
         {inviteRequired ? (
           <FormField labelKey='beta.inviteCode' errorKey={errors.invite}>
             <Input
+              startGlyph='KeyRound'
               value={inviteCode}
               onChangeText={setInviteCode}
               placeholder={t('beta.inviteCodePlaceholder')}
@@ -124,6 +125,7 @@ export default function Register() {
 
         <FormField labelKey='auth.username' errorKey={errors.username}>
           <Input
+            startGlyph='User'
             value={username}
             onChangeText={setUsername}
             placeholder={t('auth.usernamePlaceholder')}
@@ -137,6 +139,7 @@ export default function Register() {
 
         <FormField labelKey='auth.email' errorKey={errors.email}>
           <Input
+            startGlyph='Mail'
             value={email}
             onChangeText={setEmail}
             placeholder={t('auth.emailPlaceholder')}
@@ -152,11 +155,12 @@ export default function Register() {
 
         <FormField labelKey='auth.password' errorKey={errors.password}>
           <Input
+            startGlyph='Lock'
             value={password}
             onChangeText={setPassword}
             accessibilityLabel={t('auth.password')}
             invalid={Boolean(errors.password)}
-            secureTextEntry
+            secure
             autoCapitalize='none'
             autoComplete='new-password'
             textContentType='newPassword'
@@ -166,11 +170,12 @@ export default function Register() {
 
         <FormField labelKey='auth.confirmPassword' errorKey={errors.confirm}>
           <Input
+            startGlyph='Lock'
             value={confirm}
             onChangeText={setConfirm}
             accessibilityLabel={t('auth.confirmPassword')}
             invalid={Boolean(errors.confirm)}
-            secureTextEntry
+            secure
             autoCapitalize='none'
             autoComplete='new-password'
             textContentType='newPassword'
@@ -211,7 +216,18 @@ export default function Register() {
 
       <AuthDivider />
 
-      <Button variant='secondary' size='lg' onPress={submitGoogle} loading={googleBusy} accessibilityLabel={t('auth.signInGoogle')}>
+      <Button
+        variant='secondary'
+        size='lg'
+        onPress={submitGoogle}
+        loading={googleBusy}
+        startGlyph={
+          <Typography level='title-md' weight='xl'>
+            G
+          </Typography>
+        }
+        accessibilityLabel={t('auth.signInGoogle')}
+      >
         {t('auth.signInGoogle')}
       </Button>
     </AuthShell>

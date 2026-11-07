@@ -414,6 +414,8 @@
     "usernamePlaceholder": "jeandupont",
     "confirmPassword": "Confirmer le mot de passe",
     "forgotPassword": "Mot de passe oublié ?",
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe",
     "signIn": "Se connecter",
     "signUp": "Créer un compte",
     "orContinueWith": "ou continuer avec",
