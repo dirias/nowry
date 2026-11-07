@@ -65,7 +65,8 @@ import {
   SettingRow,
   Stack,
   Switch,
-  Typography
+  Typography,
+  LANGUAGES
 } from '../ui'
 
 /** Each duration's own label, which the shared table has no business knowing. */
@@ -74,15 +75,6 @@ const LENGTH_LABELS = {
   shortBreak: 'settings.productivity.shortBreak',
   longBreak: 'settings.productivity.longBreak'
 }
-
-/** The five bundles that ship. Each label is in its own language, on purpose. */
-const LANGUAGES = [
-  { code: 'en', label: 'English' },
-  { code: 'es', label: 'Español' },
-  { code: 'fr', label: 'Français' },
-  { code: 'de', label: 'Deutsch' },
-  { code: 'ja', label: '日本語' }
-]
 
 /**
  * Accent presets — the same eight the web offers (ADR-034), from the shared

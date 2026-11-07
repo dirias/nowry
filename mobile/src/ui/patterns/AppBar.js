@@ -39,6 +39,7 @@ import { readableTextOn } from '@nowry/core/tokens/colorSchemeGenerator'
 import { Avatar } from './Avatar'
 import { TimerChip } from './TimerChip'
 import { BrandLockup } from './BrandMark'
+import { LanguageSwitch } from './LanguageSheet'
 import { Icon } from '../icons'
 
 export const APP_BAR_HEIGHT = 56
@@ -187,7 +188,11 @@ export function AppBar() {
             <Avatar uri={photo} name={profile?.username || user?.email || ''} size={AVATAR} />
           </Pressable>
         </>
-      ) : null}
+      ) : (
+        // Whose screen this is, when it is nobody's: the one thing a stranger
+        // needs before they can read the rest (MOB-123).
+        <LanguageSwitch />
+      )}
     </View>
   )
 }
