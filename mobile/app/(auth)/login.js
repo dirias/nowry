@@ -18,8 +18,8 @@ import { useTranslation } from 'react-i18next'
 import { authService } from '@nowry/core/api/services'
 import { authErrorKey } from '@nowry/core/domain/authErrors'
 import { isInviteRefusal } from '@nowry/core/domain/beta'
-import { Button, Divider, FormField, Input, Stack, Typography } from '../../src/ui'
-import { AuthFooter, AuthShell } from '../../src/ui/patterns/AuthShell'
+import { Button, FormField, Input, Stack, Typography } from '../../src/ui'
+import { AuthDivider, AuthFooter, AuthLegal, AuthShell } from '../../src/ui/patterns/AuthShell'
 
 export default function Login() {
   const { t } = useTranslation()
@@ -129,16 +129,14 @@ export default function Login() {
         {t('auth.signIn')}
       </Button>
 
-      <Stack direction='row' alignItems='center' spacing={1.5}>
-        <Typography level='body-xs' color='text.tertiary'>
-          {t('auth.orContinueWith')}
-        </Typography>
-        <Divider style={{ flex: 1 }} />
-      </Stack>
+      <AuthDivider />
 
       <Button variant='secondary' size='lg' onPress={submitGoogle} loading={googleBusy} accessibilityLabel={t('auth.signInGoogle')}>
         {t('auth.signInGoogle')}
       </Button>
+
+      {/* The web shows this under both forms; the phone's Sign in had lost it (canvas flag 8). */}
+      <AuthLegal />
     </AuthShell>
   )
 }

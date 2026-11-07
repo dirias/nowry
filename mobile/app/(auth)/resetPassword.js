@@ -15,7 +15,7 @@ import { useTranslation } from 'react-i18next'
 import { authService } from '@nowry/core/api/services'
 import { authErrorKey } from '@nowry/core/domain/authErrors'
 import { Box, Button, FormField, Input, Stack, Typography } from '../../src/ui'
-import { AuthFooter, AuthShell } from '../../src/ui/patterns/AuthShell'
+import { AuthShell } from '../../src/ui/patterns/AuthShell'
 
 export default function ResetPassword() {
   const { t, i18n } = useTranslation()
@@ -44,12 +44,10 @@ export default function ResetPassword() {
   }
 
   return (
-    <AuthShell
-      title={t('auth.resetPassword.title')}
-      subtitle={t('auth.resetPassword.subtitle.step1')}
-      backHref='/login'
-      footer={<AuthFooter href='/login' label={t('auth.resetPassword.backToLogin')} />}
-    >
+    // No footer: the one way back is the bar's arrow (MOB-125). The screen
+    // used to offer "Back to sign in" at the foot as well, two Backs to one
+    // place with most of a screen between them.
+    <AuthShell title={t('auth.resetPassword.title')} subtitle={t('auth.resetPassword.subtitle.step1')}>
       {sent ? (
         // The mail is sent, so the screen says what to do next — on a ground,
         // not a hue: nothing went wrong.

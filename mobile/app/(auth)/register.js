@@ -19,8 +19,8 @@ import { betaService } from '@nowry/core/api/services'
 import { useBeta } from '@nowry/core/context/BetaContext'
 import { passwordLongEnough } from '@nowry/core/domain/authRules'
 import { legalUrl } from '@nowry/core/constants/site'
-import { Button, Checkbox, Divider, FormField, Input, Stack, Typography } from '../../src/ui'
-import { AuthFooter, AuthShell } from '../../src/ui/patterns/AuthShell'
+import { Button, Checkbox, FormField, Input, Stack, Typography } from '../../src/ui'
+import { AuthDivider, AuthFooter, AuthShell } from '../../src/ui/patterns/AuthShell'
 
 export default function Register() {
   const { t } = useTranslation()
@@ -209,12 +209,7 @@ export default function Register() {
         {t('auth.signUp')}
       </Button>
 
-      <Stack direction='row' alignItems='center' spacing={1.5}>
-        <Typography level='body-xs' color='text.tertiary'>
-          {t('auth.orContinueWith')}
-        </Typography>
-        <Divider style={{ flex: 1 }} />
-      </Stack>
+      <AuthDivider />
 
       <Button variant='secondary' size='lg' onPress={submitGoogle} loading={googleBusy} accessibilityLabel={t('auth.signInGoogle')}>
         {t('auth.signInGoogle')}
