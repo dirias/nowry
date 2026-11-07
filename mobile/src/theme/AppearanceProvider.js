@@ -19,6 +19,7 @@
  */
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { storage } from '@nowry/core'
+import { useAuth } from '@nowry/core/context/AuthContext'
 import { useUserProfile } from '@nowry/core/hooks/useUserProfile'
 import { ThemeProvider } from './index'
 import { DEFAULT_THEME_COLOR } from './buildTheme'
@@ -39,6 +40,7 @@ const readMode = () => {
 
 export function AppearanceProvider({ children }) {
   const { profile } = useUserProfile()
+  const { isAuthenticated } = useAuth()
   const [mode, setModeState] = useState(readMode)
   const [accent, setAccent] = useState(null)
 
@@ -48,6 +50,17 @@ export function AppearanceProvider({ children }) {
     const saved = accentFromProfile(profile)
     if (saved) setAccent(saved)
   }, [profile])
+
+  /*
+   * A guest is nobody's accent (MOB-127, ADR-061 §4). The colour belongs to
+   * the account, and this copy outlived the account: after sign-out the
+   * profile query went idle rather than null, nothing wrote here, and the
+   * guest screens wore whoever signed out last — green on the emulator where
+   * both clients default to teal. Signing out lets go of it.
+   */
+  useEffect(() => {
+    if (!isAuthenticated) setAccent(null)
+  }, [isAuthenticated])
 
   const setMode = useCallback((next) => {
     if (!MODES.includes(next)) return
