@@ -19,6 +19,7 @@ const read = (relative) => fs.readFileSync(path.resolve(__dirname, relative), 'u
 const screen = read('../Screen.js')
 const appBar = read('../patterns/AppBar.js')
 const layout = read('../../../app/(tabs)/_layout.js')
+const authLayout = read('../../../app/(auth)/_layout.js')
 
 describe('the bottom inset', () => {
   it('is claimed by the tab bar', () => {
@@ -57,5 +58,22 @@ describe('the tab navigator', () => {
     expect(layout).toMatch(/header:\s*\(\)\s*=>\s*<AppBar\s*\/>/)
     // headerShown:false would hide it; the option must be gone entirely.
     expect(layout).not.toContain('headerShown: false')
+  })
+})
+
+describe('the guest stack', () => {
+  /*
+   * The signed-out screens drew no bar, so nothing held the top inset and the
+   * brand floated in the body (ADR-061). They draw the same bar now, and say
+   * so, so `Screen` stops insetting the top edge under it.
+   */
+  it('declares that it draws the app bar', () => {
+    expect(authLayout).toContain('<ScreenChromeProvider top>')
+    expect(authLayout).toMatch(/header:\s*\(\)\s*=>\s*<AppBar\s*\/>/)
+    expect(authLayout).not.toContain('headerShown: false')
+  })
+
+  it('knows a guest form is pushed from Welcome', () => {
+    expect(appBar).toMatch(/segments\[0\] === PUBLIC_GROUP\) return segments\[1\] !== PUBLIC_ROOT/)
   })
 })

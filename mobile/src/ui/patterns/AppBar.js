@@ -16,6 +16,14 @@
  * bottom one: it is the chrome closest to that edge. It grows by the inset
  * rather than moving down, so its ground reaches the top of the window and the
  * status bar sits on the accent rather than on a seam.
+ *
+ * **A guest gets the same bar** (MOB-122, ADR-061). The signed-out screens had
+ * none, and that was the first fault named on the emulator: no limit between
+ * head and body, the brand floating in the body, and sign-in jumping from no
+ * bar to this one. The slots keep one meaning across the gate — the left is
+ * the product (and the way back on a pushed screen), the right is whose screen
+ * this is: the account when there is one, the language switch when there is
+ * not (MOB-123). Nothing a guest cannot use is drawn for them.
  */
 import { Pressable, View } from 'react-native'
 import { StatusBar } from 'expo-status-bar'
@@ -56,6 +64,10 @@ const AVATAR = 32
  */
 const PUSHED_IN_TABS = ['profile', 'settings']
 
+/** The guest group and its root. Every other screen in the group is pushed from it. */
+const PUBLIC_GROUP = '(auth)'
+const PUBLIC_ROOT = 'welcome'
+
 /**
  * Whether this screen was reached from another one.
  *
@@ -65,6 +77,7 @@ const PUSHED_IN_TABS = ['profile', 'settings']
  * means. A tab's root is its first two segments; anything deeper was pushed.
  */
 const isPushed = (segments) => {
+  if (segments[0] === PUBLIC_GROUP) return segments[1] !== PUBLIC_ROOT
   if (segments[0] !== '(tabs)') return true
   if (segments.length > 2) return true
   return PUSHED_IN_TABS.includes(segments[1])
@@ -77,10 +90,21 @@ export function AppBar() {
   const { config: beta } = useBeta()
   const segments = useSegments()
   const insets = useSafeAreaInsets()
-  const { user } = useAuth()
+  const { user, isAuthenticated } = useAuth()
   const { profile } = useUserProfile()
 
   const photo = profile?.avatar_url || profile?.photo_url || null
+  const inPublicGroup = segments[0] === PUBLIC_GROUP
+
+  /*
+   * A guest form reached cold — a deep link, a restored route — has no history
+   * to pop, and the arrow must still lead somewhere: Welcome, the screen every
+   * form is pushed from. A signed-in screen with nothing to pop draws no arrow
+   * at all, as before.
+   */
+  const canGoBack = inPublicGroup || router.canGoBack()
+  // A literal, so routes.test can see the target (as AuthGate writes it).
+  const goBack = () => (router.canGoBack() ? router.back() : router.replace('/welcome'))
 
   return (
     <View
@@ -104,9 +128,9 @@ export function AppBar() {
        * this keeps it, because every phone artboard draws the mark in this bar
        * and the row has the width for both.
        */}
-      {isPushed(segments) && router.canGoBack() ? (
+      {isPushed(segments) && canGoBack ? (
         <Pressable
-          onPress={() => router.back()}
+          onPress={goBack}
           accessibilityRole='button'
           accessibilityLabel={t('common.goBack')}
           hitSlop={8}
@@ -148,18 +172,22 @@ export function AppBar() {
 
       <View style={{ flex: 1 }} />
 
-      {/* A running session, visible from every screen (MOB-104). */}
-      <TimerChip />
+      {isAuthenticated ? (
+        <>
+          {/* A running session, visible from every screen (MOB-104). */}
+          <TimerChip />
 
-      <Pressable
-        onPress={() => router.push('/profile')}
-        accessibilityRole='button'
-        accessibilityLabel={t('nav.profile')}
-        hitSlop={8}
-        style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-      >
-        <Avatar uri={photo} name={profile?.username || user?.email || ''} size={AVATAR} />
-      </Pressable>
+          <Pressable
+            onPress={() => router.push('/profile')}
+            accessibilityRole='button'
+            accessibilityLabel={t('nav.profile')}
+            hitSlop={8}
+            style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+          >
+            <Avatar uri={photo} name={profile?.username || user?.email || ''} size={AVATAR} />
+          </Pressable>
+        </>
+      ) : null}
     </View>
   )
 }

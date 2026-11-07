@@ -163,11 +163,15 @@ describe('every screen can be reached', () => {
 })
 
 /**
- * Screens that deliberately have no app bar: before you are signed in there is
- * no account to show, the OAuth callback is a redirect with nothing on it, and
- * the two harness screens exist to render primitives with no chrome around them.
+ * Screens that deliberately have no app bar: the OAuth callback is a redirect
+ * with nothing on it, and the two harness screens exist to render primitives
+ * with no chrome around them. The guest group is NOT here any more: it draws
+ * the same bar as the tab group (MOB-122, ADR-061).
  */
-const CHROMELESS = ['(auth)', 'oauthredirect', 'harness', 'probe']
+const CHROMELESS = ['oauthredirect', 'harness', 'probe']
+
+/** The two navigators that draw the app bar, and so carry the way back. */
+const WITH_APP_BAR = ['(tabs)', '(auth)']
 
 describe('every screen has a way back', () => {
   /*
@@ -178,8 +182,8 @@ describe('every screen has a way back', () => {
    */
   it.each(routeFiles.map((file) => path.relative(APP, file)).sort())('%s is inside the tab group', (relative) => {
     const first = relative.split(path.sep)[0].replace(/\.js$/, '')
-    const inside = first === '(tabs)' || CHROMELESS.includes(first)
-    expect(inside ? relative : `${relative} — outside (tabs), so it has no app bar and no way back`).toEqual(relative)
+    const inside = WITH_APP_BAR.includes(first) || CHROMELESS.includes(first)
+    expect(inside ? relative : `${relative} — outside (tabs) and (auth), so it has no app bar and no way back`).toEqual(relative)
   })
 })
 
