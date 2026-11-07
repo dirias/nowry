@@ -1,19 +1,26 @@
 /**
- * Welcome — the phone's front door (docs/prd-public-site.md D-M1, SITE-009).
+ * Welcome — the phone's front door (docs/prd-public-site.md D-M1 as amended by
+ * D-M9, SITE-009, MOB-124).
  *
- * Before this, a signed-out cold start landed on the sign-in form and nothing
- * on the phone said what Nowry is. This is the landing's first view at 390
- * wide, from the same keys: the display wordmark, the headline, the sentence,
- * the loop as four rows, then the two actions pinned above the home indicator.
- * Top-aligned, one column, one solid (ADR-035 §2–§3). A returning user taps
- * Sign in once.
+ * The first cut was the landing's first view with the wordmark in the body and
+ * the loop as four rows, and it asked a stranger to trust a reading list. This
+ * is the web's hero order: the headline first (the bar above names the product
+ * now, so no wordmark here), the sentence, then the product itself — Home on
+ * the phone, drawn from the same tokens — with its caption, and the loop under
+ * it for whoever scrolls.
+ *
+ * **The door is a slot, not a position in the scroll.** The two actions used to
+ * be "pinned" by being last, and on a 1080 × 2400 screen the Sign in key was
+ * cut to a sliver at the fold. They sit in a View outside the ScrollView now,
+ * on the body ground with a hairline above, and the screen's own bottom inset
+ * puts the home indicator under them — the tab bar's rule, one screen earlier.
  */
 import { Fragment } from 'react'
+import { ScrollView, View } from 'react-native'
 import { Link } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '../../src/theme'
-import { Button, Divider, Screen, Stack, Typography } from '../../src/ui'
-import { BrandWordmark } from '../../src/ui/patterns/BrandMark'
+import { Button, Divider, PhoneFrame, Screen, Stack, Typography } from '../../src/ui'
 
 /** The product's own order (PRD D3): the same keys the web's loop reads. */
 const STEPS = ['read', 'cards', 'study', 'plan']
@@ -23,17 +30,24 @@ export default function Welcome() {
   const theme = useTheme()
 
   return (
-    // No companion floats over a guest screen, so the bubble clearance the
-    // default padding reserves would be dead space under the pinned actions.
-    <Screen contentContainerStyle={{ paddingBottom: theme.spacing[3] }}>
-      <Stack spacing={4} flex={1}>
-        <Stack spacing={3} flex={1}>
-          <BrandWordmark level='display-md' />
-
+    // No keyboard on this screen and no companion bubble over a guest, so the
+    // screen is a plain frame: the scroll above, the slot below.
+    <Screen scroll={false} padding={0} keyboard='ignore'>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: theme.spacing[3] }}>
+        <Stack spacing={3}>
           <Stack spacing={1.5}>
-            <Typography level='h1'>{t('landing.hero.title')}</Typography>
+            <Typography level='h1' accessibilityRole='header'>
+              {t('landing.hero.title')}
+            </Typography>
             <Typography level='body-md' color='text.secondary'>
               {t('landing.hero.lead')}
+            </Typography>
+          </Stack>
+
+          <Stack spacing={1}>
+            <PhoneFrame />
+            <Typography level='body-xs' color='text.tertiary'>
+              {t('landing.hero.phoneCaption')}
             </Typography>
           </Stack>
 
@@ -56,8 +70,14 @@ export default function Welcome() {
             ))}
           </Stack>
         </Stack>
+      </ScrollView>
 
-        <Stack spacing={1.5}>
+      <View>
+        <Divider />
+        <Stack
+          spacing={1.5}
+          style={{ paddingHorizontal: theme.spacing[3], paddingTop: theme.spacing[2], paddingBottom: theme.spacing[1.5] }}
+        >
           <Link href='/register' asChild>
             <Button size='lg' accessibilityLabel={t('landing.hero.cta')}>
               {t('landing.hero.cta')}
@@ -72,7 +92,7 @@ export default function Welcome() {
             {t('auth.createAccountSubtitle')}
           </Typography>
         </Stack>
-      </Stack>
+      </View>
     </Screen>
   )
 }
