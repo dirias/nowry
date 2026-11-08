@@ -27,6 +27,10 @@ module.exports = {
    */
   globals: { __DEV__: true },
   testMatch: ['<rootDir>/src/**/__tests__/**/*.test.js'],
+  // The floor only rises (QA-025, ADR-049 amended): today's measured figure,
+  // honest about the phone: almost every test here reads source, none renders.
+  collectCoverageFrom: ['src/**/*.js', 'app/**/*.js', '!src/**/__tests__/**'],
+  coverageThreshold: { global: { lines: 8 } },
   resetMocks: true,
   transform: {
     '^.+\\.js$': ['babel-jest', { presets: [['babel-preset-react-app', { runtime: 'automatic' }]] }]

@@ -97,6 +97,20 @@
     "transformIgnorePatterns": [
       "[/\\\\]node_modules[/\\\\](?!(react-markdown|remark-.+|rehype-.+|micromark.*|mdast-util-.+|unist-.+|unified|bail|is-plain-obj|trough|vfile.*|hast-util-.+|hast-to-hyperscript|html-void-elements|property-information|space-separated-tokens|comma-separated-tokens|zwitch|longest-streak|decode-named-character-reference|character-entities.*|ccount|escape-string-regexp|markdown-table|trim-lines|devlop|estree-util-.+|html-url-attributes)[/\\\\]).+\\.(js|mjs|cjs|jsx|ts|tsx)$",
       "^.+\\.module\\.(css|sass|scss)$"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "lines": 44
+      }
+    },
+    "collectCoverageFrom": [
+      "src/**/*.{js,jsx}",
+      "!src/**/__tests__/**",
+      "!src/**/*.test.js",
+      "!src/index.js",
+      "!src/reportWebVitals.js",
+      "!src/setupTests.js",
+      "!src/setupTestEnv.js"
     ]
   },
   "browserslist": {

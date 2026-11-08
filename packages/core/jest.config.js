@@ -34,6 +34,8 @@ const transform = {
 
 module.exports = {
   rootDir: __dirname,
+  // The floor only rises (QA-025, ADR-049 amended): today's measured figure.
+  coverageThreshold: { global: { lines: 82 } },
   projects: [
     {
       displayName: 'core (no DOM)',
