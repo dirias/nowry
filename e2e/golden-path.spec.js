@@ -1,6 +1,7 @@
 /**
  * QA-010 — the golden path a new user walks on launch day, end to end:
  * sign up → (skip onboarding) → create a deck → add cards → study them →
+ * write a book and find it after a reload (QA-023) →
  * sign in again from a fresh browser and find it all still there → the plans.
  *
  * Every step goes through the real web client and the real API; sign-in is the
@@ -10,6 +11,7 @@
 const { test, expect } = require('@playwright/test')
 
 const PASSWORD = 'Str0ng-enough!'
+const SENTENCE = 'The inner membrane folds into cristae.'
 const CARDS = [
   ['Capital of France?', 'Paris'],
   ['Capital of Japan?', 'Tokyo']
@@ -81,6 +83,28 @@ test('a new user signs up, makes a deck, studies it, and finds it there next tim
     // The session ends on its reading (ADR-060): the object, and both cards held.
     await expect(page.getByTestId('session-end')).toBeVisible()
     await expect(page.getByText('All 2 held.')).toBeVisible()
+  })
+
+  await test.step('write a book, and find the sentence after a reload', async () => {
+    // QA-023: autosave losing typed text was a real bug in October (QA-009);
+    // this is the editor's first end-to-end check. Autosave is off by default,
+    // so the step turns it on, as a writer who keeps a book open would.
+    await page.goto('/books')
+    await page.getByRole('button', { name: 'Add a document' }).click()
+    await page.getByRole('button', { name: 'New document' }).click()
+    const sheet = page.getByRole('dialog')
+    await sheet.getByPlaceholder('Untitled book').fill('E2E Mitochondria')
+    await sheet.getByRole('button', { name: 'Create & write' }).click()
+    await page.waitForURL((url) => url.pathname.startsWith('/book/'))
+    const editor = page.locator('.editor-content[contenteditable="true"]')
+    await editor.click()
+    await page.keyboard.type(SENTENCE)
+    await page.getByRole('button', { name: 'Enable autosave' }).click()
+    await expect(page.getByText('Saved', { exact: true })).toBeVisible({ timeout: 15000 })
+    await page.reload()
+    await expect(page.locator('.editor-content[contenteditable="true"]')).toContainText(SENTENCE)
+    await page.goto('/books')
+    await expect(page.getByText('E2E Mitochondria').first()).toBeVisible()
   })
 
   await test.step('sign in again from a fresh browser and find the deck studied', async () => {
