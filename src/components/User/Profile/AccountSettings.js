@@ -1201,6 +1201,13 @@ export default function AccountSettings() {
                   >
                     {t('settings.dangerZone.deleteButton')}
                   </Button>
+                  {/* The API's refusal (public content still published) used to be
+                      stored and never shown: the modal closed and nothing said why (QA-020). */}
+                  {deleteError && (
+                    <Typography level='body-sm' role='alert' sx={{ color: 'danger.plainColor', mt: 2 }}>
+                      {deleteError}
+                    </Typography>
+                  )}
                 </Box>
               </Stack>
             </Box>
