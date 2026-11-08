@@ -1,0 +1,68 @@
+# QA-024 — the phone's golden path, as a stranger walks it on the emulator.
+#
+# welcome → create an account → Home → the Study tab → a first deck → the
+# account → Settings → delete the account (which signs out) → welcome again.
+# Every tap is on the label a screen reader hears, so the flow reads the way
+# the app is described, and it breaks when a string a user depends on changes.
+#
+# Runs against the API the dev client is pointed at (mobile/.env). That API
+# keeps the beta gate on, so pass an invite: `-e INVITE=<code>`. The account
+# it makes is deleted at the end; the suffix keeps the run idempotent.
+appId: com.nowry.app
+env:
+  INVITE: ""
+  PASSWORD: "Str0ng-enough!"
+---
+- launchApp:
+    clearState: true
+- assertVisible: "Your books,"
+- tapOn: "Create a free account"
+
+# ── create an account ───────────────────────────────────────────────────────
+- evalScript: ${output.suffix = String(Date.now()).slice(-6)}
+- runFlow:
+    when:
+      visible: "Invite code"
+    commands:
+      - tapOn: "Invite code"
+      - inputText: ${INVITE}
+- tapOn: "Username"
+- inputText: e2e_${output.suffix}
+- tapOn: "Email"
+- inputText: e2e-${output.suffix}@example.com
+- tapOn: "Password"
+- inputText: ${PASSWORD}
+- tapOn: "Confirm Password"
+- inputText: ${PASSWORD}
+- hideKeyboard
+- tapOn:
+    text: "I agree to the.*"
+- tapOn: "Create account"
+
+# ── Home, then the first deck ───────────────────────────────────────────────
+- extendedWaitUntil:
+    visible: "Welcome back.*"
+    timeout: 30000
+- tapOn: "Study"
+- tapOn: "Add"
+- tapOn: "New Deck"
+- tapOn: "Deck name"
+- inputText: E2E Capitals
+- hideKeyboard
+- tapOn: "Create deck"
+- assertVisible: "E2E Capitals"
+
+# ── leave: the account, Settings, delete ───────────────────────────────────
+- tapOn: "Profile"
+- tapOn: "Settings"
+- scrollUntilVisible:
+    element: "Delete account"
+    direction: DOWN
+- tapOn: "Confirm your email address"
+- inputText: e2e-${output.suffix}@example.com
+- hideKeyboard
+- tapOn: "Delete account"
+- tapOn: "Delete permanently"
+- extendedWaitUntil:
+    visible: "Your books,"
+    timeout: 30000

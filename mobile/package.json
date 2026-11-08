@@ -39,6 +39,7 @@
     "start": "expo start --dev-client",
     "start:web-check": "expo start",
     "lint": "eslint \"app/**/*.js\" \"src/**/*.js\" \"*.js\"",
-    "test": "jest --config jest.config.js"
+    "test": "jest --config jest.config.js",
+    "e2e": "maestro test e2e/golden-path.yaml"
   }
 }
