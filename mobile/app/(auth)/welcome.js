@@ -1,6 +1,6 @@
 /**
  * Welcome — the phone's front door (docs/prd-public-site.md D-M1 as amended by
- * D-M9 and D-M13, SITE-009, MOB-124, MOB-128).
+ * D-M9 and D-M13, SITE-009, MOB-124, MOB-128, MOB-129).
  *
  * The first cut was the landing's first view with the wordmark in the body and
  * the loop as four rows, and it asked a stranger to trust a reading list. This
@@ -8,11 +8,13 @@
  * now, so no wordmark here), the sentence, then the product itself, drawn from
  * the same tokens, with its caption, and the loop under it for whoever scrolls.
  *
- * **One frame, so the one claim nobody else makes.** The web has five frames,
- * one per step of the loop; this screen has one above the fold. It showed Home
- * on the phone first, which on a phone proves what the visitor already holds
- * and reads as a to-do list (PRD E-M15). It shows a card with its source now:
- * a book, a card made from it, and the schedule's four keys in one object.
+ * **One frame, three nouns.** The web has five frames, one per step of the
+ * loop; this screen has one above the fold. It showed Home on the phone first
+ * (on a phone that proves what the visitor already holds, PRD E-M15), then a
+ * card alone (one noun of three). It shows the cascade now (PRD D-M13, second
+ * pass; MOB-129): three equal tiles — a section, the card it became, the plan
+ * it counts toward — on a staircase, with no caption: the frame takes the
+ * whole budget above the fold and the tiles' bars name the product.
  *
  * **The door is a slot, not a position in the scroll.** The two actions used to
  * be "pinned" by being last, and on a 1080 × 2400 screen the Sign in key was
@@ -25,7 +27,7 @@ import { ScrollView, View } from 'react-native'
 import { Link } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useTheme } from '../../src/theme'
-import { Button, CardFrame, Divider, Screen, Stack, Typography } from '../../src/ui'
+import { Button, CascadeFrame, Divider, Screen, Stack, Typography } from '../../src/ui'
 
 /** The product's own order (PRD D3): the same keys the web's loop reads. */
 const STEPS = ['read', 'cards', 'study', 'plan']
@@ -49,12 +51,7 @@ export default function Welcome() {
             </Typography>
           </Stack>
 
-          <Stack spacing={1}>
-            <CardFrame />
-            <Typography level='body-xs' color='text.tertiary'>
-              {t('landing.hero.cardCaption')}
-            </Typography>
-          </Stack>
+          <CascadeFrame />
 
           <Stack accessibilityRole='list'>
             {STEPS.map((step, index) => (
