@@ -1676,6 +1676,15 @@
     },
     "autosave": "Autosave",
     "editor": {
+      "images": {
+        "uploading": "Uploading {{name}}… {{percent}} %",
+        "notSaved": "Save the document before adding an image.",
+        "noFile": "No image was chosen.",
+        "unsupported": "That file type isn't supported. Use JPEG, PNG, GIF or WebP.",
+        "tooLarge": "That image is {{size}} MB. The limit is {{limit}} MB.",
+        "failed": "The image couldn't be uploaded. Try again.",
+        "limitReached": "You've reached this month's image limit."
+      },
       "titlePlaceholder": "Enter book title...",
       "contentPlaceholder": "Start writing...",
       "notesPlaceholder": "Add notes...",

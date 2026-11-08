@@ -2824,6 +2824,15 @@
     },
     "autosave": "Enregistrement auto",
     "editor": {
+      "images": {
+        "uploading": "Envoi de {{name}}… {{percent}} %",
+        "notSaved": "Enregistrez le document avant d'ajouter une image.",
+        "noFile": "Aucune image n'a été choisie.",
+        "unsupported": "Ce type de fichier n'est pas pris en charge. Utilisez JPEG, PNG, GIF ou WebP.",
+        "tooLarge": "Cette image fait {{size}} Mo. La limite est de {{limit}} Mo.",
+        "failed": "L'image n'a pas pu être envoyée. Réessayez.",
+        "limitReached": "Vous avez atteint la limite d'images de ce mois."
+      },
       "titlePlaceholder": "Entrez le titre du livre...",
       "contentPlaceholder": "Commencez à écrire...",
       "notesPlaceholder": "Ajouter des notes...",

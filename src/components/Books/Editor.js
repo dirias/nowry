@@ -16,7 +16,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { AI_LIMIT_REACHED_CODE } from '@nowry/core/domain/limits'
 import { FREE_AI_CALLS_PER_MONTH } from '@nowry/core/domain/plans'
-import { Box, useTheme, Snackbar, Alert, Button, LinearProgress } from '@mui/joy'
+import { Box, useTheme, Snackbar, Alert, Button, LinearProgress, Typography } from '@mui/joy'
 import DiagramPreviewPanel from './DiagramPreviewPanel'
 import DOMPurify from 'dompurify'
 import { LexicalComposer } from '@lexical/react/LexicalComposer'
@@ -280,6 +280,8 @@ export default function Editor({
   const [questionnaireData, setQuestionnaireData] = useState([])
   const [error, setError] = useState(null)
   const [isLimitError, setIsLimitError] = useState(false)
+  // An image on its way to storage: { name, percent } while it runs, null otherwise (PRD editor-media D4).
+  const [upload, setUpload] = useState(null)
   // True while the "you can't edit in reading mode" hint is showing.
   const [blockedEditOpen, setBlockedEditOpen] = useState(false)
   const [isExpandingText, setIsExpandingText] = useState(false)
@@ -768,6 +770,37 @@ export default function Editor({
             }}
           />
         )}
+        {upload && (
+          <Box
+            role='status'
+            aria-live='polite'
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              zIndex: 'floating',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 0.5,
+              px: 2,
+              py: 1,
+              bgcolor: 'background.surface',
+              borderBottom: '1px solid',
+              borderColor: 'divider'
+            }}
+          >
+            <Typography level='body-xs' sx={{ color: 'text.secondary' }} noWrap>
+              {t('books.editor.images.uploading', { name: upload.name, percent: upload.percent })}
+            </Typography>
+            <LinearProgress
+              determinate
+              value={upload.percent}
+              size='sm'
+              aria-label={t('books.editor.images.uploading', { name: upload.name, percent: upload.percent })}
+            />
+          </Box>
+        )}
         <Snackbar open={!!error} autoHideDuration={6000} onClose={() => setError(null)} color='danger' variant='soft'>
           <Alert
             color='danger'
@@ -883,7 +916,20 @@ export default function Editor({
           <FocusReportPlugin onFocus={onFocus} />
           <EditorEditablePlugin mode={mode} />
           <EditorSyncPlugin onContentChange={setInternalContent} />
-          <ImageUploadPlugin bookId={book?._id} onUploadComplete={onImageUpload} onUploadError={(msg) => setError(msg)} />
+          <ImageUploadPlugin
+            bookId={book?._id}
+            onUploadStart={(name) => setUpload({ name, percent: 0 })}
+            onUploadProgress={(percent) => setUpload((current) => (current ? { ...current, percent } : current))}
+            onUploadComplete={(result) => {
+              setUpload(null)
+              if (onImageUpload) onImageUpload(result)
+            }}
+            onUploadError={(message, { limit } = {}) => {
+              setUpload(null)
+              setIsLimitError(!!limit)
+              setError(message)
+            }}
+          />
           <CodePastePlugin />
           <HistoryPlugin />
           {/* <AutoFocusPlugin /> */}

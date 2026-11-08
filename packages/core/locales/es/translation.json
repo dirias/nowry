@@ -1259,6 +1259,15 @@
     },
     "autosave": "Guardado automático",
     "editor": {
+      "images": {
+        "uploading": "Subiendo {{name}}… {{percent}} %",
+        "notSaved": "Guarda el documento antes de añadir una imagen.",
+        "noFile": "No se eligió ninguna imagen.",
+        "unsupported": "Ese tipo de archivo no es compatible. Usa JPEG, PNG, GIF o WebP.",
+        "tooLarge": "Esa imagen pesa {{size}} MB. El límite es {{limit}} MB.",
+        "failed": "No se pudo subir la imagen. Inténtalo de nuevo.",
+        "limitReached": "Alcanzaste el límite de imágenes de este mes."
+      },
       "titlePlaceholder": "Ingresa el título del libro...",
       "contentPlaceholder": "Empieza a escribir...",
       "notesPlaceholder": "Agregar notas...",

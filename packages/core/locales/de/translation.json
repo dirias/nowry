@@ -2813,6 +2813,15 @@
     },
     "autosave": "Auto-Speichern",
     "editor": {
+      "images": {
+        "uploading": "{{name}} wird hochgeladen… {{percent}} %",
+        "notSaved": "Speichere das Dokument, bevor du ein Bild hinzufügst.",
+        "noFile": "Es wurde kein Bild ausgewählt.",
+        "unsupported": "Dieser Dateityp wird nicht unterstützt. Verwende JPEG, PNG, GIF oder WebP.",
+        "tooLarge": "Das Bild hat {{size}} MB. Die Grenze liegt bei {{limit}} MB.",
+        "failed": "Das Bild konnte nicht hochgeladen werden. Versuche es noch einmal.",
+        "limitReached": "Du hast das Bildlimit für diesen Monat erreicht."
+      },
       "titlePlaceholder": "Buchtitel eingeben...",
       "contentPlaceholder": "Beginne zu schreiben...",
       "notesPlaceholder": "Notizen hinzufügen...",

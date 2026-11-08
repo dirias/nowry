@@ -1000,6 +1000,15 @@
     "coverImagePlaceholder": "https://example.com/image.jpg",
     "errorImport": "ファイルの処理中にエラーが発生しました。もう一度お試しください。",
     "editor": {
+      "images": {
+        "uploading": "{{name}} をアップロード中… {{percent}} %",
+        "notSaved": "画像を追加する前に文書を保存してください。",
+        "noFile": "画像が選択されていません。",
+        "unsupported": "このファイル形式には対応していません。JPEG、PNG、GIF、WebP を使ってください。",
+        "tooLarge": "この画像は {{size}} MB です。上限は {{limit}} MB です。",
+        "failed": "画像をアップロードできませんでした。もう一度お試しください。",
+        "limitReached": "今月の画像の上限に達しました。"
+      },
       "titlePlaceholder": "本のタイトルを入力…",
       "contentPlaceholder": "書き始めましょう…",
       "notesPlaceholder": "メモを追加…",
