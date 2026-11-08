@@ -95,7 +95,14 @@ describe('reading a document body', () => {
 
   it('carries an image with its source and its alt text', () => {
     const { blocks } = readDocument(doc([{ type: 'image', src: 'https://x/y.png', altText: 'A diagram' }]))
-    expect(blocks[0]).toMatchObject({ type: 'image', src: 'https://x/y.png', alt: 'A diagram' })
+    expect(blocks[0]).toMatchObject({ type: 'image', src: 'https://x/y.png', alt: 'A diagram', width: null, height: null })
+  })
+
+  it('carries the size the writer gave an image, and nulls for a size that is not one', () => {
+    const sized = readDocument(doc([{ type: 'image', src: 'https://x/y.png', altText: '', width: 500, height: 250 }]))
+    expect(sized.blocks[0]).toMatchObject({ width: 500, height: 250 })
+    const odd = readDocument(doc([{ type: 'image', src: 'https://x/y.png', altText: '', width: 'inherit', height: 0 }]))
+    expect(odd.blocks[0]).toMatchObject({ width: null, height: null })
   })
 
   it('keeps a soft line break, because a dropped one welds two lines together', () => {

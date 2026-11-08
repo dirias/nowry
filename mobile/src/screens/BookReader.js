@@ -37,7 +37,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { bookContext } from '@nowry/core/domain/screenContext'
 import { useScreenSubject } from './screenSubject'
-import { AppState, Linking, View } from 'react-native'
+import { AppState, Image, Linking, View } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
@@ -341,13 +341,34 @@ function Block({ block, theme, t, index, onHeadingLayout }) {
       )
 
     case 'image':
-      // Named rather than drawn: an image in a document is served from the
-      // account's own storage, and reaching it needs the auth this client
-      // sends on API calls and not on an <Image> source (PRD FR-034).
+      /*
+       * Drawn, width-fitted to the column at the size the writer gave it
+       * (4:3 when there is none), with the alt text as its name (PRD FR-034
+       * as rewritten, editor-media D6). A delivery URL is public, so no
+       * header is needed. A node with no source is still named in place
+       * (FR-032): a reader that drops content teaches the writer it is gone.
+       */
+      if (!block.src) {
+        return (
+          <Typography level='body-sm' color='text.tertiary'>
+            {block.alt ? t('books.reader.imageWithAlt', { alt: block.alt }) : t('books.reader.image')}
+          </Typography>
+        )
+      }
       return (
-        <Typography level='body-sm' color='text.tertiary'>
-          {block.alt ? t('books.reader.imageWithAlt', { alt: block.alt }) : t('books.reader.image')}
-        </Typography>
+        <Image
+          source={{ uri: block.src }}
+          accessible
+          accessibilityRole='image'
+          accessibilityLabel={block.alt || t('books.reader.imageUnnamed')}
+          resizeMode='contain'
+          style={{
+            width: '100%',
+            aspectRatio: block.width && block.height ? block.width / block.height : 4 / 3,
+            borderRadius: theme.radius.md,
+            backgroundColor: resolveColor(theme, 'background.level1')
+          }}
+        />
       )
 
     default:

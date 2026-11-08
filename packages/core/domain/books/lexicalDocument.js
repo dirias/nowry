@@ -128,7 +128,17 @@ const blockFor = (node) => {
     case 'code':
       return { type: 'code', text: plain(node) }
     case 'image':
-      return { type: 'image', src: node.src ?? null, alt: node.altText ?? '' }
+      /*
+       * The size the writer gave the image, when there is one, so a reader can
+       * reserve the right box before the bytes arrive (PRD editor-media D6).
+       */
+      return {
+        type: 'image',
+        src: node.src ?? null,
+        alt: node.altText ?? '',
+        width: Number.isFinite(node.width) && node.width > 0 ? node.width : null,
+        height: Number.isFinite(node.height) && node.height > 0 ? node.height : null
+      }
     case 'horizontalrule':
       return { type: 'rule' }
     case 'table':

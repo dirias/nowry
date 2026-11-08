@@ -2879,8 +2879,9 @@
     "errorImport": "Erreur lors du traitement du fichier. Veuillez réessayer.",
     "reader": {
       "empty": "Ce document est encore vide.",
-      "image": "Une image, que cette application peut afficher sur le web.",
-      "imageWithAlt": "Une image : {{alt}}. Ouvrez-la sur le web pour la voir.",
+      "image": "Une image sans source.",
+      "imageWithAlt": "Une image sans source : {{alt}}",
+      "imageUnnamed": "Image",
       "legacyOnly": "Ce document a été écrit dans un ancien format que le téléphone ne peut pas encore afficher. Ouvrez-le sur le web pour le lire.",
       "unsupported": "Un bloc {{name}}, que le téléphone ne sait pas encore dessiner."
     }

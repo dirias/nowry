@@ -1737,8 +1737,9 @@
     "coverImagePlaceholder": "https://example.com/image.jpg",
     "reader": {
       "empty": "This document has nothing in it yet.",
-      "image": "An image, which this app can show on the web.",
-      "imageWithAlt": "An image: {{alt}}. Open it on the web to see it.",
+      "image": "An image without a source.",
+      "imageWithAlt": "An image without a source: {{alt}}",
+      "imageUnnamed": "Image",
       "legacyOnly": "This document was written in an older format that the phone can't display yet. Open it on the web to read it.",
       "unsupported": "A {{name}} block, which the phone can't draw yet."
     }

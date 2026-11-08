@@ -192,6 +192,8 @@ const IDENTICAL_BY_DESIGN = {
   // "Portrait(s)" is the French word, so both the heading and the numbered
   // option label land on English by coincidence rather than by neglect.
   fr: [
+    // MEDIA-005: the phone reader's accessible name for an image with no alt text is the French word.
+    'books.reader.imageUnnamed',
     // Boards (BOARD-006/008/009): file extensions, format names and the list comma are universal; "Image (PNG)", "note" and "Question" are the French words.
     'boards.menu.importTypes',
     'boards.menu.exportCanvas',
