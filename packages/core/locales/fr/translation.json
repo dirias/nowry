@@ -494,7 +494,8 @@
       "proof": "Parcourir la bibliothèque publique",
       "fineprint": "Sans carte bancaire. Cinq langues : English, Español, Français, Deutsch, 日本語.",
       "frameCaption": "Le Centre d'étude, tel qu'il est aujourd'hui.",
-      "phoneCaption": "L'accueil sur le téléphone, tel qu'il est aujourd'hui."
+      "phoneCaption": "L'accueil sur le téléphone, tel qu'il est aujourd'hui.",
+      "cardCaption": "Une carte, et d'où elle vient."
     },
     "loop": {
       "title": "Lire, créer des cartes, étudier, planifier. Et recommencer.",

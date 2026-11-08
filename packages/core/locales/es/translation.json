@@ -400,7 +400,8 @@
       "proof": "Explorar la biblioteca pública",
       "fineprint": "Sin tarjeta. Cinco idiomas: English, Español, Français, Deutsch, 日本語.",
       "frameCaption": "El Centro de estudio, tal como se ve hoy.",
-      "phoneCaption": "Inicio en el teléfono, tal como se ve hoy."
+      "phoneCaption": "Inicio en el teléfono, tal como se ve hoy.",
+      "cardCaption": "Una tarjeta, y de dónde salió."
     },
     "loop": {
       "title": "Lee, crea tarjetas, estudia, planifica. Y otra vez.",

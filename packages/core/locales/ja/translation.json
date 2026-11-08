@@ -447,7 +447,8 @@
       "proof": "公開ライブラリを見る",
       "fineprint": "カード登録は不要。5 か国語対応：English、Español、Français、Deutsch、日本語。",
       "frameCaption": "学習センター、今日の姿。",
-      "phoneCaption": "スマートフォンのホーム、今日の姿。"
+      "phoneCaption": "スマートフォンのホーム、今日の姿。",
+      "cardCaption": "カードと、その出どころ。"
     },
     "loop": {
       "title": "読む、カードにする、学ぶ、計画する。そしてまた。",
