@@ -188,6 +188,7 @@ export default function Register() {
           <Checkbox
             checked={accepted}
             onPress={() => setAccepted((value) => !value)}
+            testID='register-consent'
             accessibilityLabel={`${t('auth.agreeTerms')} ${t('auth.termsOfService')} ${t('auth.and')} ${t('auth.privacyPolicy')}`}
             label={
               <Typography level='body-sm' color='text.secondary' style={{ flex: 1 }}>

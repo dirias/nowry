@@ -9,13 +9,39 @@
 # keeps the beta gate on, so pass an invite: `-e INVITE=<code>`. The account
 # it makes is deleted at the end; the suffix keeps the run idempotent.
 appId: com.nowry.app
+# Parameters, all from the command line (`-e NAME=value`): a default written
+# here would shadow the value passed in, so none is.
+#   INVITE      the beta invite code the dev API expects
+#   DEV_SERVER  a development build runs its JS from Metro: the server as the
+#               emulator reaches it, URL-encoded; leave it out for a production APK
 env:
-  INVITE: ""
   PASSWORD: "Str0ng-enough!"
 ---
-- launchApp:
-    clearState: true
-- assertVisible: "Your books,"
+- launchApp
+- runFlow:
+    when:
+      true: "${typeof DEV_SERVER !== 'undefined' && DEV_SERVER.length > 0}"
+    commands:
+      - openLink: com.nowry.app://expo-development-client/?url=${DEV_SERVER}
+# The app bar names the product on every screen, signed in or out: it is the
+# sign that the bundle is up.
+- extendedWaitUntil:
+    visible: "Nowry"
+    timeout: 120000
+# A development build keeps the last session: if somebody is signed in, leave
+# first. (The flow deletes its own account at the end, so a clean run never
+# needs this.)
+- runFlow:
+    when:
+      visible: "Profile"
+    commands:
+      - tapOn: "Profile"
+      - tapOn: "Logout"
+# The headline is one text node of three lines and Maestro's matcher does not
+# cross a line break, so Welcome is recognised by its key.
+- extendedWaitUntil:
+    visible: "Create a free account"
+    timeout: 30000
 - tapOn: "Create a free account"
 
 # ── create an account ───────────────────────────────────────────────────────
@@ -25,18 +51,31 @@ env:
       visible: "Invite code"
     commands:
       - tapOn: "Invite code"
-      - inputText: ${INVITE}
+      - inputText: "${typeof INVITE !== 'undefined' ? INVITE : ''}"
 - tapOn: "Username"
 - inputText: e2e_${output.suffix}
 - tapOn: "Email"
 - inputText: e2e-${output.suffix}@example.com
+# The keyboard covers the lower fields; Maestro only sees what is on screen.
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Password"
+    direction: DOWN
 - tapOn: "Password"
 - inputText: ${PASSWORD}
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Confirm Password"
+    direction: DOWN
 - tapOn: "Confirm Password"
 - inputText: ${PASSWORD}
 - hideKeyboard
+- scrollUntilVisible:
+    element: "Create account"
+    direction: DOWN
+# The consent row's label holds two links, so the tap goes to the box itself.
 - tapOn:
-    text: "I agree to the.*"
+    id: "register-consent-box"
 - tapOn: "Create account"
 
 # ── Home, then the first deck ───────────────────────────────────────────────
@@ -44,6 +83,8 @@ env:
     visible: "Welcome back.*"
     timeout: 30000
 - tapOn: "Study"
+# The Study tab opens on the dashboard; the library is its second view.
+- tapOn: "Library"
 - tapOn: "Add"
 - tapOn: "New Deck"
 - tapOn: "Deck name"
@@ -51,6 +92,8 @@ env:
 - hideKeyboard
 - tapOn: "Create deck"
 - assertVisible: "E2E Capitals"
+# The create sheet closes on its Done key.
+- tapOn: "Done"
 
 # ── leave: the account, Settings, delete ───────────────────────────────────
 - tapOn: "Profile"
@@ -64,5 +107,5 @@ env:
 - tapOn: "Delete account"
 - tapOn: "Delete permanently"
 - extendedWaitUntil:
-    visible: "Your books,"
+    visible: "Create a free account"
     timeout: 30000

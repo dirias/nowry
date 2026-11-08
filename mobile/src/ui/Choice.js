@@ -16,7 +16,7 @@ import { MIN_TOUCH_TARGET } from './buttonSpec'
 
 const BOX = 22
 
-function Control({ checked, round, disabled, label, onPress, accessibilityRole, style, ...rest }) {
+function Control({ checked, round, disabled, label, onPress, accessibilityRole, style, testID, ...rest }) {
   const theme = useTheme()
 
   return (
@@ -31,9 +31,13 @@ function Control({ checked, round, disabled, label, onPress, accessibilityRole, 
         { minHeight: MIN_TOUCH_TARGET, flexDirection: 'row', alignItems: 'center', gap: theme.spacing[1], opacity: disabled ? 0.45 : 1 },
         style
       ]}
+      testID={testID}
       {...rest}
     >
+      {/* The box carries its own id so a UI test can tap it rather than the
+          label, whose links are targets of their own (QA-024). */}
       <View
+        testID={testID ? `${testID}-box` : undefined}
         style={{
           width: BOX,
           height: BOX,

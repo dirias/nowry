@@ -4,6 +4,30 @@ import { apiClient } from '../client'
 import { usernameFor } from '../../domain/username'
 import { inviteHeaders } from '../../domain/beta'
 
+/**
+ * The sign-up in flight, if any (QA-024).
+ *
+ * Creating the Firebase account fires `onAuthStateChanged` at once, and the
+ * auth context answers it by reading `/users/me` — before `/auth/register`
+ * has carried the invite code to the server. While the beta gate is on, that
+ * first read is a brand-new uid with no invite header, which the server
+ * refuses with 403; the context then treats the session as invalid and the
+ * phone stays on the form it just submitted, signed in to Firebase and out of
+ * the app. The context awaits this promise before its first read, so the
+ * account exists by the time it asks.
+ */
+export const registration = { pending: null }
+
+const whileRegistering = async (work) => {
+  const run = work()
+  registration.pending = run.catch(() => {})
+  try {
+    return await run
+  } finally {
+    registration.pending = null
+  }
+}
+
 /*
  * Both clients run the same Firebase JS SDK (ADR-028) and differ only in how
  * they construct the Auth object, so the operations above are shared and the
@@ -28,6 +52,10 @@ export const authService = {
    * @returns {Promise<Object>} User data
    */
   async register(email, password, username, inviteCode) {
+    return whileRegistering(() => this.registerNow(email, password, username, inviteCode))
+  },
+
+  async registerNow(email, password, username, inviteCode) {
     try {
       // Create user in Firebase
       const userCredential = await createUserWithEmailAndPassword(firebaseAuth(), email, password)
@@ -127,6 +155,10 @@ export const authService = {
    * @returns {Promise<Object>} User session data
    */
   async loginWithGoogle(inviteCode) {
+    return whileRegistering(() => this.loginWithGoogleNow(inviteCode))
+  },
+
+  async loginWithGoogleNow(inviteCode) {
     try {
       const userCredential = await authPort.signInWithGoogle()
 

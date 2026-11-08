@@ -21,8 +21,11 @@ curl -fsSL "https://get.maestro.mobile.dev" | bash
 2. The dev API keeps the beta gate on, so the flow needs an invite code:
 
 ```bash
-npm run e2e --workspace=nowry-mobile -- -e INVITE=<your invite code>
+npm run e2e --workspace=nowry-mobile -- -e INVITE=<your invite code> -e DEV_SERVER=http%3A%2F%2F10.0.2.2%3A8082
 ```
+
+`DEV_SERVER` is the Metro server as the emulator reaches it, URL-encoded; the flow opens the bundle
+through the dev client with it. Leave it out for a production APK.
 
 The flow makes its own throwaway account (`e2e-<suffix>@example.com`) and deletes it at the end, so it
 leaves nothing behind. Every tap is on the label a screen reader hears, which is why it breaks when a

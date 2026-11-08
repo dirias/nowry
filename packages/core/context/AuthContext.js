@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react'
 import { onAuthStateChanged } from 'firebase/auth'
 import { apiClient } from '../api/client'
-import { authService } from '../api/services'
+import { authService, registration } from '../api/services'
 import { queryClient } from '../api/queryClient'
 import { auth as authPort, session, storage } from '../platform'
 
@@ -120,7 +120,11 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(authPort.instance(), async (firebaseUser) => {
       if (firebaseUser) {
-        // Firebase session is confirmed — now safe to fetch backend profile
+        // Firebase session is confirmed — now safe to fetch backend profile.
+        // A sign-up in flight has created the Firebase account but not yet
+        // the Nowry one: wait for it, or the read is refused while the beta
+        // gate is on (QA-024).
+        if (registration?.pending) await registration.pending
         await checkUser()
       } else {
         // No Firebase session at all (new visit or after logout). Firebase

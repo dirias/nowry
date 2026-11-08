@@ -18,12 +18,14 @@ jest.mock('firebase/auth', () => ({
   }
 }))
 jest.mock('../../api/client', () => ({ apiClient: { get: jest.fn() } }))
-jest.mock('../../api/services', () => ({ authService: {} }))
+jest.mock('../../api/services', () => ({ authService: {}, registration: { pending: null } }))
 jest.mock('../../api/queryClient', () => ({ queryClient: { clear: jest.fn() } }))
 jest.mock('i18next', () => ({ changeLanguage: jest.fn() }))
 
 import { AuthProvider, useAuth } from '../AuthContext'
 import { apiClient } from '../../api/client'
+// The mocked holder above, so a test can put a sign-up in flight.
+import { registration as mockRegistration } from '../../api/services'
 
 /*
  * AuthContext reads the Firebase instance, the stored token and the session
@@ -162,4 +164,34 @@ test('no Firebase session erases it too, so the next person sees their own name'
   })
   expect(read().user).toBeNull()
   expect(storage.get('NOWRY_LAST_PROFILE')).toBeFalsy()
+})
+
+/*
+ * QA-024: creating the Firebase account fires the listener before
+ * /auth/register has carried the invite code; while a sign-up is in flight
+ * the first profile read waits for it, or the beta gate refuses a uid it has
+ * never seen and the phone stays on the form it just submitted.
+ */
+test('the first profile read waits for a sign-up in flight', async () => {
+  apiClient.get.mockResolvedValue({ data: { username: 'brand-new' } })
+  let finishSignup
+  mockRegistration.pending = new Promise((resolve) => {
+    finishSignup = resolve
+  })
+  const ctx = renderWithConsumer()
+
+  let listener
+  await act(async () => {
+    listener = mockAuthCallback({ uid: 'u-new' })
+    await Promise.resolve()
+  })
+  expect(apiClient.get).not.toHaveBeenCalled()
+
+  await act(async () => {
+    finishSignup()
+    await listener
+  })
+  mockRegistration.pending = null
+  expect(apiClient.get).toHaveBeenCalledWith('/users/me')
+  await waitFor(() => expect(ctx().user?.username).toBe('brand-new'))
 })
