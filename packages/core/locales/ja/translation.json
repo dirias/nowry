@@ -984,6 +984,7 @@
     "customColor": "カスタム色を選択",
     "summaryLabel": "概要",
     "saveFailed": "変更を保存できませんでした",
+    "openFailed": "このドキュメントは完全に開けなかったため、保存を停止しました。内容は変更されていません。ページを再読み込みしてください。",
     "publishFailed": "本を公開できませんでした",
     "unpublishFailed": "本の公開を解除できませんでした",
     "pageCount_other": "{{count}} ページ",
@@ -1015,7 +1016,15 @@
       "summaryPlaceholder": "概要を追加…"
     },
     "import": {
-      "titlePlaceholder": "書籍のタイトルを入力..."
+      "titlePlaceholder": "書籍のタイトルを入力...",
+      "unsupportedType": "{{name}} は Nowry で読み込めない形式です。PDF、Word の .docx、またはテキストファイルを使ってください。",
+      "legacyDoc": "{{name}} は古い Word 形式です。Word か Google ドキュメントで開き、.docx として保存してから読み込んでください。",
+      "empty": "{{name}} には読み込めるテキストがありません。",
+      "passwordProtected": "{{name}} はパスワードで保護されています。パスワードを解除してから、もう一度読み込んでください。",
+      "unreadable": "{{name}} を読み取れませんでした。ファイルが壊れている可能性があります。",
+      "tooLarge": "{{name}} は {{limit}} MB の上限を超えています。",
+      "notReached": "Nowry に接続できなかったため、{{name}} は読み込まれませんでした。接続を確認して、もう一度お試しください。",
+      "failed": "{{name}} を読み込めませんでした。もう一度お試しください。"
     },
     "reader": {
       "empty": "このドキュメントにはまだ何もありません。",

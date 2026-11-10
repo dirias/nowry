@@ -1,6 +1,9 @@
 import { apiClient } from '../client'
 import { ENDPOINTS } from '../utils/endpoints'
 
+/** How long an import may take before the client gives up: five minutes. */
+export const IMPORT_TIMEOUT_MS = 300000
+
 /**
  * Books Service
  * Handles all book-related API operations
@@ -143,10 +146,15 @@ export const booksService = {
     formData.append('preview', preview.toString())
     if (title) formData.append('title', title)
 
+    // An import uploads the file, parses it and stores its pictures inside one
+    // request, which the 10-second default cannot cover: it gave up on a 1 MB
+    // PDF with two dozen pictures while the server went on to create the book,
+    // and the retry made a second copy (IMPORT-004).
     const { data } = await apiClient.post('/book/import', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
-      }
+      },
+      timeout: IMPORT_TIMEOUT_MS
     })
     return data
   }

@@ -1691,7 +1691,15 @@
       "summaryPlaceholder": "Add summary..."
     },
     "import": {
-      "titlePlaceholder": "Enter the book title..."
+      "titlePlaceholder": "Enter the book title...",
+      "unsupportedType": "{{name}} is not a type Nowry can import. Use a PDF, a Word .docx or a plain text file.",
+      "legacyDoc": "{{name}} is in the old Word format. Open it in Word or Google Docs, save it as .docx, and import that.",
+      "empty": "{{name}} has no text to import.",
+      "passwordProtected": "{{name}} is password-protected. Remove the password and import it again.",
+      "unreadable": "{{name}} could not be read. The file may be damaged.",
+      "tooLarge": "{{name}} is over the {{limit}} MB limit.",
+      "notReached": "Nowry could not be reached, so {{name}} was not imported. Check your connection and try again.",
+      "failed": "{{name}} could not be imported. Please try again."
     },
     "title": "Books",
     "create": "Create Book",
@@ -1720,6 +1728,7 @@
     "customColor": "Choose a custom colour",
     "summaryLabel": "Summary",
     "saveFailed": "Couldn't save your changes",
+    "openFailed": "This document did not open completely, so saving is off and nothing was changed. Reload the page.",
     "publishFailed": "Couldn't publish your book",
     "unpublishFailed": "Couldn't unpublish your book",
     "pageCount_one": "{{count}} page",

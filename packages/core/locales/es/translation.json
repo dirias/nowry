@@ -1320,7 +1320,15 @@
       "summaryPlaceholder": "Agregar resumen..."
     },
     "import": {
-      "titlePlaceholder": "Escribe el título del libro..."
+      "titlePlaceholder": "Escribe el título del libro...",
+      "unsupportedType": "{{name}} no es un tipo de archivo que Nowry pueda importar. Usa un PDF, un Word .docx o un archivo de texto.",
+      "legacyDoc": "{{name}} está en el formato antiguo de Word. Ábrelo en Word o Google Docs, guárdalo como .docx e importa ese.",
+      "empty": "{{name}} no tiene texto que importar.",
+      "passwordProtected": "{{name}} está protegido con contraseña. Quita la contraseña y vuelve a importarlo.",
+      "unreadable": "No se pudo leer {{name}}. Puede que el archivo esté dañado.",
+      "tooLarge": "{{name}} supera el límite de {{limit}} MB.",
+      "notReached": "No se pudo conectar con Nowry, así que {{name}} no se importó. Revisa tu conexión e inténtalo de nuevo.",
+      "failed": "No se pudo importar {{name}}. Inténtalo de nuevo."
     },
     "title": "Libros",
     "create": "Crear Libro",
@@ -1346,6 +1354,7 @@
     "customColor": "Elegir un color personalizado",
     "summaryLabel": "Resumen",
     "saveFailed": "No se pudieron guardar tus cambios",
+    "openFailed": "Este documento no se abrió completo, así que el guardado está desactivado y no se cambió nada. Recarga la página.",
     "publishFailed": "No se pudo publicar tu libro",
     "unpublishFailed": "No se pudo despublicar tu libro",
     "pageCount_one": "{{count}} página",

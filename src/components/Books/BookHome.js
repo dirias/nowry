@@ -24,6 +24,7 @@ import DocumentActionsMenu from './DocumentActionsMenu'
 import DeleteDocumentDialog from './DeleteDocumentDialog'
 import { filterDocuments, kindCounts, pickContinue, resumeHref, sortDocuments, tagCounts } from '@nowry/core/domain/books/libraryQuery'
 import { BOOK_LIMITS, NEXT_PLAN, bookLimitFor } from '../../config/planLimits'
+import { importRefusal, rejectedFileRefusal } from '@nowry/core/domain/books/importRefusal'
 
 const VIEW_KEY = 'book_view_mode'
 
@@ -100,46 +101,75 @@ export default function BookHome() {
     [openUpgradeModal, t]
   )
 
-  const onDrop = useCallback(
-    async (acceptedFiles) => {
-      if (!acceptedFiles.length) return
-      try {
-        setPendingFiles(acceptedFiles)
-        const preview = await booksService.importFile(acceptedFiles[0], username || 'Unknown', true)
-        setPreviewData(preview)
-        setShowPreview(true)
-      } catch (error) {
-        setErrorMessage(error.response?.data?.detail || t('books.errorImport'))
-      }
+  // Why one file was not imported, as a sentence that names it (IMPORT-007).
+  // The ceiling's sentence is shared with the editor and names no file, so the
+  // name goes in front of it here, where a drop can hold several.
+  const refusalSentence = useCallback(
+    ({ key, options }) => {
+      const sentence = t(key, options)
+      return options.name && !sentence.includes(options.name) ? `${options.name}: ${sentence}` : sentence
     },
-    [username, t]
+    [t]
+  )
+
+  // A drop is previewed by its first readable file. A file that cannot be
+  // previewed is set aside with its reason and the next one is tried: one bad
+  // file used to stop the whole drop, or hide the good ones behind an error
+  // that named nothing (IMPORT-008).
+  const onDrop = useCallback(
+    async (acceptedFiles, fileRejections = []) => {
+      const failures = fileRejections.map(({ file }) => refusalSentence(rejectedFileRefusal(file.name)))
+      const files = [...acceptedFiles]
+      let preview = null
+      while (files.length && !preview) {
+        try {
+          preview = await booksService.importFile(files[0], username || 'Unknown', true)
+        } catch (error) {
+          failures.push(refusalSentence(importRefusal(error, files[0].name)))
+          files.shift()
+        }
+      }
+      if (failures.length) setErrorMessage(failures)
+      if (!preview) return
+      setPendingFiles(files)
+      setPreviewData(preview)
+      setShowPreview(true)
+    },
+    [username, refusalSentence]
   )
 
   const handleConfirmImport = useCallback(
     async (inputTitle) => {
       setConfirmingImport(true)
-      try {
-        const useTitle = pendingFiles.length === 1 && inputTitle ? inputTitle : null
-        const imported = []
-        for (const file of pendingFiles) {
+      const useTitle = pendingFiles.length === 1 && inputTitle ? inputTitle : null
+      const imported = []
+      const failures = []
+      // Each file on its own: the ones that import are in, the ones that do not
+      // are named with their reason.
+      for (const file of pendingFiles) {
+        try {
           imported.push(await booksService.importFile(file, username || 'Unknown', false, useTitle))
+        } catch (error) {
+          failures.push(refusalSentence(importRefusal(error, file.name)))
         }
-        setShowPreview(false)
-        setPreviewData(null)
-        setPendingFiles([])
-        await fetchBooks()
+      }
+      setShowPreview(false)
+      setPreviewData(null)
+      setPendingFiles([])
+      // Read again even when something failed: an earlier file may be in, and so
+      // may a file whose answer was lost. Left stale, the library invited a retry
+      // that made a duplicate (IMPORT-004).
+      await fetchBooks()
+      if (imported.length) {
         setToast({
           message: t('books.lib.importedToast', { count: imported.length }),
           bookId: imported.length === 1 ? imported[0]._id : null
         })
-      } catch (error) {
-        setErrorMessage(error.response?.data?.detail || t('books.errorImport'))
-        setShowPreview(false)
-      } finally {
-        setConfirmingImport(false)
       }
+      if (failures.length) setErrorMessage(failures)
+      setConfirmingImport(false)
     },
-    [username, pendingFiles, fetchBooks, t]
+    [username, pendingFiles, fetchBooks, t, refusalSentence]
   )
 
   const handleCancelPreview = useCallback(() => {
@@ -157,11 +187,13 @@ export default function BookHome() {
     open: openFilePicker
   } = useDropzone({
     onDrop,
+    // No `.doc`: the old binary Word format cannot be read, and offering it
+    // only to fail was worse than saying so (IMPORT-007). A rejected file
+    // reaches `onDrop` as a rejection and is answered there.
     accept: {
       'text/plain': ['.txt'],
       'application/pdf': ['.pdf'],
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
-      'application/msword': ['.doc']
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx']
     },
     multiple: true,
     noClick: true,
@@ -354,8 +386,6 @@ export default function BookHome() {
         {toast?.message}
       </Snackbar>
 
-      {errorMessage && <ErrorWindow title={t('common.error')} error_msg={errorMessage} onClose={() => setErrorMessage('')} />}
-
       {bookToEdit && <BookEditSheet book={bookToEdit} onSaved={fetchBooks} onClose={() => setBookToEdit(null)} />}
 
       <BookCreateSheet open={showCreate} onClose={() => setShowCreate(false)} />
@@ -367,6 +397,23 @@ export default function BookHome() {
         onConfirm={handleConfirmImport}
         loading={confirmingImport}
       />
+
+      {/* After the preview, so a refusal that arrives with one is in front of it */}
+      {errorMessage && (
+        <ErrorWindow
+          title={t('common.error')}
+          error_msg={
+            Array.isArray(errorMessage)
+              ? errorMessage.map((line) => (
+                  <Box component='span' key={line} sx={{ display: 'block', '& + &': { mt: 1 } }}>
+                    {line}
+                  </Box>
+                ))
+              : errorMessage
+          }
+          onClose={() => setErrorMessage('')}
+        />
+      )}
     </Container>
   )
 }

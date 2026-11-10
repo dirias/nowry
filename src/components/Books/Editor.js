@@ -15,6 +15,7 @@ import React, { useRef, useEffect, useState, useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { AI_LIMIT_REACHED_CODE } from '@nowry/core/domain/limits'
+import { repairLexicalState } from '@nowry/core/domain/books/repairLexicalState'
 import { FREE_AI_CALLS_PER_MONTH } from '@nowry/core/domain/plans'
 import { Box, useTheme, Snackbar, Alert, Button, LinearProgress, Typography } from '@mui/joy'
 import DiagramPreviewPanel from './DiagramPreviewPanel'
@@ -235,6 +236,7 @@ export default function Editor({
   onEditorReady,
   illustrationCount = 0,
   onDiagramInserted, // called after successful diagram insert to update parent count
+  onLoadError, // called when the stored document could not be parsed whole
   // NOTE: no `tier` prop — TextMenu reads the tier from useSubscription() directly.
   ttsLanguage = 'en-US',
   ttsAutoDetect = true,
@@ -380,6 +382,11 @@ export default function Editor({
     }
   }, [onPageCountChange, pageSize])
 
+  const loadingStateRef = useRef(false)
+  const loadFailedRef = useRef(false)
+  const onLoadErrorRef = useRef(onLoadError)
+  onLoadErrorRef.current = onLoadError
+
   const editorConfig = useMemo(
     () => ({
       namespace: `NowryEditor-${book?._id}`,
@@ -413,8 +420,17 @@ export default function Editor({
 
             if (jsonContent.root) {
               // Content is already flat (no PageNodes in storage)
-              const editorState = editor.parseEditorState(jsonContent)
+              // `parseEditorState` does not throw on a node it cannot read: it
+              // reports the error and returns what it had built so far. Loading
+              // that fragment as the document is how a save came to overwrite the
+              // rest of it (IMPORT-005), so the shape is repaired first and a
+              // parse that still fails is reported instead of shown as whole.
+              loadingStateRef.current = true
+              loadFailedRef.current = false
+              const editorState = editor.parseEditorState(repairLexicalState(jsonContent))
+              loadingStateRef.current = false
               editor.setEditorState(editorState)
+              if (loadFailedRef.current) setTimeout(() => onLoadErrorRef.current?.(), 0)
               console.log('✓ Loaded from JSON format (Content-First) - flat content')
               return
             }
@@ -446,7 +462,10 @@ export default function Editor({
         })
         console.log('✓ Loaded from HTML format (legacy) - flat content')
       },
-      onError: (e) => console.error('Lexical error:', e)
+      onError: (e) => {
+        if (loadingStateRef.current) loadFailedRef.current = true
+        console.error('Lexical error:', e)
+      }
     }),
     [book?._id, initialContent]
   )

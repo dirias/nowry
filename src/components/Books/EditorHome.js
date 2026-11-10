@@ -289,8 +289,21 @@ export default function EditorHome() {
     return () => container.removeEventListener('scroll', handleScroll)
   }, [isMobile, loading])
 
+  const [saveErrorKey, setSaveErrorKey] = useState(null)
+  const [saveErrorOptions, setSaveErrorOptions] = useState({})
+
+  // A document the editor could not parse whole is on screen as a fragment.
+  // Saving it would write the fragment over the stored document, so saving is
+  // off until the page is opened again (IMPORT-005).
+  const loadFailedRef = useRef(false)
+  const handleLoadError = useCallback(() => {
+    loadFailedRef.current = true
+    setSectionNotice(t('books.openFailed'))
+  }, [t])
+
   const handleSaveBook = useCallback(
     async (currentContent) => {
+      if (loadFailedRef.current) throw new Error('document did not open completely; save refused')
       try {
         // Prepare content for saving
         let contentToSave = currentContent
@@ -312,8 +325,16 @@ export default function EditorHome() {
         console.log('  - Content size:', contentToSave.length, 'bytes')
         await booksService.update(id, updateData)
         console.log('✓ Save successful')
+        setSaveErrorKey(null)
       } catch (e) {
         console.error('❌ Error updating book:', e)
+        // ADR-041: a document past the word ceiling is refused with a code; say so.
+        setSaveErrorKey(limitRefusalKey(e))
+        setSaveErrorOptions(limitRefusalOptions(e))
+        // A save that failed is not a save. This used to end here, so the
+        // autosave marked the content saved and a manual save said nothing,
+        // and the edit was gone on reload (IMPORT-003).
+        throw e
       }
     },
     [id, bookName, pageSize, autoSaveEnabled]
@@ -458,9 +479,6 @@ export default function EditorHome() {
   }, [loading, searchParams, setSearchParams])
 
   // Manual save always uses the latest content ref to avoid stale React state
-  const [saveErrorKey, setSaveErrorKey] = useState(null)
-  const [saveErrorOptions, setSaveErrorOptions] = useState({})
-
   const handleManualSave = async () => {
     try {
       const latestContent = latestContentRef.current || content
@@ -472,9 +490,11 @@ export default function EditorHome() {
       resetBaseline(latestContent)
     } catch (e) {
       console.error('Manual save failed:', e)
-      // ADR-041: a document past the word ceiling is refused with a code; say so.
-      setSaveErrorKey(limitRefusalKey(e))
-      setSaveErrorOptions(limitRefusalOptions(e))
+      // The writer pressed Save and it did not happen: say so where they are
+      // looking, with the ceiling's own sentence when that is the reason.
+      const limitKey = limitRefusalKey(e)
+      if (loadFailedRef.current) setSectionNotice(t('books.openFailed'))
+      else setSectionNotice(limitKey ? t(limitKey, limitRefusalOptions(e)) : t('books.saveFailed'))
     }
   }
 
@@ -1412,6 +1432,7 @@ export default function EditorHome() {
               onEditorReady={handleEditorReady}
               illustrationCount={illustrationCount}
               onDiagramInserted={handleDiagramInserted}
+              onLoadError={handleLoadError}
               ttsLanguage={ttsLanguage}
               ttsAutoDetect={ttsAutoDetect}
               comments={comments}

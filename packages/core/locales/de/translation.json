@@ -2828,7 +2828,15 @@
       "summaryPlaceholder": "Zusammenfassung hinzufügen..."
     },
     "import": {
-      "titlePlaceholder": "Buchtitel eingeben..."
+      "titlePlaceholder": "Buchtitel eingeben...",
+      "unsupportedType": "{{name}} ist kein Dateityp, den Nowry importieren kann. Verwende ein PDF, ein Word-.docx oder eine Textdatei.",
+      "legacyDoc": "{{name}} liegt im alten Word-Format vor. Öffne die Datei in Word oder Google Docs, speichere sie als .docx und importiere diese.",
+      "empty": "{{name}} enthält keinen Text zum Importieren.",
+      "passwordProtected": "{{name}} ist passwortgeschützt. Entferne das Passwort und importiere die Datei erneut.",
+      "unreadable": "{{name}} konnte nicht gelesen werden. Die Datei ist möglicherweise beschädigt.",
+      "tooLarge": "{{name}} überschreitet das Limit von {{limit}} MB.",
+      "notReached": "Nowry war nicht erreichbar, deshalb wurde {{name}} nicht importiert. Prüfe deine Verbindung und versuche es erneut.",
+      "failed": "{{name}} konnte nicht importiert werden. Bitte versuche es erneut."
     },
     "untitled": "Buch ohne Titel",
     "createTitle": "Neues Buch",
@@ -2850,6 +2858,7 @@
     "customColor": "Eigene Farbe wählen",
     "summaryLabel": "Zusammenfassung",
     "saveFailed": "Deine Änderungen konnten nicht gespeichert werden",
+    "openFailed": "Dieses Dokument wurde nicht vollständig geöffnet. Das Speichern ist deaktiviert und nichts wurde geändert. Lade die Seite neu.",
     "publishFailed": "Dein Buch konnte nicht veröffentlicht werden",
     "unpublishFailed": "Die Veröffentlichung konnte nicht aufgehoben werden",
     "pageCount_one": "{{count}} Seite",
