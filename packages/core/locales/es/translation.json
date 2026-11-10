@@ -82,7 +82,15 @@
     "add": "Añadir",
     "back": "Atrás",
     "optional": "Opcional",
-    "select": "Seleccionar"
+    "select": "Seleccionar",
+    "changes": "Cambios",
+    "front": "Anverso",
+    "listen": "Escuchar",
+    "voiceSettings": "Ajustes de voz",
+    "deleteModal": {
+      "whatWillHappen": "Qué va a pasar:",
+      "recoveryNotice": "Los datos se pueden recuperar durante 30 días escribiendo a soporte"
+    }
   },
   "news": {
     "title": "Últimas Noticias",
@@ -147,7 +155,9 @@
     "links": {
       "library": "Biblioteca",
       "pricing": "Precios",
-      "copyright": "Derechos de autor"
+      "copyright": "Derechos de autor",
+      "privacy": "Política de privacidad",
+      "terms": "Términos del servicio"
     },
     "support": {
       "title": "Soporte",
@@ -182,7 +192,8 @@
       "dueIn": "En {{hours}} h",
       "newCount_one": "{{count}} nueva",
       "newCount_other": "{{count}} nuevas",
-      "resting": "En descanso"
+      "resting": "En descanso",
+      "mastery": "Dominio"
     },
     "views": {
       "dashboard": "Panel",
@@ -267,7 +278,9 @@
       "weeklyCards_one": "{{count}} revisada hoy",
       "weeklyCards_other": "{{count}} revisadas hoy",
       "streakZeroLabel": "Comienza tu racha hoy",
-      "noDecks": "Añade un mazo y Nowry empezará a programarlo por ti."
+      "noDecks": "Añade un mazo y Nowry empezará a programarlo por ti.",
+      "caughtUpTitle": "¡Estás al día!",
+      "caughtUpSubtitle": "Ningún mazo necesita repaso ahora."
     },
     "sections": {
       "dueNow": "Para hoy",
@@ -279,7 +292,10 @@
       "deckCount_other": "{{count}} mazos",
       "yourDecks": "Tus mazos",
       "weeklyMomentumSubtitle_one": "{{count}} tarjeta esta semana",
-      "weeklyMomentumSubtitle_other": "{{count}} tarjetas esta semana"
+      "weeklyMomentumSubtitle_other": "{{count}} tarjetas esta semana",
+      "needingReview": "Mazos por repasar",
+      "weeklyMomentum": "Impulso semanal",
+      "recentPerformance": "Rendimiento reciente"
     },
     "deckPill": {
       "ariaLabel": "Estudiar {{name}}",
@@ -305,7 +321,12 @@
       "yesterday": "Ayer",
       "daysAgo": "hace {{count}} d",
       "minutes_one": "{{count}} min",
-      "minutes_other": "{{count}} min"
+      "minutes_other": "{{count}} min",
+      "weeksAgo": "hace {{count}} sem"
+    },
+    "tabs": {
+      "dashboard": "Panel",
+      "contentLibrary": "Biblioteca de contenido"
     }
   },
   "auth": {
@@ -857,7 +878,8 @@
       "security": "Seguridad",
       "danger": "Zona de peligro",
       "jump": "Navegar a sección",
-      "jumpTo": "Ir a"
+      "jumpTo": "Ir a",
+      "plan": "Plan y facturación"
     },
     "account": {
       "title": "Cuenta",
@@ -1049,6 +1071,29 @@
       "createGoal": "Crea tu primer objetivo",
       "viewFullPlan": "Ver plan completo",
       "loadingAria": "Cargando objetivos anuales"
+    },
+    "priorities": {
+      "title": "Prioridades de hoy",
+      "noTasks": "¡Estás al día!",
+      "addTask": "Añadir una tarea",
+      "viewAll": "Ver todas las tareas"
+    },
+    "stats": {
+      "title": "Esta semana",
+      "goalsOnTrack": "Objetivos en buen camino",
+      "tasksCompleted": "Tareas completadas",
+      "cardsReviewed": "Tarjetas repasadas",
+      "studyStreak": "Racha de estudio",
+      "days": "días"
+    },
+    "quickAccess": {
+      "title": "Acceso rápido",
+      "studyCenter": "Centro de estudio",
+      "books": "Libros",
+      "annualPlanning": "Planificación",
+      "newsFeed": "Noticias",
+      "taskManager": "Gestor de tareas",
+      "bugReport": "Reportar un error"
     }
   },
   "motivation": {
@@ -1092,7 +1137,8 @@
       "goals": "Objetivos",
       "priorities": "Prioridades",
       "activities": "Hábitos",
-      "habits": "Hábitos"
+      "habits": "Hábitos",
+      "milestones": "Hitos"
     },
     "noEvents": "No hay eventos para este día",
     "today": "Hoy",
@@ -1322,7 +1368,10 @@
       "imageUnnamed": "Imagen",
       "legacyOnly": "Este documento se escribió en un formato antiguo que el teléfono aún no puede mostrar. Ábrelo en la web para leerlo.",
       "unsupported": "Un bloque de tipo {{name}}, que el teléfono aún no puede dibujar."
-    }
+    },
+    "tableOfContents": "Índice",
+    "noHeadings": "Aún no hay encabezados",
+    "useHeadings": "Usa /h1, /h2, /h3 para crear la estructura"
   },
   "cards": {
     "archived": {
@@ -1774,6 +1823,16 @@
       "split": "Dividir",
       "rested": "Descansa una semana. Vuelve el {{date}}.",
       "prompt": "Ya he fallado esta tarjeta cuatro veces. Explícamela de otra manera y dime con qué podría estar confundiéndola."
+    },
+    "studyTotal": "Estudiar ({{count}})",
+    "tags": {
+      "all": "Todas",
+      "filterBy": "Filtrar por etiqueta"
+    },
+    "previewModal": {
+      "cardOf": "{{current}} de {{total}}",
+      "clickToFlip": "Haz clic para voltear",
+      "description": "Descripción"
     }
   },
   "filters": {
@@ -2111,7 +2170,10 @@
       "timeframeQ2": "T2 (abr – jun)",
       "timeframeQ3": "T3 (jul – sep)",
       "timeframeQ4": "T4 (oct – dic)",
-      "saveError": "No se pudo guardar este objetivo."
+      "saveError": "No se pudo guardar este objetivo.",
+      "timeframe": "Plazo",
+      "basicInfo": "Información básica",
+      "timelineVisual": "Cronograma y apariencia"
     },
     "activity": {
       "title": "Actividades y Hábitos",
@@ -2313,7 +2375,8 @@
       "prioritiesEmptyBody": "Las pocas cosas que más importan este año. Marca una tarea o un hito para convertirlo en una prioridad.",
       "areaGoalCount_one": "{{count}} objetivo",
       "areaGoalCount_other": "{{count}} objetivos"
-    }
+    },
+    "back": "Volver al plan"
   },
   "focusBar": {
     "overdue": "Atrasado",
@@ -3491,7 +3554,34 @@
       "portraitWorn": "En uso",
       "portraitOption": "Retrato {{index}}",
       "portraitsForStage": "Retratos — {{stage}}",
-      "speciesMovement": "La especie decide cómo se mueve tu compañero."
+      "speciesMovement": "La especie decide cómo se mueve tu compañero.",
+      "avatarStage0": "Preparando el retrato de tu compañero...",
+      "avatarStage1": "Pintando con pinceles de IA...",
+      "avatarStage2": "Dando los últimos toques...",
+      "avatarStage3": "Ya casi: últimos detalles...",
+      "elapsedSeconds": "{{seconds}} s transcurridos",
+      "animationTitle": "Animación del compañero",
+      "animationDescription": "Genera una animación en bucle de tu compañero en movimiento. Tarda de 1 a 3 minutos.",
+      "animationLockedDescription": "Actualiza a Plus para desbloquear los compañeros animados.",
+      "animationRequiresAvatar": "Genera primero un retrato para desbloquear la animación.",
+      "animationRequiresNewPortrait": "Tu retrato debe regenerarse una vez para desbloquear la animación. Haz clic en Regenerar, arriba.",
+      "generateAnimation": "Generar animación",
+      "generateAnimationAriaLabel": "Generar una animación en bucle para tu compañero",
+      "animationReady": "Animación lista",
+      "regenerateAnimation": "Regenerar",
+      "regenerateAnimationAriaLabel": "Regenerar la animación del compañero",
+      "animStage0": "Estudiando cómo se mueve tu compañero...",
+      "animStage1": "Dándole vida...",
+      "animStage2": "Suavizando el bucle...",
+      "animStage3": "Renderizando los últimos fotogramas...",
+      "animStage4": "Ya casi: vale la pena la espera ✨"
+    },
+    "animation": {
+      "generateError": "Algo salió mal al generar la animación. Inténtalo de nuevo.",
+      "rateLimitError": "Alcanzaste el límite mensual de animaciones.",
+      "freeTierError": "Actualiza a Plus para generar animaciones.",
+      "requiresAvatar": "Genera primero un retrato para desbloquear la animación.",
+      "requiresHostedAvatar": "Regenera tu retrato para desbloquear la animación."
     }
   },
   "reports": {
@@ -3758,6 +3848,21 @@
         "s1": "Trazando las relaciones...",
         "s2": "Dibujándolo..."
       }
+    },
+    "questionnaireModal": {
+      "title": "Cuestionario generado",
+      "subtitle": "Selecciona las preguntas que quieres guardar.",
+      "saveTitle": "Guardar el cuestionario en un mazo",
+      "saveSubtitle": "Elige un mazo para guardar estas preguntas interactivas.",
+      "includeInDeck": "Incluir en el mazo",
+      "explanation": "Explicación",
+      "emptyQuestions": "No se generó ninguna pregunta. Inténtalo de nuevo con más contenido.",
+      "emptyOptions": "No se generaron opciones de respuesta para esta pregunta.",
+      "cancel": "Cancelar",
+      "proceed": "Continuar y guardar ({{n}})",
+      "confirmSave": "Confirmar y guardar",
+      "noExplanation": "Sin explicación.",
+      "saveError": "No se pudieron guardar estas preguntas. Inténtalo de nuevo."
     }
   },
   "aiVisualizer": {
