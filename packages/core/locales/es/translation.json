@@ -303,15 +303,15 @@
       "new": "Nuevo"
     },
     "modePicker": {
-      "title": "Choose how to study",
+      "title": "Elige cómo estudiar",
       "study": {
-        "label": "Study",
-        "description": "Review cards due today with spaced repetition",
-        "disabledHint": "Nothing due right now"
+        "label": "Estudiar",
+        "description": "Repasa las tarjetas pendientes de hoy con repetición espaciada",
+        "disabledHint": "No hay nada pendiente ahora"
       },
       "browse": {
-        "label": "Browse",
-        "description": "Look through every card — no grading, no schedule changes"
+        "label": "Explorar",
+        "description": "Recorre todas las tarjetas: sin calificar y sin cambiar el calendario"
       }
     },
     "dueCount_one": "{{count}} pendiente",
@@ -1036,7 +1036,7 @@
       "recoveryNotice": "Tus datos se pueden recuperar en un plazo de 30 días escribiendo a soporte. Pasados los 30 días, se eliminarán permanentemente."
     },
     "exportData": {
-      "error": "Failed to export data. Please try again."
+      "error": "No se pudieron exportar los datos. Inténtalo de nuevo."
     },
     "errors": {
       "loadFailed": "No se pudieron cargar los ajustes. Actualiza e inténtalo de nuevo.",
@@ -1430,7 +1430,7 @@
       "titleRequired": "Ponle nombre a tu diagrama para guardarlo",
       "codeLabel": "Código del diagrama",
       "codeRequired": "Añade código de diagrama para guardar esta tarjeta",
-      "codePlaceholder": "graph TD\n  A[Start] --> B[End]",
+      "codePlaceholder": "graph TD\n  A[Inicio] --> B[Fin]",
       "syntaxError": "Este diagrama aún no se puede representar",
       "previewEmpty": "Tu diagrama aparece aquí mientras escribes",
       "tabCode": "Código",
@@ -1581,12 +1581,12 @@
       "noDue": "No hay tarjetas pendientes por ahora.",
       "goBack": "Volver",
       "mode": {
-        "study": "Study",
-        "browse": "Browse"
+        "study": "Estudiar",
+        "browse": "Explorar"
       },
       "emptyDeck": {
-        "title": "No cards yet",
-        "body": "Add cards to this deck to browse them here."
+        "title": "Aún no hay tarjetas",
+        "body": "Añade tarjetas a este mazo para explorarlas aquí."
       },
       "error": "No se pudieron cargar las tarjetas. Revisa tu conexión e inténtalo de nuevo.",
       "enterFullscreen": "Pantalla completa",
@@ -1866,17 +1866,17 @@
       "documentTooLong": "Este documento supera el límite de {{limit}} palabras. Divídelo en dos.",
       "ttsLimitReached": "Has alcanzado la lectura en voz alta disponible este mes."
     },
-    "title": "Subscription & Billing",
+    "title": "Suscripción y facturación",
     "currentPlan": "Plan actual",
-    "nextBillingDate": "Next billing date",
+    "nextBillingDate": "Próxima fecha de cobro",
     "noBillingDate": "—",
-    "manageBilling": "Manage billing in Stripe",
-    "downgrade": "Downgrade plan",
+    "manageBilling": "Gestionar la facturación en Stripe",
+    "downgrade": "Bajar de plan",
     "aiUsage": {
-      "title": "Monthly AI Usage",
-      "meter": "{{used}} / {{limit}} this month",
-      "reset": "Resets on {{date}}",
-      "empty": "No AI usage this month"
+      "title": "Uso mensual de IA",
+      "meter": "{{used}} / {{limit}} este mes",
+      "reset": "Se reinicia el {{date}}",
+      "empty": "Sin uso de IA este mes"
     },
     "tier": {
       "free": "Gratis",
@@ -1884,30 +1884,30 @@
       "pro": "Pro"
     },
     "status": {
-      "active": "Active",
-      "past_due": "Payment Past Due",
-      "canceled": "Canceled"
+      "active": "Activa",
+      "past_due": "Pago atrasado",
+      "canceled": "Cancelada"
     },
     "page": {
       "upgraded": {
-        "title": "Welcome to {{plan}}!",
-        "message": "Your upgrade is active. Start exploring new features.",
-        "cta": "Get started"
+        "title": "¡Te damos la bienvenida a {{plan}}!",
+        "message": "Tu nuevo plan está activo. Empieza a explorar las nuevas funciones.",
+        "cta": "Empezar"
       }
     },
     "error": {
-      "portalFailed": "Could not open billing portal. Please try again.",
-      "loadFailed": "Unable to load subscription. Please try again."
+      "portalFailed": "No se pudo abrir el portal de facturación. Inténtalo de nuevo.",
+      "loadFailed": "No se pudo cargar la suscripción. Inténtalo de nuevo."
     },
     "downgradeModal": {
-      "title": "Downgrade to Free?",
-      "message": "You'll lose access to paid features. Existing content remains but creation of Pro-only content is blocked.",
-      "confirm": "Downgrade",
-      "cancel": "Keep current plan"
+      "title": "¿Bajar al plan gratuito?",
+      "message": "Perderás el acceso a las funciones de pago. Tu contenido se conserva, pero no podrás crear contenido exclusivo de Pro.",
+      "confirm": "Bajar de plan",
+      "cancel": "Conservar el plan actual"
     },
     "upgradeProcessing": {
-      "title": "Upgrade in Progress",
-      "message": "Your payment was received. Your plan will update within a few minutes — please refresh the page shortly."
+      "title": "Actualización en curso",
+      "message": "Recibimos tu pago. Tu plan se actualizará en unos minutos; actualiza la página dentro de un momento."
     },
     "usage": {
       "books": "Libros",
@@ -1982,7 +1982,7 @@
       "reportsEmptyBody": "Cierra un trimestre para ver su informe aquí."
     },
     "breadcrumb": {
-      "root": "Annual Planning"
+      "root": "Planificación anual"
     },
     "focusArea": {
       "title": "Áreas de Enfoque",
@@ -2050,7 +2050,7 @@
       "activeEmptyBody": "Las prioridades completadas están ocultas.",
       "showAll": "Mostrar todas ({{count}})",
       "completedSection": "Completadas",
-      "done": "Done",
+      "done": "Hecho",
       "markComplete": "Marcar como completada",
       "markIncomplete": "Marcar como pendiente",
       "emptyTitle": "Aún no hay prioridades",
@@ -2228,7 +2228,7 @@
       "eveningEmptyTitle": "Termina el día con intención.",
       "emptySubtitle": "Configura tu rutina diaria para mantenerte en curso cada día.",
       "emptyCta": "Configurar rutina",
-      "goalPrefix": "Goal: {{title}}",
+      "goalPrefix": "Objetivo: {{title}}",
       "toggleItem": "Marcar como hecho hoy",
       "noItems": "Aún no hay elementos de rutina configurados",
       "deleteItem": "Eliminar elemento",
@@ -2250,7 +2250,7 @@
       "goalProgress": "Progreso de Objetivos",
       "activityStreak": "Racha de Actividades",
       "upcomingDeadlines": "Próximos Vencimientos",
-      "insights": "Insights",
+      "insights": "Hallazgos",
       "noDeadlines": "No hay vencimientos próximos",
       "suggestions": {
         "noProgress": "No has actualizado {{area}} en {{days}} días",
@@ -2297,29 +2297,29 @@
       "quarterEndingIn_one": "El trimestre {{quarter}} termina en {{count}} día"
     },
     "quarterReport": {
-      "report": "Report",
-      "preview": "Preview",
-      "unassignedArea": "Unassigned",
-      "noneRecorded": "None recorded",
-      "reflections": "Quarterly Reflections",
-      "biggestWins": "Biggest Wins",
-      "challenges": "Challenges",
-      "nextFocus": "Next Focus",
-      "goalsAchieved": "Goals Achieved",
-      "milestonesCompleted": "Milestones Completed",
-      "totalProgress": "Total Progress",
-      "insights": "Quarterly Insights",
-      "routineConsistency": "Routine Consistency",
-      "activeDays": "Active {{count}} day this quarter",
-      "activeDays_other": "Active {{count}} days this quarter",
-      "activeDays_one": "Active {{count}} day this quarter",
-      "booksFinished": "Books Finished ({{count}})",
-      "breakdownByFocusArea": "Breakdown by Focus Area",
-      "migratedCount": "Migrated {{count}}x",
-      "migratedCount_other": "Migrated {{count}}x",
-      "migratedCount_one": "Migrated {{count}}x",
-      "due": "Due",
-      "migrateToNextQuarter": "Migrate to Next Quarter"
+      "report": "Informe",
+      "preview": "Vista previa",
+      "unassignedArea": "Sin asignar",
+      "noneRecorded": "Nada registrado",
+      "reflections": "Reflexiones del trimestre",
+      "biggestWins": "Mayores logros",
+      "challenges": "Desafíos",
+      "nextFocus": "Próximo enfoque",
+      "goalsAchieved": "Objetivos logrados",
+      "milestonesCompleted": "Hitos completados",
+      "totalProgress": "Progreso total",
+      "insights": "Hallazgos del trimestre",
+      "routineConsistency": "Constancia de la rutina",
+      "activeDays": "{{count}} día activo este trimestre",
+      "activeDays_other": "{{count}} días activos este trimestre",
+      "activeDays_one": "{{count}} día activo este trimestre",
+      "booksFinished": "Libros terminados ({{count}})",
+      "breakdownByFocusArea": "Desglose por área de enfoque",
+      "migratedCount": "Pasado {{count}}x",
+      "migratedCount_other": "Pasado {{count}}x",
+      "migratedCount_one": "Pasado {{count}}x",
+      "due": "Vence",
+      "migrateToNextQuarter": "Pasar al próximo trimestre"
     },
     "deleteConfirm": "¿Estás seguro de que quieres eliminar este {{type}}? Esta acción no se puede deshacer.",
     "celebration": "🎉 ¡Objetivo Completado! ¡Estás haciendo un progreso increíble!",
@@ -2531,8 +2531,8 @@
       "questionnaire": "Cuestionario",
       "visual": "Imaginar escena",
       "vocabulary": "Extraer vocabulario",
-      "expand": "Expand with AI",
-      "generateDiagram": "Generate Diagram"
+      "expand": "Ampliar con IA",
+      "generateDiagram": "Generar diagrama"
     },
     "table": {
       "addRowBelow": "Agregar fila abajo",
@@ -2956,7 +2956,7 @@
         "name": "Destello"
       },
       "2": {
-        "name": "Sprite"
+        "name": "Duende"
       },
       "3": {
         "name": "Explorador"
@@ -3246,18 +3246,18 @@
       "closeBuddy": "Cerrar compañero de estudio",
       "sendMessage": "Enviar mensaje"
     },
-    "messagesRemaining": "messages this month",
-    "persistentMemory": "Memory on",
-    "sessionOnly": "Session-only memory",
+    "messagesRemaining": "mensajes este mes",
+    "persistentMemory": "Memoria activada",
+    "sessionOnly": "Memoria solo durante la sesión",
     "chat": {
       "empty": {
         "title": "Pregúntale a tu compañero",
         "body": "Sobre una tarjeta, un mazo o qué estudiar después."
       },
       "error": {
-        "limitReached": "Monthly limit reached. Upgrade for unlimited messages."
+        "limitReached": "Alcanzaste el límite mensual. Actualiza tu plan para tener mensajes ilimitados."
       },
-      "upgradePlan": "Upgrade plan",
+      "upgradePlan": "Actualizar plan",
       "thinking": "Pensando…",
       "budgetSpent": "Has usado los mensajes de este mes. La cuenta empieza de nuevo el mes que viene.",
       "remaining_one": "Queda {{count}} mensaje este mes",
@@ -3270,16 +3270,16 @@
     },
     "personality": {
       "error": {
-        "blocked": "That personality description was flagged. Try different wording.",
-        "failed": "Personality generation failed. Please try again."
+        "blocked": "Esa descripción de personalidad fue marcada. Prueba con otras palabras.",
+        "failed": "No se pudo generar la personalidad. Inténtalo de nuevo."
       },
-      "success": "Personality updated"
+      "success": "Personalidad actualizada"
     },
     "upgrade": {
-      "persistentMemory": "Unlock persistent memory with Plus",
-      "customPersonality": "Custom personality requires Plus or Pro",
-      "morePersonality": "Unlock more personality generations with Pro",
-      "unlimitedMessages": "Unlimited messages with Plus or Pro"
+      "persistentMemory": "Desbloquea la memoria persistente con Plus",
+      "customPersonality": "La personalidad personalizada requiere Plus o Pro",
+      "morePersonality": "Desbloquea más generaciones de personalidad con Pro",
+      "unlimitedMessages": "Mensajes ilimitados con Plus o Pro"
     },
     "errors": {
       "resting": "El compañero de estudio está descansando. Inténtalo de nuevo en un momento.",
@@ -3357,13 +3357,13 @@
           "roamingDesc": "Tu compañero deambula por la pantalla entre los elementos mientras estudias."
         },
         "saved": "Guardado",
-        "regenerate": "Regenerate Personality",
-        "regenerateButton": "Regenerate",
-        "used": "used this month",
-        "upgrade": "Unlock more personality generations with Pro",
-        "customPersonalityLocked": "Custom personality requires Plus or Pro",
-        "resetDate": "Resets {{date}}",
-        "generating": "Generating personality...",
+        "regenerate": "Regenerar personalidad",
+        "regenerateButton": "Regenerar",
+        "used": "usadas este mes",
+        "upgrade": "Desbloquea más generaciones de personalidad con Pro",
+        "customPersonalityLocked": "La personalidad personalizada requiere Plus o Pro",
+        "resetDate": "Se reinicia el {{date}}",
+        "generating": "Generando personalidad...",
         "preview": {
           "title": "Vista previa en vivo",
           "caption": "La vista previa se actualiza al cambiar los ajustes.",
@@ -3373,17 +3373,17 @@
           "concise": {
             "label": "Conciso",
             "description": "1–2 oraciones. Directo al grano.",
-            "preview": "You have 8 cards due. Start your session!"
+            "preview": "Tienes 8 tarjetas pendientes. ¡Empieza tu sesión!"
           },
           "balanced": {
             "label": "Equilibrado",
             "description": "Respuestas completas sin relleno.",
-            "preview": "You have 8 due cards spread across 2 decks. I'd suggest starting with 'Organic Chemistry' since it has the most overdue items. Head to your Study Session when you're ready!"
+            "preview": "Tienes 8 tarjetas pendientes repartidas en 2 mazos. Te sugiero empezar por «Química orgánica», que es el que tiene más tarjetas atrasadas. ¡Ve a tu sesión de estudio cuando quieras!"
           },
           "detailed": {
             "label": "Detallado",
             "description": "Explicaciones exhaustivas con ejemplos.",
-            "preview": "Great question! You have 8 cards due today across 2 decks:\n• Organic Chemistry — 5 due, 2 new\n• Linear Algebra — 3 due\n\nI'd recommend tackling Organic Chemistry first since those cards are the most overdue and you're at 62% mastery there. Your study streak is at 4 days — don't break it! 🔥"
+            "preview": "¡Buena pregunta! Hoy tienes 8 tarjetas pendientes en 2 mazos:\n• Química orgánica: 5 pendientes, 2 nuevas\n• Álgebra lineal: 3 pendientes\n\nTe recomiendo empezar por Química orgánica, porque esas tarjetas son las más atrasadas y ahí llevas un 62 % de dominio. Tu racha de estudio va en 4 días. ¡No la rompas! 🔥"
           }
         },
         "teachingOptions": {
@@ -3402,22 +3402,22 @@
           "friendly": {
             "label": "Amigable",
             "description": "Cálido, alentador y conversacional.",
-            "preview": "You're doing great! Let's keep that momentum going. Hit your study session! ✨"
+            "preview": "¡Lo estás haciendo muy bien! Sigamos con ese impulso. ¡A por tu sesión de estudio! ✨"
           },
           "professional": {
             "label": "Profesional",
             "description": "Preciso, académico, sin rodeos.",
-            "preview": "You have 8 items due for review. Completing them will improve retention by reinforcing spaced repetition intervals."
+            "preview": "Tienes 8 elementos pendientes de repaso. Completarlos mejorará la retención al reforzar los intervalos de la repetición espaciada."
           },
           "strict": {
             "label": "Estricto",
             "description": "Orientado a la responsabilidad. Sin elogios vacíos.",
-            "preview": "8 cards overdue. That's falling behind. Get into your session now — every day you skip increases relearning time."
+            "preview": "8 tarjetas atrasadas. Eso es quedarse atrás. Entra a tu sesión ahora: cada día que te saltas aumenta el tiempo de reaprendizaje."
           },
           "socratic": {
             "label": "Socrático",
             "description": "Responde preguntas con preguntas orientadoras.",
-            "preview": "Before I tell you, what do you think happens to a memory trace when you skip a review? Think about what spaced repetition is designed to prevent."
+            "preview": "Antes de que te lo diga: ¿qué crees que le pasa a un recuerdo cuando te saltas un repaso? Piensa en qué intenta evitar la repetición espaciada."
           }
         }
       },
@@ -3682,34 +3682,34 @@
   },
   "billing": {
     "paymentFailed": {
-      "title": "Payment failed",
-      "message": "Your payment method failed. Update it by {{date}} to keep access.",
-      "cta": "Update payment method"
+      "title": "El pago falló",
+      "message": "Tu método de pago falló. Actualízalo antes del {{date}} para conservar el acceso.",
+      "cta": "Actualizar el método de pago"
     }
   },
   "upgrade": {
     "welcome": {
-      "title": "Welcome to {{plan}}!",
-      "message": "Your upgrade is active. Start exploring new features.",
-      "cta": "Get started"
+      "title": "¡Te damos la bienvenida a {{plan}}!",
+      "message": "Tu nuevo plan está activo. Empieza a explorar las nuevas funciones.",
+      "cta": "Empezar"
     },
-    "modelBadge": "Powered by Llama 3.3 (free)",
-    "inlineCtaText": "These results were generated with the free model — upgrade to Pro for smarter AI.",
-    "inlineCtaDismiss": "Dismiss",
+    "modelBadge": "Con Llama 3.3 (gratis)",
+    "inlineCtaText": "Estos resultados se generaron con el modelo gratuito: actualiza a Pro para una IA más capaz.",
+    "inlineCtaDismiss": "Descartar",
     "modal": {
-      "title": "Unlock Premium AI",
-      "description": "Upgrade to Plus or Pro for smarter AI models and faster generations.",
-      "feature1": "Pro uses Gemini Pro — 10x better at complex topics",
-      "feature2": "Unlimited generations — no monthly limits",
-      "feature3": "Access to personalized AI companion",
-      "cta": "View Plans & Upgrade"
+      "title": "Desbloquea la IA prémium",
+      "description": "Actualiza a Plus o Pro para tener modelos de IA más capaces y generaciones más rápidas.",
+      "feature1": "Pro usa Gemini Pro: 10 veces mejor en temas complejos",
+      "feature2": "Generaciones ilimitadas: sin límites mensuales",
+      "feature3": "Acceso a un compañero de IA personalizado",
+      "cta": "Ver planes y actualizar"
     },
     "headlines": {
-      "generateFromBook": "Unlock book-wide AI card generation with Plus",
-      "generateQuizFromBook": "Unlock book-wide quiz generation with Plus",
-      "analyzeDeck": "Unlock AI deck analysis with Pro",
-      "tts": "Hear your book read aloud with Plus",
-      "illustrations": "Unlock unlimited diagrams with Plus"
+      "generateFromBook": "Desbloquea la generación de tarjetas con IA de todo el libro con Plus",
+      "generateQuizFromBook": "Desbloquea la generación de cuestionarios de todo el libro con Plus",
+      "analyzeDeck": "Desbloquea el análisis de mazos con IA con Pro",
+      "tts": "Escucha tu libro leído en voz alta con Plus",
+      "illustrations": "Desbloquea diagramas ilimitados con Plus"
     }
   },
   "aiMagic": {
@@ -3736,23 +3736,23 @@
       "stalled": "La conexión se interrumpió. Comprueba tu red e inténtalo de nuevo.",
       "generic": "Algo salió mal al generar las tarjetas. Inténtalo de nuevo."
     },
-    "expandWithAI": "Expand with AI",
-    "expanding": "Expanding...",
-    "expandError": "Couldn't expand text. Please try again.",
+    "expandWithAI": "Ampliar con IA",
+    "expanding": "Ampliando...",
+    "expandError": "No se pudo ampliar el texto. Inténtalo de nuevo.",
     "generateFromBook": {
-      "label": "Generate Cards from Book",
-      "labelQuiz": "Generate Quiz from Book",
-      "ariaLabel": "Generate flashcards from full book content",
-      "lockedAriaLabel": "Generate Cards from Book — available with Plus",
-      "ariaLabelQuiz": "Generate quiz questions from full book content",
-      "lockedAriaLabelQuiz": "Generate Quiz from Book — available with Plus",
-      "lockedTooltip": "Available with Plus — upgrade to unlock",
-      "loading": "Analyzing book content...",
-      "generating": "Generating cards…",
-      "generatingQuiz": "Generating quiz…",
-      "generatingHint": "AI is working — this may take up to a minute",
+      "label": "Generar tarjetas del libro",
+      "labelQuiz": "Generar cuestionario del libro",
+      "ariaLabel": "Generar tarjetas a partir de todo el contenido del libro",
+      "lockedAriaLabel": "Generar tarjetas del libro: disponible con Plus",
+      "ariaLabelQuiz": "Generar preguntas de cuestionario a partir de todo el contenido del libro",
+      "lockedAriaLabelQuiz": "Generar cuestionario del libro: disponible con Plus",
+      "lockedTooltip": "Disponible con Plus: actualiza para desbloquearlo",
+      "loading": "Analizando el contenido del libro...",
+      "generating": "Generando tarjetas…",
+      "generatingQuiz": "Generando cuestionario…",
+      "generatingHint": "La IA está trabajando: puede tardar hasta un minuto",
       "error": "No se pudieron crear tarjetas desde el documento. Inténtalo de nuevo.",
-      "errorQuiz": "Couldn't generate quiz from book. Please try again.",
+      "errorQuiz": "No se pudo generar el cuestionario a partir del libro. Inténtalo de nuevo.",
       "errorAiService": "El servicio de IA no está disponible temporalmente. Por favor, inténtalo de nuevo en un momento.",
       "stages": {
         "s0": "Leyendo tu libro...",
@@ -3761,24 +3761,24 @@
       }
     },
     "analyzeDeck": {
-      "label": "Analyze Deck",
-      "ariaLabel": "Run AI deck analysis",
-      "lockedAriaLabel": "Analyze Deck — available with Pro",
-      "lockedTooltip": "Available with Pro — upgrade to unlock",
-      "loading": "Analyzing your deck...",
-      "error": "Deck analysis failed. Please try again.",
-      "emptyResult": "No issues found in this deck",
-      "emptyResultBody": "Your deck looks well-structured.",
+      "label": "Analizar mazo",
+      "ariaLabel": "Analizar el mazo con IA",
+      "lockedAriaLabel": "Analizar mazo: disponible con Pro",
+      "lockedTooltip": "Disponible con Pro: actualiza para desbloquearlo",
+      "loading": "Analizando tu mazo...",
+      "error": "No se pudo analizar el mazo. Inténtalo de nuevo.",
+      "emptyResult": "No se encontraron problemas en este mazo",
+      "emptyResultBody": "Tu mazo está bien estructurado.",
       "sections": {
-        "duplicates": "Potential Duplicates",
-        "gaps": "Topic Gaps",
-        "rewrites": "Rewrite Suggestions"
+        "duplicates": "Posibles duplicados",
+        "gaps": "Temas sin cubrir",
+        "rewrites": "Sugerencias de reescritura"
       },
       "actions": {
-        "accept": "Accept",
-        "skip": "Skip",
-        "acceptAll": "Accept All",
-        "acceptError": "Couldn't apply suggestion. Please try again."
+        "accept": "Aceptar",
+        "skip": "Omitir",
+        "acceptAll": "Aceptar todo",
+        "acceptError": "No se pudo aplicar la sugerencia. Inténtalo de nuevo."
       },
       "stages": {
         "s0": "Leyendo tu mazo...",
@@ -3787,61 +3787,61 @@
       }
     },
     "tts": {
-      "label": "Listen",
-      "playTooltip": "Listen to this book",
-      "playAriaLabel": "Play book audio",
-      "loadingAriaLabel": "Generating audio...",
-      "pauseTooltip": "Pause",
-      "pauseAriaLabel": "Pause audio playback",
-      "resumeTooltip": "Resume",
-      "resumeAriaLabel": "Resume audio playback",
-      "stopTooltip": "Stop",
-      "stopAriaLabel": "Stop audio playback",
-      "lockedTooltip": "Available with Plus — upgrade to unlock",
-      "lockedAriaLabel": "Listen to book — available with Plus",
-      "languageAriaLabel": "Select TTS language",
-      "loading": "Generating audio...",
-      "error": "Couldn't generate audio. Please try again.",
+      "label": "Escuchar",
+      "playTooltip": "Escuchar este libro",
+      "playAriaLabel": "Reproducir el audio del libro",
+      "loadingAriaLabel": "Generando audio...",
+      "pauseTooltip": "Pausar",
+      "pauseAriaLabel": "Pausar la reproducción de audio",
+      "resumeTooltip": "Reanudar",
+      "resumeAriaLabel": "Reanudar la reproducción de audio",
+      "stopTooltip": "Detener",
+      "stopAriaLabel": "Detener la reproducción de audio",
+      "lockedTooltip": "Disponible con Plus: actualiza para desbloquearlo",
+      "lockedAriaLabel": "Escuchar el libro: disponible con Plus",
+      "languageAriaLabel": "Seleccionar el idioma de la lectura en voz alta",
+      "loading": "Generando audio...",
+      "error": "No se pudo generar el audio. Inténtalo de nuevo.",
       "playSection": "Reproducir sección: {{title}}",
       "truncatedHint": "Las selecciones largas se acortan para el audio",
-      "playSelectionTooltip": "Listen",
-      "playSelectionAriaLabel": "Play selected text",
-      "stopSelectionTooltip": "Stop",
-      "stopSelectionAriaLabel": "Stop audio playback",
-      "fullBook": "Full book",
-      "fullBookHint": "Read the entire book",
-      "sectionPickerTitle": "Choose a section",
-      "autoDetectLabel": "Auto-detect language",
-      "autoDetectAriaLabel": "Automatically detect and play mixed-language text in each segment's own language",
-      "segmentError": "Couldn't detect languages automatically. Please try again.",
+      "playSelectionTooltip": "Escuchar",
+      "playSelectionAriaLabel": "Reproducir el texto seleccionado",
+      "stopSelectionTooltip": "Detener",
+      "stopSelectionAriaLabel": "Detener la reproducción de audio",
+      "fullBook": "Libro completo",
+      "fullBookHint": "Leer todo el libro",
+      "sectionPickerTitle": "Elige una sección",
+      "autoDetectLabel": "Detectar el idioma automáticamente",
+      "autoDetectAriaLabel": "Detectar automáticamente el texto en varios idiomas y leer cada fragmento en su propio idioma",
+      "segmentError": "No se pudieron detectar los idiomas automáticamente. Inténtalo de nuevo.",
       "languages": {
-        "en": "English",
-        "es": "Spanish",
-        "fr": "French",
-        "de": "German",
-        "ja": "Japanese",
-        "pt": "Portuguese",
-        "zh": "Chinese"
+        "en": "Inglés",
+        "es": "Español",
+        "fr": "Francés",
+        "de": "Alemán",
+        "ja": "Japonés",
+        "pt": "Portugués",
+        "zh": "Chino"
       }
     },
     "diagram": {
-      "panelTitle": "Generate Diagram",
-      "loading": "Generating diagram...",
-      "error": "Couldn't generate diagram. Please try again.",
-      "regenerate": "Regenerate",
-      "regenerateAriaLabel": "Regenerate diagram",
-      "insert": "Insert into Book",
-      "insertAriaLabel": "Insert diagram into book at cursor",
-      "explanation": "Explanation",
-      "typeAriaLabel": "Select diagram type",
-      "renderError": "Unable to render diagram. The syntax may be invalid. Try regenerating.",
-      "lockedTooltip": "Unlock unlimited diagrams with Plus",
+      "panelTitle": "Generar diagrama",
+      "loading": "Generando diagrama...",
+      "error": "No se pudo generar el diagrama. Inténtalo de nuevo.",
+      "regenerate": "Regenerar",
+      "regenerateAriaLabel": "Regenerar el diagrama",
+      "insert": "Insertar en el libro",
+      "insertAriaLabel": "Insertar el diagrama en el libro, donde está el cursor",
+      "explanation": "Explicación",
+      "typeAriaLabel": "Seleccionar el tipo de diagrama",
+      "renderError": "No se puede mostrar el diagrama. Puede que la sintaxis no sea válida. Prueba a regenerarlo.",
+      "lockedTooltip": "Desbloquea diagramas ilimitados con Plus",
       "types": {
-        "auto": "Auto",
-        "mindmap": "Mind Map",
-        "flowchart": "Flowchart",
-        "sequence": "Sequence Diagram",
-        "er": "ER Diagram"
+        "auto": "Automático",
+        "mindmap": "Mapa mental",
+        "flowchart": "Diagrama de flujo",
+        "sequence": "Diagrama de secuencia",
+        "er": "Diagrama ER"
       },
       "stages": {
         "s0": "Leyendo el fragmento...",
@@ -3898,10 +3898,10 @@
   },
   "accountSettings": {
     "plan": {
-      "title": "Plan & Billing",
-      "current": "You are on the {{plan}} plan",
-      "upgrade": "View plans & upgrade",
-      "manage": "Manage subscription"
+      "title": "Plan y facturación",
+      "current": "Estás en el plan {{plan}}",
+      "upgrade": "Ver planes y actualizar",
+      "manage": "Gestionar suscripción"
     }
   },
   "boards": {
@@ -4377,22 +4377,22 @@
     }
   },
   "goalAi": {
-    "buttonLabel": "AI Assist",
-    "panelTitle": "AI Goal Analysis",
-    "refresh": "Refresh analysis",
-    "loading": "Analyzing your annual plan with AI...",
-    "error": "Failed to analyze goals. Please try again.",
-    "noPlan": "No annual plan found for this year. Create a plan to unlock AI analysis.",
-    "upgradeHeadline": "Unlock AI Goal Analysis with Pro",
+    "buttonLabel": "Asistente de IA",
+    "panelTitle": "Análisis de objetivos con IA",
+    "refresh": "Actualizar el análisis",
+    "loading": "Analizando tu plan anual con IA...",
+    "error": "No se pudieron analizar los objetivos. Inténtalo de nuevo.",
+    "noPlan": "No hay un plan anual para este año. Crea un plan para desbloquear el análisis con IA.",
+    "upgradeHeadline": "Desbloquea el análisis de objetivos con IA con Pro",
     "sections": {
-      "suggestions": "Quarterly Suggestions",
-      "conflicts": "Conflicts Detected",
-      "archiving": "Archiving Recommendations"
+      "suggestions": "Sugerencias para el trimestre",
+      "conflicts": "Conflictos detectados",
+      "archiving": "Recomendaciones de archivo"
     },
     "empty": {
-      "suggestions": "No suggestions available.",
-      "conflicts": "No conflicts detected.",
-      "archiving": "No stale goals to archive."
+      "suggestions": "No hay sugerencias disponibles.",
+      "conflicts": "No se detectaron conflictos.",
+      "archiving": "No hay objetivos inactivos que archivar."
     },
     "stages": {
       "s0": "Leyendo tu plan...",
@@ -4401,62 +4401,62 @@
     }
   },
   "sheets": {
-    "title": "My Sheets",
-    "newSheet": "New sheet",
-    "untitled": "Untitled Sheet",
-    "search": "Search sheets…",
-    "error": "Couldn't load your sheets. Refresh the page to try again.",
+    "title": "Mis hojas",
+    "newSheet": "Nueva hoja",
+    "untitled": "Hoja sin título",
+    "search": "Buscar hojas…",
+    "error": "No se pudieron cargar tus hojas. Actualiza la página para intentarlo de nuevo.",
     "view": {
-      "grid": "Switch to grid view",
-      "list": "Switch to list view"
+      "grid": "Cambiar a la vista de cuadrícula",
+      "list": "Cambiar a la vista de lista"
     },
     "empty": {
-      "title": "No sheets yet",
-      "body": "Create a spreadsheet to track finances, plans, or anything you like."
+      "title": "Aún no hay hojas",
+      "body": "Crea una hoja de cálculo para llevar tus finanzas, tus planes o lo que quieras."
     },
     "create": {
-      "title": "New sheet",
-      "template": "Template",
-      "confirm": "Create sheet",
-      "nameLabel": "Name",
-      "templateLabel": "Template",
-      "error": "Failed to create sheet. Please try again."
+      "title": "Nueva hoja",
+      "template": "Plantilla",
+      "confirm": "Crear hoja",
+      "nameLabel": "Nombre",
+      "templateLabel": "Plantilla",
+      "error": "No se pudo crear la hoja. Inténtalo de nuevo."
     },
     "templates": {
-      "blank": "Blank",
-      "budgetTracker": "Budget Tracker",
-      "expenseLog": "Expense Log"
+      "blank": "En blanco",
+      "budgetTracker": "Control de presupuesto",
+      "expenseLog": "Registro de gastos"
     },
     "editor": {
-      "saving": "Saving…",
-      "saved": "Saved",
-      "filter": "Filter rows…",
-      "error": "Couldn't load this sheet. Go back to your sheets and try again.",
-      "backToSheets": "Back to sheets",
-      "filterReadOnly": "Read-only while filtering",
-      "titleInput": "Sheet name"
+      "saving": "Guardando…",
+      "saved": "Guardado",
+      "filter": "Filtrar filas…",
+      "error": "No se pudo cargar esta hoja. Vuelve a tus hojas e inténtalo de nuevo.",
+      "backToSheets": "Volver a las hojas",
+      "filterReadOnly": "Solo lectura mientras se filtra",
+      "titleInput": "Nombre de la hoja"
     },
     "delete": {
-      "title": "Delete sheet?",
-      "body": "This sheet will be moved to trash and deleted after 30 days.",
-      "confirm": "Delete \"{{title}}\"?"
+      "title": "¿Eliminar la hoja?",
+      "body": "Esta hoja se moverá a la papelera y se eliminará después de 30 días.",
+      "confirm": "¿Eliminar «{{title}}»?"
     },
     "list": {
-      "title": "My Sheets",
-      "emptyTitle": "No sheets yet",
-      "emptySubtitle": "Create a spreadsheet to track finances, plans, or anything you like.",
-      "new": "New Sheet",
-      "search": "Search sheets…",
-      "errorFetch": "Couldn’t load your sheets. Refresh the page to try again.",
-      "gridView": "Grid view",
-      "listView": "List view",
-      "columns": "Columns",
-      "noResults": "No sheets match \"{{term}}\""
+      "title": "Mis hojas",
+      "emptyTitle": "Aún no hay hojas",
+      "emptySubtitle": "Crea una hoja de cálculo para llevar tus finanzas, tus planes o lo que quieras.",
+      "new": "Nueva hoja",
+      "search": "Buscar hojas…",
+      "errorFetch": "No se pudieron cargar tus hojas. Actualiza la página para intentarlo de nuevo.",
+      "gridView": "Vista de cuadrícula",
+      "listView": "Vista de lista",
+      "columns": "Columnas",
+      "noResults": "Ninguna hoja coincide con «{{term}}»"
     }
   },
   "tts": {
-    "autoDetect": "Auto-detect language",
-    "autoDetectAriaLabel": "Automatically detect and play each segment in its own language",
+    "autoDetect": "Detectar el idioma automáticamente",
+    "autoDetectAriaLabel": "Detectar automáticamente cada fragmento y leerlo en su propio idioma",
     "listen": "Escuchar",
     "stop": "Detener"
   },

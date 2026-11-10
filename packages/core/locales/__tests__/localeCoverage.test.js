@@ -185,7 +185,45 @@ const IDENTICAL_BY_DESIGN = {
     'agent.ready.field.general',
     // "General" and "Plan" are the Spanish words for the chat subject labels (CHAT-010).
     'agent.subject.general',
-    'agent.subject.plan'
+    'agent.subject.plan',
+    // GTM-012: the Spanish pass. What follows is identical because Spanish
+    // writes it the same way, not because nobody translated it.
+    // "General", "Total", "Error", "Visual", "Audio", "Video", "Contextual",
+    // "Coral" and "Robot" are Spanish words, spelled as in English.
+    'news.categories.general',
+    'tasks.lists.general',
+    'weekly.total',
+    'study.stats.totalCards',
+    'common.error',
+    'aiVisualizer.titlePrefix',
+    'calendar.types.visual',
+    'cards.common.typeVisual',
+    'cards.manage_content.filters.visual',
+    'weekly.types.visual',
+    'deckSettings.nav.audio',
+    'editor.slashCommands.video',
+    'quiz.type.contextual',
+    'agent.companion.colors.coral',
+    'agent.companion.species.robot',
+    // Plan names and network names are proper names in every locale.
+    'plans.plus',
+    'plans.pro',
+    'subscription.tier.plus',
+    'subscription.tier.pro',
+    'header.profileMenu.tier.pro',
+    'contact.networks.facebook',
+    'contact.networks.instagram',
+    'contact.networks.tiktok',
+    'contact.networks.x',
+    // An address, a URL and a dash have nothing to translate.
+    'footer.support.email',
+    'books.coverImagePlaceholder',
+    'subscription.noBillingDate',
+    // "Ana" is the landing frame's sample learner, a Spanish name already.
+    'landing.frames.phone.name',
+    // "min" again, as in `study.dates.minutes_*` above.
+    'landing.frames.studyCenter.minutes_one',
+    'landing.frames.studyCenter.minutes_other'
   ],
   // "Business" and "Design" are the words French and German actually use — in
   // the taxonomy chip and in the news-category chip that renders the same word.
