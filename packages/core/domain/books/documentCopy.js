@@ -44,7 +44,8 @@ export const metaLine = (t, book, relative, { username = null, locale = undefine
 export const cardsReadout = (t, book) => {
   if (kindOf(book) === 'imported') {
     const position = readingPage(book)
-    if (!position) return book.cards > 0 ? { strong: null, rest: t('books.lib.cards', { count: book.cards }) } : null
+    // Not opened yet: there is no position to report, and the row already says its pages.
+    if (!position || !position.opened) return book.cards > 0 ? { strong: null, rest: t('books.lib.cards', { count: book.cards }) } : null
     if (position.done) return { strong: null, rest: t('books.lib.read') }
     return { strong: null, rest: t('books.lib.pageOf', { page: position.page, total: position.total }) }
   }
@@ -54,7 +55,10 @@ export const cardsReadout = (t, book) => {
 
 /** The measure's value: coverage for a written document with cards, the page for an import; null draws nothing. */
 export const measureOf = (book) => {
-  if (kindOf(book) === 'imported') return readingPage(book)?.pct ?? null
+  if (kindOf(book) === 'imported') {
+    const position = readingPage(book)
+    return position?.opened ? position.pct : null
+  }
   if (!book.section_count || !book.cards) return null
   return Math.round((Math.min(book.sections_with_cards || 0, book.section_count) / book.section_count) * 100)
 }

@@ -62,6 +62,10 @@ describe('documentCopy (BOOK-008, D6–D8)', () => {
     )
     expect(cardsReadout(t, IMPORTED)).toEqual({ strong: null, rest: 'books.lib.pageOf:page=140,total=296' })
     expect(cardsReadout(t, { ...IMPORTED, reading_position: 295 })).toEqual({ strong: null, rest: 'books.lib.read' })
+    // IMPORT-015: never opened, so no position to report and no measure to draw.
+    expect(cardsReadout(t, { ...IMPORTED, reading_position: null })).toBeNull()
+    expect(measureOf({ ...IMPORTED, reading_position: null })).toBeNull()
+    expect(cardsReadout(t, { source: 'imported', page_count: 1 })).toBeNull()
     expect(measureOf(IMPORTED)).toBe(47)
   })
 

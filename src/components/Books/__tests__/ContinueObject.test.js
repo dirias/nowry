@@ -82,6 +82,17 @@ describe('ContinueObject (BOOK-007)', () => {
     expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '47')
   })
 
+  it('an import nobody has opened is new: its pages, when it came in, Open, and no progress (IMPORT-015)', () => {
+    render(<ContinueObject book={{ ...IMPORTED, reading_position: null, page_count: 1 }} tier='pro' formatRelativeDate={rel} />)
+    expect(screen.getByText('books.lib.startReading')).toBeInTheDocument()
+    expect(screen.queryByText('books.lib.continueReading')).toBeNull()
+    expect(screen.getByText('books.lib.pages:count=1')).toBeInTheDocument()
+    expect(screen.getByText(/books\.lib\.importedAt/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'books.lib.open' })).toBeInTheDocument()
+    expect(screen.queryByRole('progressbar')).toBeNull()
+    expect(screen.queryByText(/pageOf|pagesRead/)).toBeNull()
+  })
+
   it('a free account keeps the readout on a locked key that opens the upgrade sheet (D10)', () => {
     const onUpgrade = jest.fn()
     const onMakeCards = jest.fn()

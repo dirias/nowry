@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useDropzone } from 'react-dropzone'
@@ -59,6 +59,8 @@ export default function BookHome() {
   const [previewData, setPreviewData] = useState(null)
   const [pendingFiles, setPendingFiles] = useState([])
   const [confirmingImport, setConfirmingImport] = useState(false)
+  const [preparingPreview, setPreparingPreview] = useState(false)
+  const dropRef = useRef(0)
 
   const relative = useCallback((value) => formatRelativeDate(t, value), [t])
   const username = user?.username || null
@@ -120,20 +122,38 @@ export default function BookHome() {
     async (acceptedFiles, fileRejections = []) => {
       const failures = fileRejections.map(({ file }) => refusalSentence(rejectedFileRefusal(file.name)))
       const files = [...acceptedFiles]
+      // The sheet opens before the file has been read (IMPORT-014): uploading
+      // and parsing a long PDF takes seconds, and a page that does nothing for
+      // seconds looks broken. `dropRef` lets a sheet the reader closed in the
+      // meantime ignore the answer when it arrives.
+      const drop = ++dropRef.current
+      const stillThisDrop = () => dropRef.current === drop
+      if (files.length) {
+        setPreviewData(null)
+        setPendingFiles(files)
+        setPreparingPreview(true)
+        setShowPreview(true)
+      }
       let preview = null
-      while (files.length && !preview) {
+      while (files.length && !preview && stillThisDrop()) {
         try {
           preview = await booksService.importFile(files[0], username || 'Unknown', true)
         } catch (error) {
           failures.push(refusalSentence(importRefusal(error, files[0].name)))
           files.shift()
+          if (stillThisDrop()) setPendingFiles([...files])
         }
       }
       if (failures.length) setErrorMessage(failures)
-      if (!preview) return
+      if (!stillThisDrop()) return
+      setPreparingPreview(false)
+      if (!preview) {
+        setShowPreview(false)
+        setPendingFiles([])
+        return
+      }
       setPendingFiles(files)
       setPreviewData(preview)
-      setShowPreview(true)
     },
     [username, refusalSentence]
   )
@@ -173,6 +193,8 @@ export default function BookHome() {
   )
 
   const handleCancelPreview = useCallback(() => {
+    dropRef.current += 1 // a preview still on its way belongs to a sheet that is gone
+    setPreparingPreview(false)
     setShowPreview(false)
     setPreviewData(null)
     setPendingFiles([])
@@ -396,6 +418,8 @@ export default function BookHome() {
         previewData={previewData}
         onConfirm={handleConfirmImport}
         loading={confirmingImport}
+        preparing={preparingPreview}
+        fileNames={pendingFiles.map((file) => file.name)}
       />
 
       {/* After the preview, so a refusal that arrives with one is in front of it */}

@@ -98,6 +98,42 @@ describe('BookHome import', () => {
     expect(screen.queryByTestId('preview')).toBeNull()
   })
 
+  it('opens the sheet while the first file is still being read, and closes it if nothing can be', async () => {
+    let answer
+    mockImportFile.mockImplementation(() => new Promise((resolve, reject) => (answer = { resolve, reject })))
+    renderPage()
+    let dropped
+    act(() => {
+      dropped = mockDropzone.onDrop([file('slow.pdf')], [])
+    })
+    expect(mockPreview.open).toBe(true)
+    expect(mockPreview.preparing).toBe(true)
+    expect(mockPreview.fileNames).toEqual(['slow.pdf'])
+    await act(async () => {
+      answer.reject(refused('import_empty'))
+      await dropped
+    })
+    expect(mockPreview.open).toBe(false)
+    expect(screen.getByRole('alert')).toHaveTextContent('books.import.empty(slow.pdf)')
+  })
+
+  it('ignores a preview that arrives after the reader closed the sheet', async () => {
+    let answer
+    mockImportFile.mockImplementation(() => new Promise((resolve) => (answer = { resolve })))
+    renderPage()
+    let dropped
+    act(() => {
+      dropped = mockDropzone.onDrop([file('slow.pdf')], [])
+    })
+    act(() => mockPreview.onClose())
+    await act(async () => {
+      answer.resolve({ title: 'slow' })
+      await dropped
+    })
+    expect(mockPreview.open).toBe(false)
+    expect(mockPreview.previewData).toBeNull()
+  })
+
   it('says the connection failed, not the file, when no answer comes back', async () => {
     mockImportFile.mockRejectedValue({ code: 'ERR_NETWORK' })
     renderPage()

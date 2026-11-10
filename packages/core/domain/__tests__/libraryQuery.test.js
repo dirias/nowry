@@ -47,9 +47,14 @@ describe('libraryQuery (BOOK-007)', () => {
   })
 
   it('reads the page of an import, 1-based and clamped', () => {
-    expect(readingPage(imported)).toEqual({ page: 140, total: 296, pct: 47, done: false })
+    expect(readingPage(imported)).toEqual({ page: 140, total: 296, pct: 47, done: false, opened: true })
     expect(readingPage({ ...imported, reading_position: 999 }).done).toBe(true)
     expect(readingPage({ ...imported, reading_position: null }).page).toBe(1)
+    // IMPORT-015: an import nobody has opened is not on page 1 of its reading, and a
+    // one-page import is not "read" before it has been opened.
+    expect(readingPage({ ...imported, reading_position: undefined })).toEqual({ page: 1, total: 296, pct: 0, done: false, opened: false })
+    expect(readingPage({ source: 'imported', page_count: 1 })).toMatchObject({ done: false, pct: 0, opened: false })
+    expect(readingPage({ source: 'imported', page_count: 1, reading_position: 0 })).toMatchObject({ done: true, pct: 100, opened: true })
     expect(readingPage(written)).toBeNull()
   })
 

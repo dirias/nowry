@@ -337,21 +337,28 @@ function ContinueCard({ book, onOpen, onMakeCards, when, t }) {
 
   const imported = kindOf(book) === 'imported'
   const position = readingPage(book)
+  // An import nobody has opened is new, not something being continued (IMPORT-015).
+  const unopened = imported && position && !position.opened
   const covered = coverage(book)
   // Only a written document has sections waiting for cards; an import has pages.
   const gap = imported ? 0 : sectionsWithoutCards(book)
 
   return (
     <SummaryObject
-      title={imported ? t('books.lib.continueReading') : t('books.lib.continueWriting')}
+      title={unopened ? t('books.lib.startReading') : imported ? t('books.lib.continueReading') : t('books.lib.continueWriting')}
       context={book.title || t('books.untitled')}
-      progress={imported ? position?.pct : covered?.pct}
+      progress={unopened ? undefined : imported ? position?.pct : covered?.pct}
       readouts={
         <>
           <Readout leading>
-            {imported ? t('books.lib.openedAt', { when: when(book.updated_at) }) : t('books.lib.editedAt', { when: when(book.updated_at) })}
+            {unopened
+              ? t('books.lib.importedAt', { when: when(book.updated_at) })
+              : imported
+                ? t('books.lib.openedAt', { when: when(book.updated_at) })
+                : t('books.lib.editedAt', { when: when(book.updated_at) })}
           </Readout>
-          {imported && position ? <Readout>{t('books.lib.pagesRead', { page: position.page, total: position.total })}</Readout> : null}
+          {unopened ? <Readout>{t('books.lib.pages', { count: position.total })}</Readout> : null}
+          {imported && position?.opened ? <Readout>{t('books.lib.pagesRead', { page: position.page, total: position.total })}</Readout> : null}
           {cardsFrom(book) ? <Readout>{t('books.lib.cardsFromDocument', { count: cardsFrom(book) })}</Readout> : null}
           {/*
            * What the document owes you TODAY, which this object dropped. Every

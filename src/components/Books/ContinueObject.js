@@ -92,8 +92,19 @@ export default function ContinueObject({
     )
   } else if (kind === 'imported') {
     const position = readingPage(book)
-    title = t('books.lib.continueReading')
-    line = (
+    // An import that has not been opened is not being continued: it is new, it
+    // says its length and when it came in, and its key opens it (IMPORT-015).
+    const opened = !position || position.opened
+    title = t(opened ? 'books.lib.continueReading' : 'books.lib.startReading')
+    line = !opened ? (
+      <Stack direction='row' spacing={1} alignItems='center' flexWrap='wrap' useFlexGap sx={{ ...readout, color: 'text.secondary' }}>
+        <Typography level='body-sm' sx={{ color: 'text.primary', fontWeight: 'md', ...tabularNums }}>
+          {t('books.lib.pages', { count: position.total })}
+        </Typography>
+        <Dot />
+        <span>{t('books.lib.importedAt', { when: formatRelativeDate?.(book.updated_at) })}</span>
+      </Stack>
+    ) : (
       <Stack direction='row' spacing={1} alignItems='center' flexWrap='wrap' useFlexGap sx={{ ...readout, color: 'text.secondary' }}>
         {position && (
           <>
@@ -121,10 +132,10 @@ export default function ContinueObject({
             {t('books.lib.listen')}
           </Button>
         )}
-        <Button onClick={onContinue}>{t('books.lib.continue')}</Button>
+        <Button onClick={onContinue}>{t(opened ? 'books.lib.continue' : 'books.lib.open')}</Button>
       </Stack>
     )
-    if (position) edge = { pct: position.pct, label: t('books.lib.pagesRead', { page: position.page, total: position.total }) }
+    if (position?.opened) edge = { pct: position.pct, label: t('books.lib.pagesRead', { page: position.page, total: position.total }) }
   } else {
     const cover = coverage(book)
     const gap = sectionsWithoutCards(book)

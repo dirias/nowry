@@ -1,405 +1,243 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  Modal,
-  ModalDialog,
-  ModalClose,
-  Typography,
-  Box,
-  Stack,
-  Button,
-  Chip,
-  Divider,
-  Sheet,
-  Alert,
-  LinearProgress,
-  Input
-} from '@mui/joy'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
-import WarningIcon from '@mui/icons-material/Warning'
-import InfoIcon from '@mui/icons-material/Info'
-import ViewColumnIcon from '@mui/icons-material/ViewColumn'
-import ArticleIcon from '@mui/icons-material/Article'
+import { Alert, Box, Button, IconButton, Sheet, Skeleton, Stack, Typography } from '@mui/joy'
+import ChevronLeftRounded from '@mui/icons-material/ChevronLeftRounded'
+import ChevronRightRounded from '@mui/icons-material/ChevronRightRounded'
 import DOMPurify from 'dompurify'
 
-export default function ImportPreviewModal({ open, onClose, previewData, onConfirm, loading }) {
+import FormSheet from '../Common/Form/FormSheet'
+import FormTextField from '../Common/Form/FormTextField'
+import { focusRing } from '../Common/Form/formStyles'
+
+/**
+ * The look before an import (IMPORT-013, IMPORT-014).
+ *
+ * It opens the moment a file is dropped, with the file's name and a skeleton
+ * where its text will land, because reading a long PDF takes seconds and a
+ * page that does nothing for seconds looks broken. Then it says three facts —
+ * pages, words, pictures — and shows the first pages as they will be imported.
+ *
+ * What it no longer says: an "extraction quality" percentage (it was characters
+ * divided by 2,000), a "low word count" warning (it fired on every text and
+ * Word file) and "2-column layout preserved" (the document keeps reading order,
+ * not columns). A scan is the one thing worth a warning: it imports as
+ * pictures, and nothing can be read aloud or made into cards from it.
+ *
+ * With several files the title field is not offered: each is imported under
+ * its own file name, and the sheet says how many.
+ */
+
+const actionSx = { width: { xs: '100%', sm: 'auto' }, minHeight: 44, ...focusRing }
+const tabularNums = { fontVariantNumeric: 'tabular-nums' }
+
+// The imported HTML, drawn with the type scale: the levels cannot be applied
+// to markup that arrives as a string, so the selectors carry them.
+const previewSx = {
+  minHeight: 200,
+  maxHeight: 360,
+  overflow: 'auto',
+  p: { xs: 2, md: 3 },
+  borderRadius: 'md',
+  bgcolor: 'background.surface',
+  color: 'text.primary',
+  '& p, & li, & td, & th': { typography: 'body-sm', color: 'text.primary' },
+  '& p': { my: 1 },
+  '& h1': { typography: 'title-lg', mt: 2, mb: 1 },
+  '& h2': { typography: 'title-md', mt: 2, mb: 1 },
+  '& h3, & h4, & h5, & h6': { typography: 'title-sm', mt: 1.5, mb: 0.5 },
+  '& ul, & ol': { pl: 3, my: 1 },
+  '& table': { borderCollapse: 'collapse', my: 1.5 },
+  '& td, & th': { border: '1px solid', borderColor: 'divider', px: 1, py: 0.5, textAlign: 'left', verticalAlign: 'top' },
+  '& td p, & th p': { m: 0 },
+  // Columns are imported in reading order, so the preview reads that way too.
+  '& div': { display: 'block' }
+}
+
+const formatSize = (bytes) => {
+  if (!bytes && bytes !== 0) return null
+  return bytes >= 1024 * 1024 ? `${(bytes / (1024 * 1024)).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`
+}
+
+const Dot = () => (
+  <Box component='span' aria-hidden='true' sx={{ color: 'text.tertiary' }}>
+    ·
+  </Box>
+)
+
+export default function ImportPreviewModal({ open, onClose, previewData, onConfirm, loading = false, preparing = false, fileNames = [] }) {
   const { t } = useTranslation()
   const [editedTitle, setEditedTitle] = React.useState('')
-  const [currentPageIndex, setCurrentPageIndex] = React.useState(0)
+  const [pageIndex, setPageIndex] = React.useState(0)
 
   React.useEffect(() => {
-    if (previewData?.title) {
-      setEditedTitle(previewData.title)
-    }
+    setEditedTitle(previewData?.title || '')
+    setPageIndex(0)
   }, [previewData])
 
-  React.useEffect(() => {
-    // Reset to first page when modal opens
-    setCurrentPageIndex(0)
-  }, [open])
+  const fileCount = Math.max(fileNames.length, 1)
+  const isBatch = fileCount > 1
+  const pages = previewData?.sample_pages || []
+  const page = pages[pageIndex]
+  const facts = previewData?.facts
+  const totalPages = facts?.pages ?? previewData?.total_pages ?? pages.length
+  const fileInfo = previewData?.file_info
+  const fileName = fileInfo?.original_filename || fileNames[0] || ''
 
-  if (!previewData) return null
-
-  const { title, total_pages, quality_summary, warnings, info, sample_pages, file_info } = previewData
-
-  const handleConfirm = () => {
-    onConfirm(editedTitle)
+  // While the import runs the sheet stays: closing it never stopped the import,
+  // it only hid it, so Close and Cancel wait until the answer is in.
+  const handleClose = () => {
+    if (!loading) onClose()
   }
 
-  const handleNextPage = () => {
-    if (currentPageIndex < sample_pages.length - 1) {
-      setCurrentPageIndex(currentPageIndex + 1)
-    }
-  }
-
-  const handlePrevPage = () => {
-    if (currentPageIndex > 0) {
-      setCurrentPageIndex(currentPageIndex - 1)
-    }
-  }
-
-  const currentPage = sample_pages?.[currentPageIndex]
+  const subtitle = preparing ? (
+    t('books.import.reading', { name: fileName })
+  ) : (
+    <Stack direction='row' spacing={1} alignItems='center' flexWrap='wrap' useFlexGap component='span'>
+      <span>{fileName}</span>
+      {fileInfo?.type && (
+        <>
+          <Dot />
+          <span>{fileInfo.type}</span>
+        </>
+      )}
+      {formatSize(fileInfo?.size) && (
+        <>
+          <Dot />
+          <Box component='span' sx={tabularNums}>
+            {formatSize(fileInfo.size)}
+          </Box>
+        </>
+      )}
+    </Stack>
+  )
 
   return (
-    <Modal open={open} onClose={onClose}>
-      <ModalDialog
-        sx={{
-          width: { xs: '95%', sm: '90%', md: '85%', lg: '800px' },
-          maxWidth: '800px',
-          height: { xs: '95vh', md: 'auto' },
-          maxHeight: { xs: '95vh', md: '90vh' },
-          overflowY: 'auto',
-          p: 0,
-          borderRadius: { xs: 'lg', md: 'xl' },
-          boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
-          border: '1px solid',
-          borderColor: 'divider'
-        }}
-      >
-        {/* HEADER */}
-        <Box
-          sx={{
-            px: { xs: 2, sm: 3, md: 4 },
-            py: { xs: 2, md: 3 },
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            bgcolor: 'background.level1'
-          }}
-        >
-          <Typography level='h3' sx={{ m: 0, fontWeight: 700 }}>
-            📄 Import Preview & Validation
+    <FormSheet
+      open={open}
+      onClose={handleClose}
+      titleKey='books.import.sheetTitle'
+      titleValues={{ count: fileCount }}
+      subtitleText={subtitle}
+      width='standard'
+      footer={
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} justifyContent='space-between'>
+          <Button variant='plain' color='neutral' onClick={handleClose} disabled={loading} sx={actionSx}>
+            {t('common.cancel')}
+          </Button>
+          <Button variant='solid' loading={loading} disabled={preparing} onClick={() => onConfirm(editedTitle)} sx={actionSx}>
+            {t('books.import.action', { count: fileCount })}
+          </Button>
+        </Stack>
+      }
+    >
+      <Stack spacing={2.5} aria-busy={preparing ? 'true' : undefined}>
+        {isBatch ? (
+          <Typography level='body-sm' sx={{ color: 'text.secondary' }} data-testid='import-batch-note'>
+            {t('books.import.batchNote', { count: fileCount })}
           </Typography>
-          <Typography level='body-sm' sx={{ color: 'text.tertiary', mt: 0.5 }}>
-            Review and confirm your book import
-          </Typography>
-        </Box>
+        ) : preparing ? (
+          <Skeleton variant='rectangular' height={44} sx={{ borderRadius: 'sm' }} />
+        ) : (
+          <FormTextField
+            labelKey='books.titleLabel'
+            placeholderKey='books.import.titlePlaceholder'
+            value={editedTitle}
+            onChange={setEditedTitle}
+          />
+        )}
 
-        {/* CONTENT */}
-        <Box sx={{ px: { xs: 2, sm: 3, md: 4 }, py: { xs: 2, md: 3 } }}>
-          <Stack spacing={3}>
-            {/* Section: File Information */}
-            <Box>
-              <Alert startDecorator={<InfoIcon />} color='neutral' variant='soft'>
-                <Stack direction='row' spacing={2} flexWrap='wrap'>
-                  <Typography level='body-sm'>
-                    <strong>File:</strong> {file_info?.original_filename || 'document'}
-                  </Typography>
-                  <Typography level='body-sm'>
-                    <strong>Type:</strong> {file_info?.type || 'PDF'}
-                  </Typography>
-                  <Typography level='body-sm'>
-                    <strong>Size:</strong> {file_info?.size ? (file_info.size / 1024).toFixed(1) + ' KB' : 'Unknown'}
-                  </Typography>
-                </Stack>
-              </Alert>
-            </Box>
-
-            <Divider />
-
-            {/* Section: Book Title (Editable) */}
-            <Box>
-              <Typography level='title-md' sx={{ mb: 2, fontWeight: 700, color: 'text.primary' }}>
-                Book Information
-              </Typography>
-              <Stack spacing={2}>
-                <Box>
-                  <Typography level='body-sm' sx={{ fontWeight: 600, mb: 1 }}>
-                    Book Title
-                  </Typography>
-                  <Input
-                    value={editedTitle}
-                    onChange={(e) => setEditedTitle(e.target.value)}
-                    placeholder={t('books.import.titlePlaceholder')}
-                    size='lg'
-                    sx={{ fontWeight: 600 }}
-                  />
-                </Box>
-
-                <Stack direction='row' spacing={1.5} alignItems='center' flexWrap='wrap'>
-                  <Chip startDecorator={<ArticleIcon />} variant='soft' color='primary' size='lg'>
-                    {total_pages} {total_pages === 1 ? 'page' : 'pages'}
-                  </Chip>
-
-                  {quality_summary?.has_multi_column && (
-                    <Chip startDecorator={<ViewColumnIcon />} variant='soft' color='success' size='lg'>
-                      2 columns detected
-                    </Chip>
-                  )}
-                </Stack>
-              </Stack>
-            </Box>
-
-            {(info || (warnings && warnings.length > 0)) && <Divider />}
-
-            {/* Section: Info & Warnings (Conditional) */}
-            {(info || (warnings && warnings.length > 0)) && (
-              <Box>
-                <Typography level='title-md' sx={{ mb: 2, fontWeight: 700, color: 'text.primary' }}>
-                  Validation Results
-                </Typography>
-                <Stack spacing={1.5}>
-                  {info && (
-                    <Alert startDecorator={<InfoIcon />} color='primary' variant='soft'>
-                      {info}
-                    </Alert>
-                  )}
-
-                  {warnings && warnings.length > 0 && (
-                    <>
-                      {warnings.map((warning, idx) => (
-                        <Alert key={idx} startDecorator={<WarningIcon />} color='warning' variant='soft'>
-                          {warning}
-                        </Alert>
-                      ))}
-                    </>
-                  )}
-                </Stack>
-              </Box>
-            )}
-
-            <Divider />
-
-            {/* Section: Page Preview */}
-            <Box>
-              <Stack direction='row' justifyContent='space-between' alignItems='flex-start' mb={2}>
-                <Box>
-                  <Typography level='title-md' sx={{ fontWeight: 700, color: 'text.primary' }}>
-                    📖 Page Preview
-                  </Typography>
-                  <Typography level='body-xs' sx={{ color: 'text.tertiary', mt: 0.5 }}>
-                    Review sample pages from your document
-                  </Typography>
-                </Box>
-                <Typography level='body-sm' sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                  Page {currentPageIndex + 1} of {sample_pages?.length || 0}
-                </Typography>
-              </Stack>
-
-              {currentPage && (
-                <Sheet variant='outlined' sx={{ p: { xs: 2, md: 3 }, borderRadius: 'md' }}>
-                  {/* Page Header */}
-                  <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 2 }}>
-                    <Typography level='title-lg' sx={{ color: 'primary.solidBg', fontWeight: 700 }}>
-                      {currentPage.title}
-                    </Typography>
-                    <Stack direction='row' spacing={1}>
-                      {currentPage.has_columns && (
-                        <Chip size='sm' variant='soft' color='success'>
-                          2 columns
-                        </Chip>
-                      )}
-                      <Chip size='sm' variant='soft'>
-                        {currentPage.word_count} words
-                      </Chip>
-                    </Stack>
-                  </Stack>
-
-                  {/* Quality indicator */}
-                  <Box sx={{ mb: 2 }}>
-                    <Stack direction='row' spacing={1} alignItems='center' sx={{ mb: 0.5 }}>
-                      <Typography level='body-xs' sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                        Extraction Quality
-                      </Typography>
-                      <Typography level='body-xs' fontWeight='bold' color={currentPage.quality_score > 70 ? 'success' : 'warning'}>
-                        {currentPage.quality_score}%
-                      </Typography>
-                    </Stack>
-                    <LinearProgress
-                      determinate
-                      value={currentPage.quality_score}
-                      color={currentPage.quality_score > 70 ? 'success' : currentPage.quality_score > 40 ? 'warning' : 'danger'}
-                      sx={{ height: 6 }}
-                    />
-                  </Box>
-
-                  {/* Full Content Preview */}
-                  <Box
-                    sx={{
-                      minHeight: 300,
-                      maxHeight: 400,
-                      overflow: 'auto',
-                      p: { xs: 2, md: 3 },
-                      backgroundColor: 'background.surface',
-                      borderRadius: 'md',
-                      border: '1px solid',
-                      borderColor: 'divider',
-                      '& p': {
-                        margin: '0.75em 0',
-                        lineHeight: 1.7,
-                        fontSize: '0.875rem',
-                        color: 'text.primary'
-                      },
-                      '& h1, & h2, & h3': {
-                        margin: '1.2em 0 0.6em 0',
-                        lineHeight: 1.4,
-                        color: 'text.primary'
-                      },
-                      '& h1': { fontSize: '1.5rem', fontWeight: 'bold' },
-                      '& h2': { fontSize: '1.25rem', fontWeight: 'bold' },
-                      '& h3': { fontSize: '1.1rem', fontWeight: 'bold' },
-                      '& strong': { fontWeight: 'bold' },
-                      '& em': { fontStyle: 'italic' },
-                      '& div[style*="grid"]': {
-                        display: 'grid !important',
-                        gridTemplateColumns: '1fr 1fr !important',
-                        gap: '2rem !important',
-                        marginTop: '1rem'
-                      },
-                      '& .column-left, & .column-right': {
-                        padding: '0.5rem',
-                        borderRight: '1px solid',
-                        borderRightColor: 'divider'
-                      },
-                      '& .column-right': {
-                        borderRight: 'none'
-                      }
-                    }}
-                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(currentPage.content_preview) }}
-                  />
-
-                  {/* Navigation Buttons */}
-                  <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mt: 2 }}>
-                    <Button
-                      variant='outlined'
-                      color='neutral'
-                      onClick={handlePrevPage}
-                      disabled={currentPageIndex === 0}
-                      startDecorator={<span>←</span>}
-                      size='sm'
-                    >
-                      Previous
-                    </Button>
-
-                    <Stack direction='row' spacing={1}>
-                      {sample_pages?.map((_, idx) => (
-                        <Box
-                          key={idx}
-                          onClick={() => setCurrentPageIndex(idx)}
-                          sx={{
-                            width: 8,
-                            height: 8,
-                            borderRadius: '50%',
-                            bgcolor: idx === currentPageIndex ? 'primary.solidBg' : 'neutral.outlinedBorder',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s',
-                            '&:hover': {
-                              transform: 'scale(1.3)',
-                              bgcolor: idx === currentPageIndex ? 'primary.solidHoverBg' : 'neutral.solidBg'
-                            }
-                          }}
-                        />
-                      ))}
-                    </Stack>
-
-                    <Button
-                      variant='outlined'
-                      color='neutral'
-                      onClick={handleNextPage}
-                      disabled={currentPageIndex === sample_pages.length - 1}
-                      endDecorator={<span>→</span>}
-                      size='sm'
-                    >
-                      Next
-                    </Button>
-                  </Stack>
-                </Sheet>
+        {preparing ? (
+          <Skeleton variant='text' level='body-sm' width='45%' />
+        ) : (
+          facts && (
+            <Stack
+              direction='row'
+              spacing={1}
+              alignItems='center'
+              flexWrap='wrap'
+              useFlexGap
+              sx={{ typography: 'body-sm', color: 'text.secondary', ...tabularNums }}
+              data-testid='import-facts'
+            >
+              <span>{t('books.lib.pages', { count: facts.pages })}</span>
+              <Dot />
+              <span>{t('books.lib.words', { count: facts.words, words: facts.words.toLocaleString() })}</span>
+              {facts.pictures > 0 && (
+                <>
+                  <Dot />
+                  <span>{t('books.import.pictures', { count: facts.pictures })}</span>
+                </>
               )}
-            </Box>
+            </Stack>
+          )
+        )}
 
-            <Divider />
+        {!preparing && facts?.scanned && (
+          <Alert color='warning' variant='soft'>
+            {t('books.import.scanned')}
+          </Alert>
+        )}
 
-            {/* Section: Extraction Quality Summary */}
-            <Box>
-              <Typography level='title-md' sx={{ mb: 2, fontWeight: 700, color: 'text.primary' }}>
-                📊 Extraction Quality Summary
-              </Typography>
-              <Sheet variant='soft' sx={{ p: 2, borderRadius: 'md' }}>
-                <Stack spacing={1.5}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography level='body-sm' sx={{ fontWeight: 600 }}>
-                      Total Words Extracted
-                    </Typography>
-                    <Typography level='body-md' fontWeight='bold' color='success'>
-                      {quality_summary?.total_words?.toLocaleString() || 0}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography level='body-sm' sx={{ fontWeight: 600 }}>
-                      Avg Words per Page
-                    </Typography>
-                    <Typography level='body-md' fontWeight='bold'>
-                      {quality_summary?.avg_words_per_page || 0}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography level='body-sm' sx={{ fontWeight: 600 }}>
-                      Total Characters
-                    </Typography>
-                    <Typography level='body-md'>{quality_summary?.total_chars?.toLocaleString() || 0}</Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography level='body-sm' sx={{ fontWeight: 600 }}>
-                      Multi-Column Pages
-                    </Typography>
-                    <Typography level='body-md' fontWeight='bold' color={quality_summary?.has_multi_column ? 'success' : 'neutral'}>
-                      {quality_summary?.has_multi_column ? `${sample_pages?.filter((p) => p.has_columns).length || 0} pages` : 'None'}
-                    </Typography>
-                  </Box>
-                </Stack>
-              </Sheet>
-            </Box>
+        <Box>
+          <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 1 }}>
+            <Typography level='title-sm'>{t('books.import.preview')}</Typography>
+            {!preparing && pages.length > 0 && (
+              <Stack direction='row' spacing={0.5} alignItems='center'>
+                <IconButton
+                  size='sm'
+                  variant='plain'
+                  color='neutral'
+                  aria-label={t('books.import.previousPage')}
+                  disabled={pageIndex === 0}
+                  onClick={() => setPageIndex((index) => Math.max(0, index - 1))}
+                  sx={focusRing}
+                >
+                  <ChevronLeftRounded />
+                </IconButton>
+                <Typography level='body-sm' sx={{ color: 'text.secondary', ...tabularNums }} aria-live='polite'>
+                  {t('books.lib.pageOf', { page: pageIndex + 1, total: totalPages })}
+                </Typography>
+                <IconButton
+                  size='sm'
+                  variant='plain'
+                  color='neutral'
+                  aria-label={t('books.import.nextPage')}
+                  disabled={pageIndex >= pages.length - 1}
+                  onClick={() => setPageIndex((index) => Math.min(pages.length - 1, index + 1))}
+                  sx={focusRing}
+                >
+                  <ChevronRightRounded />
+                </IconButton>
+              </Stack>
+            )}
           </Stack>
-        </Box>
 
-        {/* FOOTER */}
-        <Box
-          sx={{
-            px: { xs: 2, sm: 3, md: 4 },
-            py: { xs: 2, md: 3 },
-            borderTop: '1px solid',
-            borderColor: 'divider',
-            bgcolor: 'background.surface',
-            display: 'flex',
-            flexDirection: { xs: 'column-reverse', sm: 'row' },
-            justifyContent: 'space-between',
-            gap: 2
-          }}
-        >
-          <Button variant='plain' onClick={onClose} disabled={loading} size='lg' fullWidth={{ xs: true, sm: false }}>
-            Cancel
-          </Button>
-          <Button
-            startDecorator={loading ? null : <CheckCircleIcon />}
-            onClick={handleConfirm}
-            loading={loading}
-            color='success'
-            size='lg'
-            fullWidth={{ xs: true, sm: false }}
-          >
-            Confirm & Import
-          </Button>
+          <Sheet variant='outlined' sx={{ borderRadius: 'md' }}>
+            {preparing ? (
+              <Box sx={{ p: { xs: 2, md: 3 } }} data-testid='import-preparing'>
+                <Skeleton variant='text' level='title-md' width='50%' />
+                <Skeleton variant='text' level='body-sm' />
+                <Skeleton variant='text' level='body-sm' />
+                <Skeleton variant='text' level='body-sm' width='80%' />
+                <Skeleton variant='text' level='body-sm' />
+                <Skeleton variant='text' level='body-sm' width='65%' />
+              </Box>
+            ) : page?.content_preview?.trim() ? (
+              <Box sx={previewSx} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(page.content_preview) }} />
+            ) : (
+              <Typography level='body-sm' sx={{ color: 'text.tertiary', p: { xs: 2, md: 3 } }}>
+                {t('books.import.pageWithoutText')}
+              </Typography>
+            )}
+          </Sheet>
+
+          {!preparing && pages.length < totalPages && (
+            <Typography level='body-xs' sx={{ color: 'text.tertiary', mt: 1 }}>
+              {t('books.import.previewLimited', { shown: pages.length, total: totalPages })}
+            </Typography>
+          )}
         </Box>
-      </ModalDialog>
-    </Modal>
+      </Stack>
+    </FormSheet>
   )
 }

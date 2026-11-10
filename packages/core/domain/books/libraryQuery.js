@@ -35,8 +35,13 @@ export const sectionsWithoutCards = (book) => {
 export const readingPage = (book) => {
   const total = book?.page_count || 0
   if (!total) return null
+  // An import nobody has opened has no position yet. It used to read as page 1,
+  // so a one-page import was "Read" with a full bar before it was ever opened
+  // (IMPORT-015): `opened` is the fact, and an unopened document is 0 % and not done.
+  const opened = book.reading_position !== null && book.reading_position !== undefined
   const page = Math.min(Math.max((book.reading_position ?? 0) + 1, 1), total)
-  return { page, total, pct: Math.round((page / total) * 100), done: page >= total }
+  if (!opened) return { page, total, pct: 0, done: false, opened }
+  return { page, total, pct: Math.round((page / total) * 100), done: page >= total, opened }
 }
 
 /** Where Continue goes: the section for a written document, the page for an import (D2). */
