@@ -2904,6 +2904,8 @@
     "customColor": "Choisir une couleur personnalisée",
     "summaryLabel": "Résumé",
     "saveFailed": "Impossible d'enregistrer vos modifications",
+    "importedFrom": "Importé depuis {{name}}",
+    "importedDocument": "Document importé",
     "openFailed": "Ce document ne s'est pas ouvert en entier : l'enregistrement est désactivé et rien n'a été modifié. Rechargez la page.",
     "publishFailed": "Impossible de publier votre livre",
     "unpublishFailed": "Impossible de dépublier votre livre",

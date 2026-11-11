@@ -986,6 +986,8 @@
     "customColor": "カスタム色を選択",
     "summaryLabel": "概要",
     "saveFailed": "変更を保存できませんでした",
+    "importedFrom": "{{name}} から読み込み",
+    "importedDocument": "読み込んだドキュメント",
     "openFailed": "このドキュメントは完全に開けなかったため、保存を停止しました。内容は変更されていません。ページを再読み込みしてください。",
     "publishFailed": "本を公開できませんでした",
     "unpublishFailed": "本の公開を解除できませんでした",

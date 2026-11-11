@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { importFactsLine } from '@nowry/core/domain/books/importFacts'
 import { Box, Button, Stack, Typography } from '@mui/joy'
 import { Public as PublicIcon, PublicOff as PublicOffIcon } from '@mui/icons-material'
 
@@ -94,6 +95,8 @@ export default function BookEditSheet({ book, open = true, onSaved, onClose }) {
         open={open}
         onClose={onClose}
         titleKey='books.editTitle'
+        // An import says where it came from, in the reader's language (ADR-067).
+        subtitleText={importFactsLine(t, book)}
         width='simple'
         headerAccessory={<BookHeaderPreview coverColor={form.values.coverColor} coverImage={form.values.coverImage} />}
         banner={failure ? <FormErrorBanner titleKey={failure.key} detailText={failure.detail} /> : null}

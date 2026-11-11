@@ -1389,6 +1389,8 @@
     "customColor": "Elegir un color personalizado",
     "summaryLabel": "Resumen",
     "saveFailed": "No se pudieron guardar tus cambios",
+    "importedFrom": "Importado de {{name}}",
+    "importedDocument": "Documento importado",
     "openFailed": "Este documento no se abrió completo, así que el guardado está desactivado y no se cambió nada. Recarga la página.",
     "publishFailed": "No se pudo publicar tu libro",
     "unpublishFailed": "No se pudo despublicar tu libro",

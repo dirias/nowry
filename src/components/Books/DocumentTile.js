@@ -5,6 +5,7 @@ import { focusRing, measureFill, measureTrack, oneLine, readout, tabularNums } f
 import { MOTION } from '@nowry/core/tokens/tokens'
 import CoverMark from './CoverMark'
 import { cardsReadout, measureOf, metaLine } from '@nowry/core/domain/books/documentCopy'
+import { chosenCoverColor } from '@nowry/core/domain/books/importFacts'
 
 /**
  * The grid tile: the row stacked (docs/prd-books-library.md D5). A 48×68 mark
@@ -70,7 +71,7 @@ export default function DocumentTile({ book, isContinue = false, relative, usern
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
           {pct != null && (
             <Box sx={{ ...measureTrack, width: 'auto', flex: 1 }} aria-hidden='true'>
-              <Box sx={measureFill(pct, book.cover_color || 'primary.solidBg')} />
+              <Box sx={measureFill(pct, chosenCoverColor(book) || 'primary.solidBg')} />
             </Box>
           )}
           <Typography level='body-sm' sx={{ ...readout, color: 'text.secondary', flexShrink: 0, ...tabularNums }}>

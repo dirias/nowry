@@ -31,6 +31,7 @@ import { View } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { COVER_PRESETS } from '@nowry/core/constants/bookCovers'
 import useBookForm from '@nowry/core/hooks/useBookForm'
+import { importFactsLine } from '@nowry/core/domain/books/importFacts'
 import { publicContentService } from '@nowry/core/api/services'
 import { isPublished, publishBlockKeyFor } from '@nowry/core/domain/publishListing'
 import { describeApiError } from '@nowry/core/utils/formUtils'
@@ -133,6 +134,13 @@ export function BookDetailsSheet({ book, open, onSaved, onPublished, onClose }) 
           <View style={{ alignItems: 'flex-start' }}>
             <CoverMark book={preview} width={48} ground='background.surface' />
           </View>
+
+          {/* An import says where it came from, in the reader's language (ADR-067). */}
+          {importFactsLine(t, book) ? (
+            <Typography level='body-sm' color='text.tertiary'>
+              {importFactsLine(t, book)}
+            </Typography>
+          ) : null}
 
           {form.saveError ? (
             <Typography level='body-sm' color='danger.plainColor' accessibilityLiveRegion='polite'>

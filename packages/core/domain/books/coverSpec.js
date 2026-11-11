@@ -21,6 +21,7 @@
  * other does not have — which is the drift this exists to prevent.
  */
 import { coverage, kindOf } from './libraryQuery'
+import { chosenCoverColor } from './importFacts'
 
 /** A cover is always taller than wide, in a book's own proportion. */
 export const COVER_RATIO = 1.42
@@ -105,7 +106,7 @@ export function coverOf(book, { ribbon = false, public: isPublic = false } = {})
   const { lines, filled } = coverLines(book, { public: isPublic })
   return {
     shape: coverShape(book),
-    color: book?.cover_color || null,
+    color: chosenCoverColor(book),
     image: book?.cover_image || null,
     lines,
     filled,

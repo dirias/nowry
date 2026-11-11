@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react'
 
 import { booksService } from '../api/services'
+import { chosenCoverColor, ownSummary } from '../domain/books/importFacts'
 import { parseTagInput } from '../utils/formUtils'
 import useFormCore from './useFormCore'
 
@@ -31,7 +32,8 @@ const GROUPS = ['cover', 'tags', 'summary']
 const HAS_CONTENT = {
   cover: (book) => Boolean(book?.cover_image),
   tags: (book) => Boolean(book?.tags?.length),
-  summary: (book) => Boolean(book?.summary)
+  // Not the sentence an older import stored in the field (ADR-067).
+  summary: (book) => Boolean(ownSummary(book))
 }
 
 /**
@@ -61,9 +63,9 @@ const useBookForm = ({ open, book, defaultCoverColor, onSaved, onClose, focusCon
   const toFormState = useCallback(
     (entity) => ({
       title: entity.title || '',
-      coverColor: entity.cover_color || fallbackColor.current,
+      coverColor: chosenCoverColor(entity) || fallbackColor.current,
       coverImage: entity.cover_image || '',
-      summary: entity.summary || '',
+      summary: ownSummary(entity),
       tags: entity.tags || []
     }),
     []

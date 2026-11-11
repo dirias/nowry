@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { listRow, measureFill, measureTrack, oneLine, readout, tabularNums } from '../Common/Form/formStyles'
 import CoverMark from './CoverMark'
 import { cardsReadout, measureOf, metaLine } from '@nowry/core/domain/books/documentCopy'
+import { chosenCoverColor } from '@nowry/core/domain/books/importFacts'
 
 /**
  * One document as one row (ADR-021 §15.11; docs/prd-books-library.md D5–D8):
@@ -45,7 +46,7 @@ export default function DocumentRow({ book, isContinue = false, relative, userna
         {pct != null && (
           <>
             <Box sx={measureTrack}>
-              <Box sx={measureFill(pct, book.cover_color || 'primary.solidBg')} />
+              <Box sx={measureFill(pct, chosenCoverColor(book) || 'primary.solidBg')} />
             </Box>
             <Typography level='body-xs' sx={{ ...readout, fontSize: 'xs', width: 34, textAlign: 'right' }}>
               {`${pct}%`}

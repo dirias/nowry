@@ -1763,6 +1763,8 @@
     "customColor": "Choose a custom colour",
     "summaryLabel": "Summary",
     "saveFailed": "Couldn't save your changes",
+    "importedFrom": "Imported from {{name}}",
+    "importedDocument": "Imported document",
     "openFailed": "This document did not open completely, so saving is off and nothing was changed. Reload the page.",
     "publishFailed": "Couldn't publish your book",
     "unpublishFailed": "Couldn't unpublish your book",

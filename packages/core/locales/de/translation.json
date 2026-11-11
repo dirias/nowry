@@ -2893,6 +2893,8 @@
     "customColor": "Eigene Farbe wählen",
     "summaryLabel": "Zusammenfassung",
     "saveFailed": "Deine Änderungen konnten nicht gespeichert werden",
+    "importedFrom": "Importiert aus {{name}}",
+    "importedDocument": "Importiertes Dokument",
     "openFailed": "Dieses Dokument wurde nicht vollständig geöffnet. Das Speichern ist deaktiviert und nichts wurde geändert. Lade die Seite neu.",
     "publishFailed": "Dein Buch konnte nicht veröffentlicht werden",
     "unpublishFailed": "Die Veröffentlichung konnte nicht aufgehoben werden",
