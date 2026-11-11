@@ -851,8 +851,6 @@
   "books": {
     "title": "ブック",
     "lib": {
-      "limitReadout": "ブック {{count}} / {{limit}} 冊 · {{plan}} なら {{next}}",
-      "unlimited": "無制限",
       "kindAria": "表示するドキュメント",
       "kind": {
         "all": "すべて",

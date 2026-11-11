@@ -1191,8 +1191,6 @@
   },
   "books": {
     "lib": {
-      "limitReadout": "{{count}} de {{limit}} libros · {{plan}} para {{next}}",
-      "unlimited": "ilimitados",
       "kindAria": "Qué documentos mostrar",
       "kind": {
         "all": "Todos",

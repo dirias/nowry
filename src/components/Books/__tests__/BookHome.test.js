@@ -107,11 +107,12 @@ describe('BookHome (BOOK-008)', () => {
     expect(screen.getByTestId('documents-kind')).toHaveTextContent('books.lib.kind.imported1')
   })
 
-  it('at the plan limit the title row carries the readout, and Add still opens (D3)', () => {
+  it('states no book limit on any plan: there is none (ADR-041, ADR-067)', () => {
     mockTier = 'free'
-    mockUseBooks.mockReturnValue({ books: [BOOKS[0], BOOKS[1], { ...BOOKS[0], _id: 'x' }], loading: false, error: null, reload: jest.fn() })
+    mockUseBooks.mockReturnValue({ books: [BOOKS[0], BOOKS[1], { ...BOOKS[0], _id: 'x' }, { ...BOOKS[0], _id: 'y' }], loading: false, error: null, reload: jest.fn() })
     renderPage()
-    expect(screen.getByTestId('book-limit')).toHaveTextContent('books.lib.limitReadout:3')
+    expect(screen.queryByTestId('book-limit')).toBeNull()
+    expect(document.body).not.toHaveTextContent(/limitReadout/)
     expect(screen.getByRole('button', { name: 'books.lib.addAria' })).toBeInTheDocument()
   })
 

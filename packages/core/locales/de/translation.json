@@ -2699,8 +2699,6 @@
   "books": {
     "title": "Bücher",
     "lib": {
-      "limitReadout": "{{count}} von {{limit}} Büchern · {{plan}} für {{next}}",
-      "unlimited": "unbegrenzt",
       "kindAria": "Welche Dokumente anzeigen",
       "kind": {
         "all": "Alle",

@@ -92,7 +92,6 @@ const GOVERNS_NOTHING = {
    * string is. Recorded rather than half-fixed.
    */
   'the noun agrees with another number': [
-    'books.lib.limitReadout',
     'aiMagic.streaming.progress',
     'pomodoro.cycleProgress',
     'pomodoro.status.breakQueued',

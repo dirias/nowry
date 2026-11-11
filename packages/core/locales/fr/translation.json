@@ -2710,8 +2710,6 @@
   "books": {
     "title": "Livres",
     "lib": {
-      "limitReadout": "{{count}} livres sur {{limit}} · {{plan}} pour {{next}}",
-      "unlimited": "illimité",
       "kindAria": "Quels documents afficher",
       "kind": {
         "all": "Tous",

@@ -24,7 +24,6 @@ import DocumentTile from './DocumentTile'
 import DocumentActionsMenu from './DocumentActionsMenu'
 import DeleteDocumentDialog from './DeleteDocumentDialog'
 import { resumeHref } from '@nowry/core/domain/books/libraryQuery'
-import { BOOK_LIMITS, NEXT_PLAN, bookLimitFor } from '../../config/planLimits'
 import { duplicateOf, importRefusal, rejectedFileRefusal } from '@nowry/core/domain/books/importRefusal'
 import DuplicateImportsDialog from './DuplicateImportsDialog'
 
@@ -109,12 +108,6 @@ export default function BookHome() {
   useEffect(() => {
     if (fetchError) setErrorMessage((current) => (Array.isArray(current) && current.length ? current : t('books.lib.loadError')))
   }, [fetchError, t])
-
-  // The plan's book limit shows only when reached (D3): a readout on the title row,
-  // never a gate — Add still opens and lands on the create sheet's plan-limit case.
-  const limit = bookLimitFor(tier)
-  const atLimit = !loading && Number.isFinite(limit) && libraryCount >= limit
-  const nextPlan = NEXT_PLAN[tier]
 
   const openCreate = useCallback(() => setShowCreate(true), [])
   const openDocument = useCallback((book, extra) => navigate(resumeHref(book, extra)), [navigate])
@@ -347,16 +340,6 @@ export default function BookHome() {
           <Typography level='h2' component='h1'>
             {t('books.title')}
           </Typography>
-          {atLimit && (
-            <Typography level='body-sm' sx={{ ...readout, color: 'text.secondary' }} data-testid='book-limit'>
-              {t('books.lib.limitReadout', {
-                count: libraryCount,
-                limit,
-                plan: t(`plans.${nextPlan}`),
-                next: Number.isFinite(BOOK_LIMITS[nextPlan]) ? BOOK_LIMITS[nextPlan] : t('books.lib.unlimited')
-              })}
-            </Typography>
-          )}
         </Stack>
         <AddMenu onNew={openCreate} onImport={openFilePicker} />
       </Box>

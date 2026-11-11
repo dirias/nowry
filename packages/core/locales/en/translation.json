@@ -1562,8 +1562,6 @@
   },
   "books": {
     "lib": {
-      "limitReadout": "{{count}} of {{limit}} books · {{plan}} for {{next}}",
-      "unlimited": "unlimited",
       "kindAria": "Which documents to show",
       "kind": {
         "all": "All",
