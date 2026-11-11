@@ -62,6 +62,12 @@ light and dark. Never greyscale, never a filter that only works on one ground.
 
 - **An evolution is a full-screen reveal** (EVO-003): the old form, a flash of gold, the new form
   larger, its name. A level-up without a new form is the small toast.
+- **The reveal is staged with the spiral** (ADR-075, EVO-011..015): a line of light in the accent's
+  plain colour draws around the old form, tightens with a few motes, closes into the gold flash,
+  and opens as the new form arrives. It is an effect, not anatomy, so it serves any form. A new
+  portrait plays the same sequence and then says how many are left this month; a portrait already
+  made plays a one-second version. Both clients read one timeline. Preview: `/__evolution` on the
+  web's dev server, the harness on the phone's dev build.
 - **The journey** shows all six forms in a row, each bigger than the last, reached ones in colour.
 
 ## 7. Checklist for a generated set

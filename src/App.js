@@ -40,6 +40,8 @@ import StudyPet from './components/Agent/StudyPet'
 const Landing = lazy(() => import('./components/HomePage/Landing'))
 const Contact = lazy(() => import('./components/HomePage/Contact'))
 const PricingPage = lazy(() => import('./components/HomePage/PricingPage'))
+// A development tool (EVO-015): outside a production build only, so the bundle that ships never holds it.
+const EvolutionPreview = process.env.NODE_ENV === 'production' ? null : lazy(() => import('./components/Agent/EvolutionPreview'))
 const Login = lazy(() => import('./components/User/Login'))
 const Register = lazy(() => import('./components/User/Register'))
 const ResetPassword = lazy(() => import('./components/User/ResetPassword'))
@@ -171,6 +173,7 @@ const AppContent = () => {
               <Route path='/contact' element={<Contact />} />
               {/* The early-access sentence while prices are hidden (ADR-073). */}
               <Route path='/pricing' element={<PricingPage />} />
+              {EvolutionPreview && <Route path='/__evolution' element={<EvolutionPreview />} />}
               <Route path='/browse' element={<PublicBrowse />} />
               <Route path='/public/:type/:id' element={<PublicView />} />
 

@@ -47,9 +47,19 @@ const ENTER = { duration: seconds(MOTION.duration.slow), ease: [0.2, 0, 0, 1] }
 /** How long the short variant rests on the new portrait before closing itself. */
 const REST_MS = 3 * MOTION.duration.slow
 
-const EvolutionReveal = ({ kind = EVOLUTION_KIND.stage, fromStage, toStage, level, generationsRemaining, renderForm, onClose }) => {
+const EvolutionReveal = ({
+  kind = EVOLUTION_KIND.stage,
+  fromStage,
+  toStage,
+  level,
+  generationsRemaining,
+  renderForm,
+  onClose,
+  reducedMotion = false
+}) => {
   const { t, i18n } = useTranslation()
-  const reduceMotion = useReducedMotion()
+  // The system's setting, or the preview's switch standing in for it (EVO-015).
+  const reduceMotion = useReducedMotion() || reducedMotion
   const gold = earnedGold(useTheme().palette.mode)
   const titleId = useId()
   const variant = evolutionVariant(kind)

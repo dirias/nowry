@@ -66,6 +66,20 @@ Under `prefers-reduced-motion: reduce`:
   stories at once. One moving thing per moment.
 - Do not add a page-load animation. The first frame is the page.
 
+### The one exception: an evolution (ADR-075)
+
+When the companion changes form, or a new portrait is made, the reveal is staged over about three
+seconds: a spiral draws, tightens, closes into a flash and opens again. Nothing else in the product
+may run this long or move this much. Its limits:
+
+- The timeline is data (`@nowry/core/domain/petEvolution.js`): every beat is a whole number of the
+  scale's steps, and no component writes a duration.
+- One thing moves at a time. While the spiral is on screen the companion holds still; its own
+  entrance comes after the spiral has gone.
+- One line and at most eight motes. No confetti, shake or sound.
+- A tap skips to the end. Under reduced motion the sequence does not play: the new form is there.
+- On the phone a beat ends when its own animation does, never on a separate clock.
+
 ## 6. References
 
 - `DESIGN_GUIDELINES.md` §14.4 (parallax on book cards — the one place a longer, physical motion
