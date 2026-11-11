@@ -52,6 +52,8 @@ export default function BookHome() {
   const [showCreate, setShowCreate] = useState(false)
   const [bookToEdit, setBookToEdit] = useState(null)
   const [errorMessage, setErrorMessage] = useState('')
+  // Where focus goes when a failure window closes: the sheet it came from is gone by then (IMPORT-051).
+  const addButtonRef = useRef(null)
   const [toast, setToast] = useState(null)
 
   // Import: preview first, then confirm (unchanged flow behind a new surface)
@@ -346,7 +348,7 @@ export default function BookHome() {
             {t('books.title')}
           </Typography>
         </Stack>
-        <AddMenu onNew={openCreate} onImport={openFilePicker} />
+        <AddMenu onNew={openCreate} onImport={openFilePicker} buttonRef={addButtonRef} />
       </Box>
 
       {/* The summary object (D1, D2, D12): where you were, and what your notes owe the deck. */}
@@ -540,6 +542,7 @@ export default function BookHome() {
               : errorMessage
           }
           onClose={() => setErrorMessage('')}
+          returnFocusRef={addButtonRef}
         />
       )}
     </Container>

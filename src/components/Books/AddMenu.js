@@ -11,11 +11,12 @@ import { focusRing } from '../Common/Form/formStyles'
  * "Add ▾" on the title row (docs/prd-books-library.md D3): the two ways a
  * document enters the library, always both, as one secondary key.
  */
-export default function AddMenu({ onNew, onImport }) {
+export default function AddMenu({ onNew, onImport, buttonRef }) {
   const { t } = useTranslation()
   return (
     <Dropdown>
       <MenuButton
+        ref={buttonRef}
         variant='soft'
         color='neutral'
         startDecorator={<AddRounded />}

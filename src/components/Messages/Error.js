@@ -1,11 +1,31 @@
 import React from 'react'
 import { Modal, ModalDialog, DialogContent, Typography, Stack, Button, Box } from '@mui/joy'
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
+import { useTranslation } from 'react-i18next'
 
-const ErrorWindow = ({ title, error_msg, onClose }) => {
+/**
+ * The window a failure is said in.
+ *
+ * It interrupts, so it is an `alertdialog`: a screen reader announces its title
+ * and its message when it opens, focus lands on its one key, and when it closes
+ * focus goes back to `returnFocusRef` — the control the reader was using — when
+ * the element that had it is gone, as the import sheet is by then (IMPORT-051).
+ */
+const ErrorWindow = ({ title, error_msg, onClose, returnFocusRef }) => {
+  const { t } = useTranslation()
+  const titleId = React.useId()
+  const messageId = React.useId()
+  const close = (...args) => {
+    onClose?.(...args)
+    // After the modal has let go of focus, or its own restore would win.
+    if (returnFocusRef?.current) setTimeout(() => returnFocusRef.current?.focus(), 0)
+  }
   return (
-    <Modal open={true} onClose={onClose}>
+    <Modal open={true} onClose={close}>
       <ModalDialog
+        role='alertdialog'
+        aria-labelledby={titleId}
+        aria-describedby={messageId}
         variant='outlined'
         sx={{
           width: { xs: '90%', sm: 440 },
@@ -43,6 +63,7 @@ const ErrorWindow = ({ title, error_msg, onClose }) => {
               <ErrorOutlineIcon sx={{ fontSize: 22 }} />
             </Box>
             <Typography
+              id={titleId}
               level='title-lg'
               sx={{
                 m: 0,
@@ -59,7 +80,7 @@ const ErrorWindow = ({ title, error_msg, onClose }) => {
 
         {/* Content */}
         <DialogContent sx={{ px: 3, py: 3 }}>
-          <Typography level='body-md' sx={{ color: 'text.primary', lineHeight: 1.6 }}>
+          <Typography id={messageId} level='body-md' sx={{ color: 'text.primary', lineHeight: 1.6 }}>
             {error_msg}
           </Typography>
         </DialogContent>
@@ -76,8 +97,8 @@ const ErrorWindow = ({ title, error_msg, onClose }) => {
             justifyContent: 'flex-end'
           }}
         >
-          <Button variant='solid' color='primary' onClick={onClose} size='lg' sx={{ minWidth: 100 }}>
-            OK
+          <Button autoFocus variant='solid' color='primary' onClick={close} size='lg' sx={{ minWidth: 100 }}>
+            {t('common.close')}
           </Button>
         </Box>
       </ModalDialog>
