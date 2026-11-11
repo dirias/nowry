@@ -9,6 +9,7 @@ import themeConfig from './theme'
 import { components } from './components'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@nowry/core/context/AuthContext'
+import { clearStoredAccent, readStoredAccent, storeAccent, wearsBrand } from './accentStore'
 
 // Context to allow other components to update theme settings
 export const ThemePreferencesContext = createContext({
@@ -98,8 +99,11 @@ export const buildDynamicTheme = (themeColor, { brand = false } = {}) => {
 }
 
 export const DynamicThemeProvider = ({ children }) => {
-  const [themeColor, setThemeColor] = useState(DEFAULT_ACCENT)
-  const { user } = useAuth()
+  // The accent this device remembers, read once and before the first render,
+  // so a member's reload does not start in the guest's colours (ADR-074 §3).
+  const [storedAccent] = useState(readStoredAccent)
+  const [themeColor, setThemeColor] = useState(storedAccent ?? DEFAULT_ACCENT)
+  const { user, loading } = useAuth()
   const { i18n } = useTranslation()
 
   // Update theme when user changes.
@@ -118,8 +122,18 @@ export const DynamicThemeProvider = ({ children }) => {
   }, [user, i18n])
 
   // Generate dynamic theme based on color
+  // Remember the accent while someone is signed in; forget it when the session
+  // is known to be empty, which is what signing out leaves.
+  useEffect(() => {
+    if (user) storeAccent(themeColor)
+    else if (!loading) {
+      clearStoredAccent()
+      setThemeColor(DEFAULT_ACCENT)
+    }
+  }, [user, loading, themeColor])
+
   // A guest wears the brand; a member wears their accent (ADR-074 §3).
-  const isGuest = !user
+  const isGuest = wearsBrand({ user, loading, storedAccent })
   const dynamicTheme = useMemo(() => buildDynamicTheme(themeColor, { brand: isGuest }), [themeColor, isGuest])
 
   // Context value

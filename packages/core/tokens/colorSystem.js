@@ -250,7 +250,9 @@ export function categoryColors({ h, C }, mode) {
   if (mode === 'light') {
     return { dot: oklchToHex(0.64, C, h), tint: oklchToHex(0.945, Math.min(C * 0.3, 0.035), h), ink: oklchToHex(0.4, C * 0.7, h) }
   }
-  return { dot: oklchToHex(0.72, C * 0.95, h), tint: oklchToHex(0.27, Math.min(C * 0.33, 0.04), h), ink: oklchToHex(0.88, C * 0.5, h) }
+  // On the teal grounds (ADR-074) a tint sits above a card and a raised panel
+  // (L 0.335, 0.37), as the tones' soft tints do, never below them.
+  return { dot: oklchToHex(0.78, C * 0.95, h), tint: oklchToHex(0.43, Math.min(C * 0.45, 0.055), h), ink: oklchToHex(0.94, C * 0.4, h) }
 }
 
 /** The stored swatch for a category id: its light dot. */

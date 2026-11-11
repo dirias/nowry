@@ -1,6 +1,7 @@
-import { BRAND, CATEGORY_COLORS, CATEGORY_SPEC, categoryColors, categoryDot } from '../colorSystem'
+import { BRAND, CATEGORY_COLORS, CATEGORY_SPEC, NEUTRALS, categoryColors, categoryDot } from '../colorSystem'
+import { STICKY_PALETTE } from '../colorSchemeGenerator'
 import { FOCUS_AREA_COLORS, nextFocusAreaColor } from '../../domain/focusAreas'
-import { contrastRatio } from '../oklch'
+import { contrastRatio, relativeLuminance } from '../oklch'
 
 describe('the category family (ADR-034)', () => {
   // Focus areas and book covers STORE these hex values. Pinned so a moved
@@ -14,6 +15,27 @@ describe('the category family (ADR-034)', () => {
     for (const spec of CATEGORY_SPEC) {
       const { ink, tint } = categoryColors(spec, mode)
       expect(contrastRatio(ink, tint)).toBeGreaterThanOrEqual(4.5)
+    }
+  })
+
+  it('stands every dark tint and dot off the teal grounds (ADR-074)', () => {
+    const { background } = NEUTRALS.dark
+    for (const spec of CATEGORY_SPEC) {
+      const { dot, tint } = categoryColors(spec, 'dark')
+      for (const ground of ['body', 'surface', 'level1']) {
+        expect(relativeLuminance(tint)).toBeGreaterThan(relativeLuminance(background[ground]))
+        expect(contrastRatio(dot, background[ground])).toBeGreaterThanOrEqual(3)
+      }
+      expect(contrastRatio(dot, tint)).toBeGreaterThanOrEqual(3)
+    }
+  })
+
+  it('keeps a sticky note readable in both modes', () => {
+    for (const mode of ['light', 'dark']) {
+      for (const { bg, border, text } of Object.values(STICKY_PALETTE[mode])) {
+        expect(contrastRatio(text, bg)).toBeGreaterThanOrEqual(4.5)
+        expect(contrastRatio(border, bg)).toBeGreaterThanOrEqual(mode === 'dark' ? 3 : 1.5)
+      }
     }
   })
 

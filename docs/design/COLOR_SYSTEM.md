@@ -66,6 +66,10 @@ fixed, move the hue, and contrast stays put. That is the whole guarantee.
 - **The brand tone** (`brandTone`, `generateBrandScheme`) is what a guest wears: Ink Teal solids
   and `#155157` links on paper; Coil Gold solids with ink text and gold links on teal. Signed in,
   the primary is the learner's and gold means earned.
+- **Categories in dark** sit above the teal grounds like the soft tints: tint L 0.43, dot L 0.78,
+  ink L 0.94. Sticky notes are drawn from them.
+- **The member's accent is remembered on the device** (`src/theme/accentStore.js`), so a reload
+  starts in it; it is cleared when the session is empty.
 - **Links and coloured text** read a tone's plain colour: the web theme points Joy's `mainChannel`
   at `plainColor`, since Joy would otherwise draw them from the 500 step (3.4:1 on paper).
 - **The accent is normalised** (`accentTone`): the learner's hue, their chroma capped at 0.13, the
