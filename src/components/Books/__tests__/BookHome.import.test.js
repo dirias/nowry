@@ -121,6 +121,16 @@ describe('BookHome import', () => {
     expect(screen.queryByTestId('preview')).toBeNull()
   })
 
+  it('says so when a document was imported without some of its pictures (ADR-071)', async () => {
+    renderPage()
+    mockImportFile.mockResolvedValue({ title: 'scan' })
+    await act(() => mockDropzone.onDrop([file('scan.pdf')], []))
+    mockImportFile.mockReset().mockResolvedValue({ _id: 'b1', pictures_dropped: 2 })
+    await act(() => mockPreview.onConfirm('scan'))
+    expect(screen.getByText('books.lib.importedToast:1')).toBeInTheDocument()
+    expect(screen.getByRole('alert')).toHaveTextContent('books.import.picturesDropped(scan.pdf)')
+  })
+
   it('opens the sheet while the first file is still being read, and closes it if nothing can be', async () => {
     let answer
     mockImportFile.mockImplementation(() => new Promise((resolve, reject) => (answer = { resolve, reject })))

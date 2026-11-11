@@ -1699,6 +1699,10 @@
       "empty": "{{name}} has no text to import.",
       "passwordProtected": "{{name}} is password-protected. Remove the password and import it again.",
       "unreadable": "{{name}} could not be read. The file may be damaged.",
+      "tooComplex": "{{name}} is too large or too complex for Nowry to read. Try splitting it into smaller files.",
+      "picturesNotStored": "{{name}} is made of pictures, and they could not be stored, so nothing was imported. Very large pictures cannot be kept.",
+      "picturesDropped_one": "{{name}} was imported, but {{count}} picture could not be stored and is missing.",
+      "picturesDropped_other": "{{name}} was imported, but {{count}} pictures could not be stored and are missing.",
       "tooLarge": "{{name}} is over the {{limit}} MB limit.",
       "notReached": "Nowry could not be reached, so {{name}} was not imported. Check your connection and try again.",
       "failed": "{{name}} could not be imported. Please try again.",
@@ -2281,6 +2285,7 @@
       "upgradeAdvice": "Please upgrade your plan in Settings.",
       "aiLimitReached": "You've used this month's {{limit}} AI generations. More on Plus, or next month.",
       "documentTooLong": "This document is over the {{limit}}-word ceiling. Split it into two.",
+      "documentTooLarge": "This document is over the {{limit}} MB size ceiling. Split it into two.",
       "ttsLimitReached": "You've reached this month's read-aloud allowance."
     },
     "title": "Subscription & Billing",

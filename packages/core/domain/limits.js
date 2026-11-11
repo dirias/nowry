@@ -8,11 +8,14 @@
  */
 export const AI_LIMIT_REACHED_CODE = 'ai_limit_reached'
 export const DOCUMENT_TOO_LONG_CODE = 'document_too_long'
+// ADR-071: the stored size has a ceiling too; 190,000 very long words are under the word one.
+export const DOCUMENT_TOO_LARGE_CODE = 'document_too_large'
 export const TTS_LIMIT_REACHED_CODE = 'tts_limit_reached'
 
 const KEY_BY_CODE = Object.freeze({
   [AI_LIMIT_REACHED_CODE]: 'subscription.errors.aiLimitReached',
   [DOCUMENT_TOO_LONG_CODE]: 'subscription.errors.documentTooLong',
+  [DOCUMENT_TOO_LARGE_CODE]: 'subscription.errors.documentTooLarge',
   [TTS_LIMIT_REACHED_CODE]: 'subscription.errors.ttsLimitReached'
 })
 

@@ -1328,6 +1328,10 @@
       "empty": "{{name}} no tiene texto que importar.",
       "passwordProtected": "{{name}} está protegido con contraseña. Quita la contraseña y vuelve a importarlo.",
       "unreadable": "No se pudo leer {{name}}. Puede que el archivo esté dañado.",
+      "tooComplex": "{{name}} es demasiado grande o complejo para que Nowry lo lea. Prueba a dividirlo en archivos más pequeños.",
+      "picturesNotStored": "{{name}} está formado por imágenes y no se pudieron guardar, así que no se importó nada. Las imágenes muy grandes no se pueden conservar.",
+      "picturesDropped_one": "{{name}} se importó, pero {{count}} imagen no se pudo guardar y falta.",
+      "picturesDropped_other": "{{name}} se importó, pero {{count}} imágenes no se pudieron guardar y faltan.",
       "tooLarge": "{{name}} supera el límite de {{limit}} MB.",
       "notReached": "No se pudo conectar con Nowry, así que {{name}} no se importó. Revisa tu conexión e inténtalo de nuevo.",
       "failed": "No se pudo importar {{name}}. Inténtalo de nuevo.",
@@ -1910,6 +1914,7 @@
       "upgradeAdvice": "Por favor mejora tu plan en Configuración.",
       "aiLimitReached": "Has usado las {{limit}} generaciones con IA de este mes. Más con Plus, o el mes que viene.",
       "documentTooLong": "Este documento supera el límite de {{limit}} palabras. Divídelo en dos.",
+      "documentTooLarge": "Este documento supera el límite de tamaño de {{limit}} MB. Divídelo en dos.",
       "ttsLimitReached": "Has alcanzado la lectura en voz alta disponible este mes."
     },
     "title": "Suscripción y facturación",

@@ -1026,6 +1026,10 @@
       "empty": "{{name}} には読み込めるテキストがありません。",
       "passwordProtected": "{{name}} はパスワードで保護されています。パスワードを解除してから、もう一度読み込んでください。",
       "unreadable": "{{name}} を読み取れませんでした。ファイルが壊れている可能性があります。",
+      "tooComplex": "{{name}} は大きすぎるか複雑すぎるため、Nowry では読み取れません。小さなファイルに分けてお試しください。",
+      "picturesNotStored": "{{name}} は画像でできており、その画像を保存できなかったため、何も読み込まれませんでした。非常に大きな画像は保存できません。",
+      "picturesDropped_one": "{{name}} を読み込みましたが、画像 {{count}} 枚を保存できなかったため欠けています。",
+      "picturesDropped_other": "{{name}} を読み込みましたが、画像 {{count}} 枚を保存できなかったため欠けています。",
       "tooLarge": "{{name}} は {{limit}} MB の上限を超えています。",
       "notReached": "Nowry に接続できなかったため、{{name}} は読み込まれませんでした。接続を確認して、もう一度お試しください。",
       "failed": "{{name}} を読み込めませんでした。もう一度お試しください。",
@@ -2861,6 +2865,7 @@
       "limitReached": "プランの上限に達しました。",
       "aiLimitReached": "今月の AI 生成 {{limit}} 回を使い切りました。Plus ならもっと、または来月にどうぞ。",
       "documentTooLong": "この文書は {{limit}} 語の上限を超えています。二つに分けてください。",
+      "documentTooLarge": "この文書は {{limit}} MB のサイズ上限を超えています。二つに分けてください。",
       "ttsLimitReached": "今月の読み上げ上限に達しました。"
     },
     "usage": {

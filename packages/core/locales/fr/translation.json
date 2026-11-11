@@ -2847,6 +2847,10 @@
       "empty": "{{name}} ne contient aucun texte à importer.",
       "passwordProtected": "{{name}} est protégé par un mot de passe. Retirez le mot de passe et importez-le de nouveau.",
       "unreadable": "Impossible de lire {{name}}. Le fichier est peut-être endommagé.",
+      "tooComplex": "{{name}} est trop volumineux ou trop complexe pour que Nowry le lise. Essayez de le diviser en fichiers plus petits.",
+      "picturesNotStored": "{{name}} est composé d'images qui n'ont pas pu être enregistrées ; rien n'a donc été importé. Les très grandes images ne peuvent pas être conservées.",
+      "picturesDropped_one": "{{name}} a été importé, mais {{count}} image n'a pas pu être enregistrée et manque.",
+      "picturesDropped_other": "{{name}} a été importé, mais {{count}} images n'ont pas pu être enregistrées et manquent.",
       "tooLarge": "{{name}} dépasse la limite de {{limit}} Mo.",
       "notReached": "Impossible de joindre Nowry : {{name}} n'a pas été importé. Vérifiez votre connexion et réessayez.",
       "failed": "Impossible d'importer {{name}}. Veuillez réessayer.",
@@ -2993,6 +2997,7 @@
       "limitReached": "Limite atteinte pour votre forfait.",
       "aiLimitReached": "Vous avez utilisé les {{limit}} générations par l'IA de ce mois. Plus avec Plus, ou le mois prochain.",
       "documentTooLong": "Ce document dépasse le plafond de {{limit}} mots. Coupez-le en deux.",
+      "documentTooLarge": "Ce document dépasse le plafond de taille de {{limit}} Mo. Coupez-le en deux.",
       "ttsLimitReached": "Vous avez atteint la lecture à voix haute disponible ce mois-ci."
     },
     "usage": {

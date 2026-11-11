@@ -193,7 +193,12 @@ export default function BookHome() {
         // Which file of how many: a long drop used to show a spinner and nothing else.
         if (mountedRef.current) setImportProgress({ done: index, total: files.length, name: file.name })
         try {
-          imported.push(await booksService.importFile(file, username || 'Unknown', false, title, onDuplicate))
+          const saved = await booksService.importFile(file, username || 'Unknown', false, title, onDuplicate)
+          imported.push(saved)
+          // ADR-071: it is in, and some of its pictures are not. Say which file, and how many.
+          if (saved?.pictures_dropped > 0) {
+            failures.push(t('books.import.picturesDropped', { name: file.name, count: saved.pictures_dropped }))
+          }
         } catch (error) {
           const existing = duplicateOf(error)
           if (existing) duplicates.push({ file, existing })

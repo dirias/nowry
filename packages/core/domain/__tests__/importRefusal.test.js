@@ -38,6 +38,21 @@ describe('importRefusal', () => {
     expect(result).toEqual({ key: 'subscription.errors.documentTooLong', options: { limit: 200000, name: 'long.txt' } })
   })
 
+  it('uses the size ceiling sentence for a document the database could not hold (ADR-071)', () => {
+    const result = importRefusal(refused(413, { code: 'document_too_large', limit: 12, megabytes: 20.6 }), 'hex.txt')
+    expect(result).toEqual({ key: 'subscription.errors.documentTooLarge', options: { limit: 12, name: 'hex.txt' } })
+  })
+
+  it('says a file was too complex to read, and that a scan could not be stored (ADR-070, ADR-071)', () => {
+    expect(importRefusal(refused(422, { code: 'import_too_complex' }), 'bomb.docx').key).toBe('books.import.tooComplex')
+    expect(importRefusal(refused(422, { code: 'import_pictures_not_stored' }), 'scan.pdf').key).toBe('books.import.picturesNotStored')
+  })
+
+  it('words a coded server failure as a failure of the import, not of the connection', () => {
+    expect(importRefusal(refused(500, { code: 'import_failed' }), 'a.pdf')).toEqual({ key: 'books.import.failed', options: { name: 'a.pdf' } })
+    expect(importRefusal(refused(409, { code: 'import_in_progress' }), 'a.pdf').key).toBe('books.import.failed')
+  })
+
   it('blames the connection, not the file, when no answer came back', () => {
     expect(importRefusal({ code: 'ECONNABORTED' }, 'a.pdf')).toEqual({ key: 'books.import.notReached', options: { name: 'a.pdf' } })
   })

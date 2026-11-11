@@ -17,7 +17,11 @@ const KEY_BY_CODE = Object.freeze({
   import_empty: 'books.import.empty',
   import_password_protected: 'books.import.passwordProtected',
   import_unreadable: 'books.import.unreadable',
-  import_too_large: 'books.import.tooLarge'
+  import_too_large: 'books.import.tooLarge',
+  // ADR-070: the file could not be read within the time a file is given, or expands past what one may hold.
+  import_too_complex: 'books.import.tooComplex',
+  // ADR-071: a scan whose pictures the storage would not keep is refused rather than saved empty.
+  import_pictures_not_stored: 'books.import.picturesNotStored'
 })
 
 const extensionOf = (fileName) => {

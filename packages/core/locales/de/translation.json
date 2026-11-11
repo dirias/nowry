@@ -2836,6 +2836,10 @@
       "empty": "{{name}} enthält keinen Text zum Importieren.",
       "passwordProtected": "{{name}} ist passwortgeschützt. Entferne das Passwort und importiere die Datei erneut.",
       "unreadable": "{{name}} konnte nicht gelesen werden. Die Datei ist möglicherweise beschädigt.",
+      "tooComplex": "{{name}} ist zu groß oder zu komplex, um von Nowry gelesen zu werden. Teile die Datei in kleinere Dateien auf.",
+      "picturesNotStored": "{{name}} besteht aus Bildern, die nicht gespeichert werden konnten; es wurde nichts importiert. Sehr große Bilder können nicht behalten werden.",
+      "picturesDropped_one": "{{name}} wurde importiert, aber {{count}} Bild konnte nicht gespeichert werden und fehlt.",
+      "picturesDropped_other": "{{name}} wurde importiert, aber {{count}} Bilder konnten nicht gespeichert werden und fehlen.",
       "tooLarge": "{{name}} überschreitet das Limit von {{limit}} MB.",
       "notReached": "Nowry war nicht erreichbar, deshalb wurde {{name}} nicht importiert. Prüfe deine Verbindung und versuche es erneut.",
       "failed": "{{name}} konnte nicht importiert werden. Bitte versuche es erneut.",
@@ -2982,6 +2986,7 @@
       "limitReached": "Limit deines Tarifs erreicht.",
       "aiLimitReached": "Du hast die {{limit}} KI-Generierungen dieses Monats verbraucht. Mehr mit Plus, oder nächsten Monat.",
       "documentTooLong": "Dieses Dokument liegt über der Grenze von {{limit}} Wörtern. Teile es in zwei.",
+      "documentTooLarge": "Dieses Dokument liegt über der Größengrenze von {{limit}} MB. Teile es in zwei.",
       "ttsLimitReached": "Du hast das Vorlese-Kontingent dieses Monats erreicht."
     },
     "usage": {
