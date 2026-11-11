@@ -20,6 +20,10 @@ import React from 'react'
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 
+// An upgrade key is offered only while prices are shown and upgrades are open (ADR-073).
+let mockUpgradesOpen = true
+jest.mock('@nowry/core/hooks/useUpgradesOpen', () => ({ __esModule: true, default: () => mockUpgradesOpen }))
+
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key, options) => {
@@ -264,5 +268,19 @@ describe('a failed create', () => {
     // The title survives the retry, which is what makes the regression
     // survivable: upgrade, press Create again, nothing was lost.
     expect(titleField()).toHaveValue('Meditations')
+  })
+
+  it('names the plan limit without an Upgrade key while prices are hidden (ADR-073)', async () => {
+    mockUpgradesOpen = false
+    try {
+      failWith({ status: 403, data: { detail: 'Book limit reached' } })
+      await attempt()
+
+      const alert = screen.getByRole('alert')
+      expect(within(alert).getByText('subscription.errors.bookLimit')).toBeInTheDocument()
+      expect(within(alert).queryByRole('button', { name: 'subscription.upgrade' })).not.toBeInTheDocument()
+    } finally {
+      mockUpgradesOpen = true
+    }
   })
 })

@@ -13,6 +13,10 @@ import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 
+// An upgrade key is offered only while prices are shown and upgrades are open (ADR-073).
+let mockUpgradesOpen = true
+jest.mock('@nowry/core/hooks/useUpgradesOpen', () => ({ __esModule: true, default: () => mockUpgradesOpen }))
+
 // Mock i18next — return key as value so we can assert on keys
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -89,6 +93,21 @@ describe('UpgradePrompt — GATE-03, GATE-04', () => {
     fireEvent.click(screen.getByText('upgrade.modal.cta'))
     expect(onClose).toHaveBeenCalledTimes(1)
     expect(mockNavigate).toHaveBeenCalledWith('/plans')
+  })
+
+  test('is a notice with no way to the plans while prices are hidden (ADR-073)', () => {
+    mockUpgradesOpen = false
+    try {
+      render(
+        <MemoryRouter>
+          <UpgradePrompt {...defaultProps} />
+        </MemoryRouter>
+      )
+      expect(screen.getByText('beta.upgradesClosed')).toBeInTheDocument()
+      expect(screen.queryByText('upgrade.modal.cta')).not.toBeInTheDocument()
+    } finally {
+      mockUpgradesOpen = true
+    }
   })
 
   test('renders feature list items', () => {

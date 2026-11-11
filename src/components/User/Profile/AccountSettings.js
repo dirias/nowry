@@ -73,6 +73,7 @@ import { useTranslation } from 'react-i18next'
 import { useBlockReminderSetting } from '@nowry/core/hooks/useBlockReminders'
 import LearningPreferencesSection from './LearningPreferencesSection'
 import { getUsernameValidationError } from '@nowry/core/utils/usernameValidation'
+import useUpgradesOpen from '@nowry/core/hooks/useUpgradesOpen'
 
 // ─── Section IDs ─────────────────────────────────────────────────────────────
 const SECTION_IDS = [
@@ -192,6 +193,8 @@ function useActiveSection(sectionIds) {
 // ─── Main component ──────────────────────────────────────────────────────────
 export default function AccountSettings() {
   const { t, i18n } = useTranslation()
+  // ADR-073: no upgrade key while prices are hidden or upgrades are closed.
+  const upgradesOpen = useUpgradesOpen()
   const blockReminders = useBlockReminderSetting()
   const { user, subscriptionTier, updateUser } = useAuth()
   const { mode, setMode } = useColorScheme()
@@ -1006,7 +1009,7 @@ export default function AccountSettings() {
                   >
                     {t('accountSettings.plan.manage')}
                   </Button>
-                  {(subscriptionTier ?? 'free') !== 'pro' && (
+                  {upgradesOpen && (subscriptionTier ?? 'free') !== 'pro' && (
                     <Button component={RouterLink} to='/plans' variant='solid' size='sm' aria-label={t('accountSettings.plan.upgrade')}>
                       {t('accountSettings.plan.upgrade')}
                     </Button>

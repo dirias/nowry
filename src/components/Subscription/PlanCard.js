@@ -51,17 +51,19 @@ export default function PlanCard({
         </Stack>
       </Stack>
 
-      {/* Price */}
-      <Skeleton loading={loading} variant='rectangular' sx={{ borderRadius: 'sm' }}>
-        <Stack direction='row' alignItems='baseline' spacing={0.5}>
-          <Typography level='h4' sx={{ color: 'text.primary' }}>
-            {price}
-          </Typography>
-          <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
-            / {period}
-          </Typography>
-        </Stack>
-      </Skeleton>
+      {/* Price — absent while prices are hidden (ADR-073) */}
+      {price != null && (
+        <Skeleton loading={loading} variant='rectangular' sx={{ borderRadius: 'sm' }}>
+          <Stack direction='row' alignItems='baseline' spacing={0.5}>
+            <Typography level='h4' sx={{ color: 'text.primary' }}>
+              {price}
+            </Typography>
+            <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
+              / {period}
+            </Typography>
+          </Stack>
+        </Skeleton>
+      )}
 
       <Divider />
 

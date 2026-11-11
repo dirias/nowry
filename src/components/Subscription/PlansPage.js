@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { Box, Container, Typography, Stack, Button, Alert } from '@mui/joy'
 import { subscriptionService } from '@nowry/core/api/services'
 import { useSubscription } from '@nowry/core/hooks/useSubscription'
-import { PLAN_TIERS, annualSavingsPercent } from '@nowry/core/domain/plans'
-import { useBeta } from '@nowry/core/context/BetaContext'
+import { PLAN_TIERS, SHOW_PRICING, annualSavingsPercent } from '@nowry/core/domain/plans'
+import useUpgradesOpen from '@nowry/core/hooks/useUpgradesOpen'
 import PlanCard from './PlanCard'
 
 // Price IDs are publishable values from env vars (safe to expose client-side per T-03-07-02).
@@ -19,9 +19,8 @@ const PRICE_IDS = {
 export default function PlansPage() {
   const { t } = useTranslation()
   const { tier: currentTier } = useSubscription()
-  // ADR-038: while the beta keeps upgrades closed, no card offers a checkout.
-  const { config: beta } = useBeta()
-  const upgradesOpen = beta.upgrades_open
+  // ADR-038, ADR-073: while upgrades are closed or prices hidden, no card offers a checkout.
+  const upgradesOpen = useUpgradesOpen()
   const [billingInterval, setBillingInterval] = useState('monthly')
   const [checkoutLoading, setCheckoutLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -75,42 +74,44 @@ export default function PlansPage() {
         </Typography>
       </Stack>
 
-      {/* Billing Toggle — pill style per UI-SPEC.md § Component Inventory #3 */}
-      <Stack direction='row' justifyContent='center' alignItems='center' spacing={1} sx={{ mb: 4 }}>
-        <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-          {t('plans.billingToggle.label')}
-        </Typography>
-        <Box
-          sx={{
-            display: 'flex',
-            gap: 0.5,
-            bgcolor: 'background.level1',
-            p: 0.5,
-            borderRadius: 'xl'
-          }}
-        >
-          <Button
-            variant={isMonthly ? 'solid' : 'plain'}
-            color='primary'
-            size='sm'
-            onClick={() => setBillingInterval('monthly')}
-            aria-label={t('plans.billingToggle.monthly')}
-            aria-pressed={isMonthly}
+      {/* Billing Toggle — pill style per UI-SPEC.md § Component Inventory #3. Its label is read off the prices, so it goes with them (ADR-073). */}
+      {SHOW_PRICING && (
+        <Stack direction='row' justifyContent='center' alignItems='center' spacing={1} sx={{ mb: 4 }}>
+          <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+            {t('plans.billingToggle.label')}
+          </Typography>
+          <Box
+            sx={{
+              display: 'flex',
+              gap: 0.5,
+              bgcolor: 'background.level1',
+              p: 0.5,
+              borderRadius: 'xl'
+            }}
           >
-            {t('plans.billingToggle.monthly')}
-          </Button>
-          <Button
-            variant={!isMonthly ? 'solid' : 'plain'}
-            color='primary'
-            size='sm'
-            onClick={() => setBillingInterval('annual')}
-            aria-label={t('plans.billingToggle.annual', { percent: savingsPercent })}
-            aria-pressed={!isMonthly}
-          >
-            {t('plans.billingToggle.annual', { percent: savingsPercent })}
-          </Button>
-        </Box>
-      </Stack>
+            <Button
+              variant={isMonthly ? 'solid' : 'plain'}
+              color='primary'
+              size='sm'
+              onClick={() => setBillingInterval('monthly')}
+              aria-label={t('plans.billingToggle.monthly')}
+              aria-pressed={isMonthly}
+            >
+              {t('plans.billingToggle.monthly')}
+            </Button>
+            <Button
+              variant={!isMonthly ? 'solid' : 'plain'}
+              color='primary'
+              size='sm'
+              onClick={() => setBillingInterval('annual')}
+              aria-label={t('plans.billingToggle.annual', { percent: savingsPercent })}
+              aria-pressed={!isMonthly}
+            >
+              {t('plans.billingToggle.annual', { percent: savingsPercent })}
+            </Button>
+          </Box>
+        </Stack>
+      )}
 
       {/* Error state */}
       {error && (
@@ -130,7 +131,7 @@ export default function PlansPage() {
 
       {!upgradesOpen && (
         <Alert color='neutral' variant='soft' sx={{ mb: 3 }}>
-          {t('beta.upgradesClosed')}
+          {SHOW_PRICING ? t('beta.upgradesClosed') : t('beta.pricing.message')}
         </Alert>
       )}
 
@@ -145,7 +146,7 @@ export default function PlansPage() {
         {/* Free plan */}
         <PlanCard
           name={t('subscription.tier.free')}
-          price={free.price.monthly}
+          price={SHOW_PRICING ? free.price.monthly : null}
           period={t('plans.per.monthly')}
           features={featuresOf(free)}
           isCurrent={currentTier === 'free'}
@@ -158,7 +159,7 @@ export default function PlansPage() {
         {/* Plus plan */}
         <PlanCard
           name={t('subscription.tier.plus')}
-          price={plus.price[billingInterval]}
+          price={SHOW_PRICING ? plus.price[billingInterval] : null}
           period={t(`plans.per.${billingInterval}`)}
           features={featuresOf(plus)}
           isCurrent={currentTier === 'plus'}
@@ -167,13 +168,13 @@ export default function PlansPage() {
             upgradesOpen && currentTier === 'free' ? () => handleUpgrade(isMonthly ? PRICE_IDS.plus_monthly : PRICE_IDS.plus_annual) : null
           }
           loading={checkoutLoading}
-          showSavings={!isMonthly}
+          showSavings={SHOW_PRICING && !isMonthly}
         />
 
         {/* Pro plan */}
         <PlanCard
           name={t('subscription.tier.pro')}
-          price={pro.price[billingInterval]}
+          price={SHOW_PRICING ? pro.price[billingInterval] : null}
           period={t(`plans.per.${billingInterval}`)}
           features={featuresOf(pro)}
           isCurrent={currentTier === 'pro'}
@@ -182,7 +183,7 @@ export default function PlansPage() {
             upgradesOpen && currentTier !== 'pro' ? () => handleUpgrade(isMonthly ? PRICE_IDS.pro_monthly : PRICE_IDS.pro_annual) : null
           }
           loading={checkoutLoading}
-          showSavings={!isMonthly}
+          showSavings={SHOW_PRICING && !isMonthly}
         />
       </Box>
     </Container>

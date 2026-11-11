@@ -8,6 +8,7 @@ import { useAuth } from '@nowry/core/context/AuthContext'
 import BugReportModal from '../Bugs/BugReportModal'
 import { bugsService } from '@nowry/core/api/services/bugs.service'
 import { userService } from '@nowry/core/api/services'
+import { SHOW_PRICING } from '@nowry/core/domain/plans'
 
 const InstagramIcon = () => (
   <SvgIcon sx={{ fontSize: 18 }}>
@@ -50,7 +51,7 @@ const Footer = () => {
   // Library · Pricing · Contact · Privacy · Terms · the one support address (PRD FR-10).
   const navLinks = [
     { key: 'library', label: t('footer.links.library'), to: '/browse' },
-    { key: 'pricing', label: t('footer.links.pricing'), to: { pathname: '/', hash: '#pricing' } },
+    { key: 'pricing', label: SHOW_PRICING ? t('footer.links.pricing') : t('beta.earlyAccess'), to: { pathname: '/', hash: '#pricing' } },
     { key: 'contact', label: t('footer.support.contact'), to: '/contact' },
     { key: 'privacy', label: t('footer.links.privacy'), to: '/privacy' },
     { key: 'terms', label: t('footer.links.terms'), to: '/terms' },

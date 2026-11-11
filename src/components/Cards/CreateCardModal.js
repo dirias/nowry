@@ -13,6 +13,7 @@ import FlashcardFields from './card/FlashcardFields'
 import QuizCardFields from './card/QuizCardFields'
 import VisualCardFields from './card/VisualCardFields'
 import { focusFirstControl } from '../Common/Form/formUtils'
+import useUpgradesOpen from '@nowry/core/hooks/useUpgradesOpen'
 
 /**
  * The one card sheet.
@@ -38,6 +39,8 @@ const BODIES = { flashcard: FlashcardFields, quiz: QuizCardFields, visual: Visua
  */
 export default function CreateCardModal({ open, onClose, onCardSaved, decks = [], card = null, draft = null, initialSection = null }) {
   const { t } = useTranslation()
+  // ADR-073: no upgrade key while prices are hidden or upgrades are closed.
+  const upgradesOpen = useUpgradesOpen()
   const navigate = useNavigate()
   // The hook names what it needs and this file supplies the DOM (MOB-003B).
   // `draft` is a split (SR-004): another card's words without its id, so the save creates.
@@ -68,7 +71,7 @@ export default function CreateCardModal({ open, onClose, onCardSaved, decks = []
       // branch with its own Upgrade button; the third caught the error and
       // only logged it, so a failed visual-card save was completely silent.
       detailText={form.limitReached ? t('subscription.errors.limitReached') : form.saveError}
-      action={form.limitReached ? { labelKey: 'subscription.upgrade', onClick: () => navigate('/profile') } : null}
+      action={form.limitReached && upgradesOpen ? { labelKey: 'subscription.upgrade', onClick: () => navigate('/profile') } : null}
     />
   ) : null
 

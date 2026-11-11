@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Link as RouterLink } from 'react-router-dom'
 import { Alert, Box, Button, Container, FormControl, FormLabel, Input, Link, Stack, Textarea, Typography } from '@mui/joy'
 import { contactService } from '@nowry/core/api/services/contact.service'
+import { SHOW_PRICING } from '@nowry/core/domain/plans'
 
 /** Where the public conversation happens; the same four the footer carries. */
 const FOLLOW = [
@@ -127,12 +128,16 @@ const Contact = () => {
                       {t(`contact.faq.${key}.q`)}
                     </Typography>
                     <Typography component='dd' level='body-sm' sx={{ color: 'text.secondary', m: 0 }}>
-                      {t(`contact.faq.${key}.a`)}
+                      {key === 'free' && !SHOW_PRICING ? t('beta.pricing.message') : t(`contact.faq.${key}.a`)}
                       {key === 'free' && (
                         <>
                           {' '}
-                          <Link component={RouterLink} to={{ pathname: '/', hash: '#pricing' }} sx={{ fontWeight: 'lg' }}>
-                            {t('contact.faq.free.link')}
+                          <Link
+                            component={RouterLink}
+                            to={SHOW_PRICING ? { pathname: '/', hash: '#pricing' } : '/pricing'}
+                            sx={{ fontWeight: 'lg' }}
+                          >
+                            {SHOW_PRICING ? t('contact.faq.free.link') : t('contact.faq.free.betaLink')}
                           </Link>
                         </>
                       )}

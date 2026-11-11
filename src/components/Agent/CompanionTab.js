@@ -18,8 +18,10 @@
 import React from 'react'
 import { Alert, Box, Button, Card, Chip, Divider, FormControl, FormHelperText, FormLabel, Grid, Input, Stack, Typography } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
+import { Link as RouterLink } from 'react-router-dom'
 import useGenerationProgress from '@nowry/core/hooks/useGenerationProgress'
 import { canCustomizeCompanion } from '@nowry/core/domain/petPortrait'
+import useUpgradesOpen from '@nowry/core/hooks/useUpgradesOpen'
 import GenerationProgress from '../Common/GenerationProgress'
 import StageJourney from './StageJourney'
 
@@ -67,6 +69,8 @@ const CompanionTab = ({
   onGenerateAvatar
 }) => {
   const { t } = useTranslation()
+  // ADR-073: no upgrade key while prices are hidden or upgrades are closed.
+  const upgradesOpen = useUpgradesOpen()
 
   // GEN-004. This component grew the app's only real progress indicator and kept
   // it to itself; it now reads the shared one. The visible behaviour is the same
@@ -247,17 +251,19 @@ const CompanionTab = ({
               {t('agent.companion.avatarLockedDescription')}
             </Typography>
 
-            <Button
-              variant='solid'
-              color='primary'
-              size='sm'
-              fullWidth
-              aria-label={t('agent.companion.upgradePlusAriaLabel')}
-              component='a'
-              href='/pricing'
-            >
-              {t('agent.companion.upgradePlus')}
-            </Button>
+            {upgradesOpen && (
+              <Button
+                variant='solid'
+                color='primary'
+                size='sm'
+                fullWidth
+                aria-label={t('agent.companion.upgradePlusAriaLabel')}
+                component={RouterLink}
+                to='/plans'
+              >
+                {t('agent.companion.upgradePlus')}
+              </Button>
+            )}
           </Card>
         )}
 

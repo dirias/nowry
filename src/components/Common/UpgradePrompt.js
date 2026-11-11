@@ -13,16 +13,15 @@
 import React from 'react'
 import { Modal, ModalDialog, ModalClose, Typography, Box, Button, Stack, List, ListItem } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
-import { useBeta } from '@nowry/core/context/BetaContext'
+import useUpgradesOpen from '@nowry/core/hooks/useUpgradesOpen'
 import { useNavigate } from 'react-router-dom'
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded'
 
 const UpgradePrompt = ({ open, onClose, headline }) => {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  // ADR-038: closed upgrades turn the prompt into a notice with one key.
-  const { config: beta } = useBeta()
-  const upgradesOpen = beta.upgrades_open
+  // ADR-038, ADR-073: closed upgrades turn the prompt into a notice with one key.
+  const upgradesOpen = useUpgradesOpen()
 
   // MUST call onClose() BEFORE navigating (Pitfall 5 — prevents modal persisting after nav)
   const handleUpgrade = () => {

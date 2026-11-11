@@ -53,6 +53,7 @@ import { hasCoarsePointer, shouldSendOnKey } from '../../utils/chatSubmitKey'
 import { STAGE_CONFIG, isNearEvolution } from '@nowry/core/domain/petStages'
 import { DEFAULT_ACCENT, readableTextOn } from '@nowry/core/tokens/colorSchemeGenerator'
 import { earnedGold } from '@nowry/core/tokens/colorSystem'
+import useUpgradesOpen from '@nowry/core/hooks/useUpgradesOpen'
 import { Box, Button, Typography } from '@mui/joy'
 import { useTheme } from '@mui/joy/styles'
 
@@ -702,6 +703,8 @@ const StudyPet = () => {
   const { t, i18n } = useTranslation()
   const { isAuthenticated } = useAuth()
   const { openUpgradeModal } = useSubscriptionContext()
+  // ADR-073: no upgrade key while prices are hidden or upgrades are closed.
+  const upgradesOpen = useUpgradesOpen()
   const { themeColor } = useThemePreferences()
   const navigate = useNavigate()
   // The pet's identity colour: hue from the accent the user actually chose,
@@ -2035,23 +2038,25 @@ const StudyPet = () => {
                         }}
                       >
                         <span>{t('agent.chat.error.limitReached')}</span>
-                        <button
-                          onClick={() => openUpgradeModal(t('agent.upgrade.unlimitedMessages'))}
-                          style={{
-                            background: 'var(--joy-palette-danger-solidBg)',
-                            border: 'none',
-                            borderRadius: 6,
-                            color: 'var(--joy-palette-danger-solidColor)',
-                            cursor: 'pointer',
-                            fontSize: 12,
-                            fontWeight: 600,
-                            padding: '4px 10px',
-                            fontFamily: 'Inter, sans-serif',
-                            whiteSpace: 'nowrap'
-                          }}
-                        >
-                          {t('agent.chat.upgradePlan')}
-                        </button>
+                        {upgradesOpen && (
+                          <button
+                            onClick={() => openUpgradeModal(t('agent.upgrade.unlimitedMessages'))}
+                            style={{
+                              background: 'var(--joy-palette-danger-solidBg)',
+                              border: 'none',
+                              borderRadius: 6,
+                              color: 'var(--joy-palette-danger-solidColor)',
+                              cursor: 'pointer',
+                              fontSize: 12,
+                              fontWeight: 600,
+                              padding: '4px 10px',
+                              fontFamily: 'Inter, sans-serif',
+                              whiteSpace: 'nowrap'
+                            }}
+                          >
+                            {t('agent.chat.upgradePlan')}
+                          </button>
+                        )}
                       </div>
                     </div>
                   )}

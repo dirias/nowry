@@ -1987,7 +1987,8 @@
       "free": {
         "q": "¿Nowry es gratis?",
         "a": "Libros, tarjetas, estudio y planificación son gratis. Plus y Pro pagan la generación con IA.",
-        "link": "Ver precios."
+        "link": "Ver precios.",
+        "betaLink": "Sobre el acceso anticipado."
       },
       "anki": {
         "q": "¿Puedo traer mis mazos de Anki?",
@@ -4604,6 +4605,11 @@
     "inviteInvalid": "Ese código no es nuestro. Revísalo o apúntate a la lista de espera.",
     "inviteRequired": "Nowry está en beta privada. Regístrate con un código de invitación o apúntate a la lista de espera.",
     "noCode": "¿No tienes código?",
+    "earlyAccess": "Acceso anticipado",
+    "pricing": {
+      "message": "Gratis durante la beta. Siempre habrá un plan gratuito.",
+      "cta": "Reserva tu lugar"
+    },
     "upgradesClosed": "Las mejoras de plan se abren después de la beta. Todo lo que puedes hacer hoy es gratis mientras probamos.",
     "waitlist": {
       "title": "Apúntate a la lista de espera",

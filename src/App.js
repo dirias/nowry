@@ -39,6 +39,7 @@ import StudyPet from './components/Agent/StudyPet'
 // ── Lazily loaded: code-split at route level ─────────────────────────
 const Landing = lazy(() => import('./components/HomePage/Landing'))
 const Contact = lazy(() => import('./components/HomePage/Contact'))
+const PricingPage = lazy(() => import('./components/HomePage/PricingPage'))
 const Login = lazy(() => import('./components/User/Login'))
 const Register = lazy(() => import('./components/User/Register'))
 const ResetPassword = lazy(() => import('./components/User/ResetPassword'))
@@ -168,6 +169,8 @@ const AppContent = () => {
               {/* About folded into the landing's early-access note (ADR-035 §5). */}
               <Route path='/about' element={<Navigate to='/' replace />} />
               <Route path='/contact' element={<Contact />} />
+              {/* The early-access sentence while prices are hidden (ADR-073). */}
+              <Route path='/pricing' element={<PricingPage />} />
               <Route path='/browse' element={<PublicBrowse />} />
               <Route path='/public/:type/:id' element={<PublicView />} />
 

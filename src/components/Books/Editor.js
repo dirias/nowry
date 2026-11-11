@@ -87,6 +87,7 @@ import LinkPreviewPlugin from '../Editor/plugins/LinkPreviewPlugin'
 import EditorErrorBoundary from '../Editor/EditorErrorBoundary'
 import { PAGE_SIZES } from '../Editor/PageSizeDropdown'
 import { EXTRACT_VOCABULARY_PROMPT } from '@nowry/core/constants/prompts'
+import useUpgradesOpen from '@nowry/core/hooks/useUpgradesOpen'
 
 // Backend wire-contract limit for POST /card/generate/stream sampleText.
 // Over-limit selections are clipped client-side — never send an over-limit body.
@@ -282,6 +283,8 @@ export default function Editor({
   const [questionnaireData, setQuestionnaireData] = useState([])
   const [error, setError] = useState(null)
   const [isLimitError, setIsLimitError] = useState(false)
+  // ADR-073: no upgrade key while prices are hidden or upgrades are closed.
+  const upgradesOpen = useUpgradesOpen()
   // An image on its way to storage: { name, percent } while it runs, null otherwise (PRD editor-media D4).
   const [upload, setUpload] = useState(null)
   // True while the "you can't edit in reading mode" hint is showing.
@@ -825,7 +828,7 @@ export default function Editor({
             color='danger'
             variant='soft'
             endDecorator={
-              isLimitError ? (
+              isLimitError && upgradesOpen ? (
                 <Button size='sm' variant='solid' color='danger' onClick={() => navigate('/profile')}>
                   {t('subscription.upgrade')}
                 </Button>

@@ -1243,7 +1243,8 @@
       "free": {
         "q": "Ist Nowry kostenlos?",
         "a": "Bücher, Karten, Lernen und Planung sind kostenlos. Plus und Pro bezahlen die KI-Generierung.",
-        "link": "Preise ansehen."
+        "link": "Preise ansehen.",
+        "betaLink": "Zum Early Access."
       },
       "anki": {
         "q": "Kann ich meine Anki-Stapel mitbringen?",
@@ -4067,6 +4068,11 @@
     "inviteInvalid": "Dieser Code ist keiner von uns. Prüfe ihn oder trag dich unten in die Warteliste ein.",
     "inviteRequired": "Nowry ist in einer privaten Beta. Registriere dich mit einem Einladungscode oder trag dich in die Warteliste ein.",
     "noCode": "Kein Einladungscode?",
+    "earlyAccess": "Early Access",
+    "pricing": {
+      "message": "Kostenlos während der Beta. Es wird immer einen kostenlosen Tarif geben.",
+      "cta": "Platz sichern"
+    },
     "upgradesClosed": "Upgrades gibt es nach der Beta. Alles, was du heute tun kannst, ist während des Tests kostenlos.",
     "waitlist": {
       "title": "In die Warteliste eintragen",

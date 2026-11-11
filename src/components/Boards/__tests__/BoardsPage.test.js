@@ -6,6 +6,10 @@ import React from 'react'
 import { MemoryRouter } from 'react-router-dom'
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 
+// An upgrade key is offered only while prices are shown and upgrades are open (ADR-073).
+let mockUpgradesOpen = true
+jest.mock('@nowry/core/hooks/useUpgradesOpen', () => ({ __esModule: true, default: () => mockUpgradesOpen }))
+
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key, options) => (options?.count !== undefined ? `${key}:${options.count}` : options?.name ? `${key}:${options.name}` : key),
@@ -124,6 +128,20 @@ describe('BoardsPage — New board', () => {
     expect(screen.getByRole('link', { name: 'boards.seePlans' })).toHaveAttribute('href', '/plans')
     expect(screen.getByRole('button', { name: 'boards.newBoard' })).not.toBeDisabled()
     expect(mockNavigate).not.toHaveBeenCalled()
+  })
+
+  it('a full plan says so without a way to the plans while prices are hidden (ADR-073)', async () => {
+    mockUpgradesOpen = false
+    try {
+      const create = jest.fn().mockRejectedValue({ response: { status: 402, data: { detail: 'board_limit_reached' } } })
+      mockUseBoards.mockReturnValue(hooks({ create }))
+      renderPage()
+      fireEvent.click(screen.getByRole('button', { name: 'boards.newBoard' }))
+      expect(await screen.findByTestId('boards-limit')).toHaveTextContent('boards.limit')
+      expect(screen.queryByRole('link', { name: 'boards.seePlans' })).not.toBeInTheDocument()
+    } finally {
+      mockUpgradesOpen = true
+    }
   })
 })
 

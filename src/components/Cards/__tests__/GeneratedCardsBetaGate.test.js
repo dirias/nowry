@@ -43,6 +43,18 @@ jest.mock('../../../context/SubscriptionContext', () => ({
   })
 }))
 
+// Prices shown (ADR-073), so the server's switch is the one under test here.
+let mockShowPricing = true
+jest.mock('@nowry/core/domain/plans', () => {
+  const actual = jest.requireActual('@nowry/core/domain/plans')
+  return {
+    ...actual,
+    get SHOW_PRICING() {
+      return mockShowPricing
+    }
+  }
+})
+
 let mockBeta = { active: true, invite_required: false, upgrades_open: false }
 jest.mock('@nowry/core/context/BetaContext', () => ({ useBeta: () => ({ config: mockBeta, loading: false }) }))
 
@@ -68,4 +80,16 @@ it('offers the upgrade to a free account while upgrades are open', async () => {
   await renderModal()
   expect(screen.getByText('upgrade.inlineCtaText')).toBeInTheDocument()
   expect(screen.getByRole('button', { name: 'upgrade.modal.cta' })).toBeInTheDocument()
+})
+
+it('offers nothing while prices are hidden, even with upgrades open on the server (ADR-073)', async () => {
+  mockShowPricing = false
+  mockBeta = { active: true, invite_required: false, upgrades_open: true }
+  try {
+    await renderModal()
+    expect(screen.queryByText('upgrade.inlineCtaText')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'upgrade.modal.cta' })).not.toBeInTheDocument()
+  } finally {
+    mockShowPricing = true
+  }
 })

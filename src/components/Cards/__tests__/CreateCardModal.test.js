@@ -20,6 +20,10 @@ import { MemoryRouter } from 'react-router-dom'
 
 import { injectedCss } from '../../Common/Form/__testHelpers__/cssRules'
 
+// An upgrade key is offered only while prices are shown and upgrades are open (ADR-073).
+let mockUpgradesOpen = true
+jest.mock('@nowry/core/hooks/useUpgradesOpen', () => ({ __esModule: true, default: () => mockUpgradesOpen }))
+
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key, options) => {
@@ -290,6 +294,20 @@ describe('a failed save', () => {
     const alert = screen.getByRole('alert')
     expect(within(alert).getByText('subscription.errors.limitReached')).toBeInTheDocument()
     expect(within(alert).getByRole('button', { name: 'subscription.upgrade' })).toBeInTheDocument()
+  })
+
+  it('names the plan limit without an Upgrade key while prices are hidden (ADR-073)', async () => {
+    mockUpgradesOpen = false
+    try {
+      failWith({ status: 403, data: { detail: 'Flashcards limit reached' } })
+      await attempt()
+
+      const alert = screen.getByRole('alert')
+      expect(within(alert).getByText('subscription.errors.limitReached')).toBeInTheDocument()
+      expect(within(alert).queryByRole('button', { name: 'subscription.upgrade' })).not.toBeInTheDocument()
+    } finally {
+      mockUpgradesOpen = true
+    }
   })
 
   it('does not count a card that was not saved', async () => {

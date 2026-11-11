@@ -9,6 +9,7 @@ import { useSaveToDeck } from '@nowry/core/hooks/useSaveToDeck'
 import SaveToDeckStep from './SaveToDeck/SaveToDeckStep'
 import useGenerationProgress from '@nowry/core/hooks/useGenerationProgress'
 import GenerationProgress from '../Common/GenerationProgress'
+import useUpgradesOpen from '@nowry/core/hooks/useUpgradesOpen'
 
 mermaid.initialize({
   startOnLoad: false,
@@ -81,6 +82,8 @@ export default function VisualizerModal({ open, onClose, text }) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [isLimitError, setIsLimitError] = useState(false)
+  // ADR-073: no upgrade key while prices are hidden or upgrades are closed.
+  const upgradesOpen = useUpgradesOpen()
   const navigate = useNavigate()
   const { t } = useTranslation()
 
@@ -196,7 +199,8 @@ export default function VisualizerModal({ open, onClose, text }) {
               variant='soft'
               sx={{ mb: 2 }}
               endDecorator={
-                isLimitError && (
+                isLimitError &&
+                upgradesOpen && (
                   <Button size='sm' variant='soft' color='danger' onClick={() => navigate('/profile')}>
                     {t('subscription.upgrade')}
                   </Button>

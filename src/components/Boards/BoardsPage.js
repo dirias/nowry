@@ -9,6 +9,7 @@ import ShareSheet from './ShareSheet'
 import useBoardShare from './useBoardShare'
 import DeleteBoardDialog from './DeleteBoardDialog'
 import { readout } from '../Common/Form/formStyles'
+import useUpgradesOpen from '@nowry/core/hooks/useUpgradesOpen'
 
 const GRID = {
   display: 'grid',
@@ -46,6 +47,8 @@ function TileSkeletons() {
  */
 export default function BoardsPage() {
   const { t } = useTranslation()
+  // ADR-073: no upgrade key while prices are hidden or upgrades are closed.
+  const upgradesOpen = useUpgradesOpen()
   const navigate = useNavigate()
   const { boards, loading, error, create, rename, duplicate, remove, reload } = useBoards()
   const { shareId, share, closeShare } = useBoardShare()
@@ -148,10 +151,15 @@ export default function BoardsPage() {
               sx={{ color: 'text.secondary', textAlign: 'right', maxWidth: 320 }}
               data-testid='boards-limit'
             >
-              {t('boards.limit')}{' '}
-              <Link component={RouterLink} to='/plans' level='body-xs'>
-                {t('boards.seePlans')}
-              </Link>
+              {t('boards.limit')}
+              {upgradesOpen && (
+                <>
+                  {' '}
+                  <Link component={RouterLink} to='/plans' level='body-xs'>
+                    {t('boards.seePlans')}
+                  </Link>
+                </>
+              )}
             </Typography>
           )}
         </Stack>

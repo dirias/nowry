@@ -12,6 +12,21 @@
  * three cards side by side line up row for row.
  */
 
+/**
+ * Whether the clients print prices and offer upgrades (ADR-073). Off for the
+ * early-access beta: the landing's pricing section, `/pricing` and `/plans`
+ * say "Free during the beta" instead of an amount, and no key leads toward a
+ * checkout. This is the one place to turn prices back on; nothing was deleted.
+ */
+export const SHOW_PRICING = false
+
+/**
+ * May a client offer an upgrade? Only when prices are shown and the server has
+ * upgrades open (ADR-038, ADR-073). Every upgrade key reads this, through
+ * `useUpgradesOpen`, so a page cannot hide the price and still point at the till.
+ */
+export const upgradesAvailable = (betaConfig, showPricing = SHOW_PRICING) => showPricing === true && betaConfig?.upgrades_open !== false
+
 export const PLAN_INTERVALS = Object.freeze(['monthly', 'annual'])
 
 /**

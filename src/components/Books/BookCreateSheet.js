@@ -11,6 +11,7 @@ import { focusRing } from '../Common/Form/formStyles'
 import { useAuth } from '@nowry/core/context/AuthContext'
 import useBookCreate from '@nowry/core/hooks/useBookCreate'
 import { focusFirstControl } from '../Common/Form/formUtils'
+import useUpgradesOpen from '@nowry/core/hooks/useUpgradesOpen'
 
 /**
  * Book creation — four elements at rest, and the fastest form in the system
@@ -36,6 +37,8 @@ const actionSx = { width: { xs: '100%', sm: 'auto' }, minHeight: 44, ...focusRin
 
 export default function BookCreateSheet({ open, onClose }) {
   const { t } = useTranslation()
+  // ADR-073: no upgrade key while prices are hidden or upgrades are closed.
+  const upgradesOpen = useUpgradesOpen()
   const navigate = useNavigate()
   const { user } = useAuth()
 
@@ -63,7 +66,7 @@ export default function BookCreateSheet({ open, onClose }) {
     <FormErrorBanner
       titleKey='books.createFailed'
       detailText={form.limitReached ? t('subscription.errors.bookLimit') : form.saveError}
-      action={form.limitReached ? { labelKey: 'subscription.upgrade', onClick: () => navigate('/profile') } : null}
+      action={form.limitReached && upgradesOpen ? { labelKey: 'subscription.upgrade', onClick: () => navigate('/profile') } : null}
     />
   ) : null
 

@@ -1,4 +1,4 @@
-import { FEATURED_TIER_ID, PLAN_FEATURE_ROWS, PLAN_INTERVALS, PLAN_TIERS, planTier } from '../plans'
+import { FEATURED_TIER_ID, PLAN_FEATURE_ROWS, PLAN_INTERVALS, PLAN_TIERS, SHOW_PRICING, planTier, upgradesAvailable } from '../plans'
 import en from '../../locales/en/translation.json'
 
 const resolve = (key) => key.split('.').reduce((node, part) => (node == null ? undefined : node[part]), en)
@@ -58,5 +58,26 @@ describe('annual pricing (GTM-006)', () => {
     ]
     expect(annualSavingsPercent(tiers)).toBe(50)
     expect(annualSavingsPercent([{ price: { monthly: '$0', annual: '$0' } }])).toBe(0)
+  })
+})
+
+describe('hidden pricing (ADR-073)', () => {
+  it('ships with prices hidden for the beta', () => {
+    expect(SHOW_PRICING).toBe(false)
+  })
+
+  it('offers an upgrade only when prices are shown and the server has upgrades open', () => {
+    expect(upgradesAvailable({ upgrades_open: true }, true)).toBe(true)
+    expect(upgradesAvailable({ upgrades_open: false }, true)).toBe(false)
+    expect(upgradesAvailable({ upgrades_open: true }, false)).toBe(false)
+    expect(upgradesAvailable(undefined, true)).toBe(true)
+  })
+
+  it('offers none by default, whatever the server says', () => {
+    expect(upgradesAvailable({ upgrades_open: true })).toBe(false)
+  })
+
+  it('keeps the price table while it is hidden', () => {
+    expect(PLAN_TIERS.map((tier) => tier.price.monthly)).toEqual(['$0', '$8.99', '$19.99'])
   })
 })

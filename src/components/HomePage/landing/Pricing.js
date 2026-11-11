@@ -3,18 +3,24 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Box, Button, Stack, Typography } from '@mui/joy'
 import { CheckRounded } from '@mui/icons-material'
-import { FEATURED_TIER_ID, PLAN_TIERS } from '@nowry/core/domain/plans'
-import { useBeta } from '@nowry/core/context/BetaContext'
+import { FEATURED_TIER_ID, PLAN_TIERS, SHOW_PRICING } from '@nowry/core/domain/plans'
+import useUpgradesOpen from '@nowry/core/hooks/useUpgradesOpen'
+import EarlyAccess from './EarlyAccess'
 
 /**
  * Pricing in public (PRD D4, ADR-035 §5): the three tiers from the one table
  * `/plans` reads, so the numbers cannot drift. The featured tier carries the
  * section's one solid; the others are secondaries. Every CTA goes to
  * `/register`, because a visitor has no account to upgrade yet.
+ *
+ * While `SHOW_PRICING` is off (ADR-073) the whole section, heading and lead
+ * included, is the early-access sentence under the same `#pricing` anchor.
  */
 const Pricing = () => {
   const { t } = useTranslation()
-  const { config: beta } = useBeta()
+  const upgradesOpen = useUpgradesOpen()
+
+  if (!SHOW_PRICING) return <EarlyAccess id='pricing' />
 
   return (
     <Box component='section' id='pricing' aria-labelledby='landing-pricing-title' sx={{ py: { xs: 6, md: 10 }, scrollMarginTop: 80 }}>
@@ -86,7 +92,7 @@ const Pricing = () => {
                 ))}
               </Stack>
 
-              {tier.id !== 'free' && !beta.upgrades_open ? (
+              {tier.id !== 'free' && !upgradesOpen ? (
                 <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
                   {t('beta.upgradesClosed')}
                 </Typography>

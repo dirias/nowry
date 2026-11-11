@@ -8,10 +8,15 @@
  */
 import React from 'react'
 import { act, render, screen, fireEvent } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (k, opts) => (opts ? `${k}:${JSON.stringify(opts)}` : k) })
 }))
+
+// An upgrade key is offered only while prices are shown and upgrades are open (ADR-073).
+let mockUpgradesOpen = true
+jest.mock('@nowry/core/hooks/useUpgradesOpen', () => ({ __esModule: true, default: () => mockUpgradesOpen }))
 
 // StageJourney fetches on mount and has its own suite; it is not under test here.
 jest.mock('../StageJourney', () => {
@@ -22,23 +27,25 @@ jest.mock('../StageJourney', () => {
 const CompanionTab = require('../CompanionTab').default
 
 const tabElement = (props = {}) => (
-  <CompanionTab
-    petName='Nowry'
-    setPetName={jest.fn()}
-    petSpecies='owl'
-    onSpeciesSelect={jest.fn()}
-    onNameBlur={jest.fn()}
-    suggestedSpecies={null}
-    hasSuggestion={false}
-    error={null}
-    tier='pro'
-    avatarUrl={null}
-    avatarGenerating={false}
-    avatarError={null}
-    generationsRemaining={3}
-    onGenerateAvatar={jest.fn()}
-    {...props}
-  />
+  <MemoryRouter>
+    <CompanionTab
+      petName='Nowry'
+      setPetName={jest.fn()}
+      petSpecies='owl'
+      onSpeciesSelect={jest.fn()}
+      onNameBlur={jest.fn()}
+      suggestedSpecies={null}
+      hasSuggestion={false}
+      error={null}
+      tier='pro'
+      avatarUrl={null}
+      avatarGenerating={false}
+      avatarError={null}
+      generationsRemaining={3}
+      onGenerateAvatar={jest.fn()}
+      {...props}
+    />
+  </MemoryRouter>
 )
 
 const renderTab = (props = {}) => render(tabElement(props))
@@ -170,6 +177,18 @@ describe('CompanionTab — a portrait is a paid feature (EVO-009, ADR-053)', () 
     renderTab({ tier: 'free', avatarUrl: null })
     expect(generate()).not.toBeInTheDocument()
     expect(upgrade()).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'agent.companion.upgradePlusAriaLabel' })).toHaveAttribute('href', '/plans')
+  })
+
+  it('names the lock without a way to Plus while prices are hidden (ADR-073)', () => {
+    mockUpgradesOpen = false
+    try {
+      renderTab({ tier: 'free', avatarUrl: null })
+      expect(screen.getByText('agent.companion.avatarLockedTitle')).toBeInTheDocument()
+      expect(upgrade()).not.toBeInTheDocument()
+    } finally {
+      mockUpgradesOpen = true
+    }
   })
 
   it('keeps it that way for a free account that already holds an old portrait', () => {

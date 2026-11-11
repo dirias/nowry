@@ -59,6 +59,7 @@ import BugReportModal from '../Bugs/BugReportModal'
 import { bugsService } from '@nowry/core/api/services/bugs.service'
 import { useAuth } from '@nowry/core/context/AuthContext'
 import { useBeta } from '@nowry/core/context/BetaContext'
+import { SHOW_PRICING } from '@nowry/core/domain/plans'
 
 const HeaderUtils = ({ variant = 'header' }) => {
   const { mode, setMode } = useColorScheme()
@@ -225,10 +226,15 @@ const Header = () => {
     '&:hover': { bgcolor: 'background.level1', color: 'text.primary' }
   })
 
-  /** The guest header's nav: the library, pricing on the landing, contact. */
+  /** The guest header's nav: the library, pricing on the landing ("Early access" while prices are hidden, ADR-073), contact. */
   const guestNav = [
     { name: t('header.library'), to: '/browse', path: '/browse', icon: <PublicRounded /> },
-    { name: t('header.pricing'), to: { pathname: '/', hash: '#pricing' }, path: '/#pricing', icon: <SellRounded /> },
+    {
+      name: SHOW_PRICING ? t('header.pricing') : t('beta.earlyAccess'),
+      to: { pathname: '/', hash: '#pricing' },
+      path: '/#pricing',
+      icon: <SellRounded />
+    },
     { name: t('header.contact'), to: '/contact', path: '/contact', icon: <MailOutlineRounded /> }
   ]
 

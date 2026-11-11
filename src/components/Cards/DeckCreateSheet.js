@@ -14,6 +14,7 @@ import FormTextField from '../Common/Form/FormTextField'
 import { focusRing } from '../Common/Form/formStyles'
 import useDeckForm from '@nowry/core/hooks/useDeckForm'
 import { focusFirstControl } from '../Common/Form/formUtils'
+import useUpgradesOpen from '@nowry/core/hooks/useUpgradesOpen'
 
 /**
  * Deck creation — four elements at rest (DECKS.md §2.2).
@@ -39,6 +40,8 @@ const actionSx = { width: { xs: '100%', sm: 'auto' }, minHeight: 44, ...focusRin
 
 export default function DeckCreateSheet({ open, onClose, onSaved, onAddCards }) {
   const { t } = useTranslation()
+  // ADR-073: no upgrade key while prices are hidden or upgrades are closed.
+  const upgradesOpen = useUpgradesOpen()
   const navigate = useNavigate()
   const form = useDeckForm({ open, onSaved, onClose, focusControl: focusFirstControl })
   const created = form.createdDeck
@@ -46,7 +49,7 @@ export default function DeckCreateSheet({ open, onClose, onSaved, onAddCards }) 
   const banner = form.saveError ? (
     <FormErrorBanner
       detailText={form.limitReached ? t('subscription.errors.limitReached') : form.saveError}
-      action={form.limitReached ? { labelKey: 'subscription.upgrade', onClick: () => navigate('/profile') } : null}
+      action={form.limitReached && upgradesOpen ? { labelKey: 'subscription.upgrade', onClick: () => navigate('/profile') } : null}
     />
   ) : null
 

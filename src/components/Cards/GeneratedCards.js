@@ -31,7 +31,7 @@ import { sourceFieldsFor } from '@nowry/core/domain/books/sectionCards'
 import { useSaveToDeck } from '@nowry/core/hooks/useSaveToDeck'
 import { useSubscription } from '@nowry/core/hooks/useSubscription'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
-import { useBeta } from '@nowry/core/context/BetaContext'
+import useUpgradesOpen from '@nowry/core/hooks/useUpgradesOpen'
 import useGenerationProgress from '@nowry/core/hooks/useGenerationProgress'
 import GenerationProgress from '../Common/GenerationProgress'
 import GeneratedCard from './GeneratedCard'
@@ -85,7 +85,7 @@ export default function GeneratedCards({
   const { tier, flashcardLimit, flashcardCount } = useSubscription()
   const { upgradeDismissed, dismissUpgrade, isUpgradeModalOpen, openUpgradeModal, closeUpgradeModal } = useSubscriptionContext()
   // The beta can close upgrades; then nothing here offers one (QA-015), as PlansPage and UpgradePrompt do.
-  const { config: beta } = useBeta()
+  const upgradesOpen = useUpgradesOpen()
 
   const [step, setStep] = useState('select_cards') // 'select_cards' | 'select_deck'
   // Which card is open in the in-place editor, and which half the caret landed
@@ -554,7 +554,7 @@ export default function GeneratedCards({
               )}
 
               {/* ── Free tier: dismissible inline upgrade CTA ─────────────── */}
-              {!upgradeDismissed && tier === 'free' && beta.upgrades_open && (
+              {!upgradeDismissed && tier === 'free' && upgradesOpen && (
                 <Box
                   sx={{
                     p: 2,
@@ -605,16 +605,18 @@ export default function GeneratedCards({
               variant='soft'
               sx={{ mb: 1.5, justifyContent: 'space-between', alignItems: 'center' }}
               endDecorator={
-                <Button
-                  size='sm'
-                  variant='solid'
-                  color='primary'
-                  onClick={openUpgradeModal}
-                  aria-label={t('upgrade.modal.cta')}
-                  sx={{ '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: 2 } }}
-                >
-                  {t('upgrade.modal.cta')}
-                </Button>
+                upgradesOpen && (
+                  <Button
+                    size='sm'
+                    variant='solid'
+                    color='primary'
+                    onClick={openUpgradeModal}
+                    aria-label={t('upgrade.modal.cta')}
+                    sx={{ '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: 2 } }}
+                  >
+                    {t('upgrade.modal.cta')}
+                  </Button>
+                )
               }
             >
               {t('cards.generatedCards.partialSave', { saved: partialSave.saved, total: partialSave.total })}
