@@ -24,7 +24,8 @@ import DocumentActionsMenu from './DocumentActionsMenu'
 import DeleteDocumentDialog from './DeleteDocumentDialog'
 import { resumeHref } from '@nowry/core/domain/books/libraryQuery'
 import { BOOK_LIMITS, NEXT_PLAN, bookLimitFor } from '../../config/planLimits'
-import { importRefusal, rejectedFileRefusal } from '@nowry/core/domain/books/importRefusal'
+import { duplicateOf, importRefusal, rejectedFileRefusal } from '@nowry/core/domain/books/importRefusal'
+import DuplicateImportsDialog from './DuplicateImportsDialog'
 
 const VIEW_KEY = 'book_view_mode'
 
@@ -59,6 +60,8 @@ export default function BookHome() {
   const [pendingFiles, setPendingFiles] = useState([])
   const [confirmingImport, setConfirmingImport] = useState(false)
   const [preparingPreview, setPreparingPreview] = useState(false)
+  const [duplicateAsk, setDuplicateAsk] = useState([])
+  const [importingCopies, setImportingCopies] = useState(false)
   const dropRef = useRef(0)
 
   const relative = useCallback((value) => formatRelativeDate(t, value), [t])
@@ -169,24 +172,24 @@ export default function BookHome() {
     [username, refusalSentence]
   )
 
-  const handleConfirmImport = useCallback(
-    async (inputTitle) => {
-      setConfirmingImport(true)
-      const useTitle = pendingFiles.length === 1 && inputTitle ? inputTitle : null
+  // Import a list of files, each on its own (IMPORT-008). A file already in the
+  // library is not a failure and not a silent copy: with `ask` the server
+  // refuses it and names the document it would duplicate, and the reader is
+  // asked afterwards (ADR-066).
+  const importFiles = useCallback(
+    async (files, { title = null, onDuplicate = 'ask' } = {}) => {
       const imported = []
       const failures = []
-      // Each file on its own: the ones that import are in, the ones that do not
-      // are named with their reason.
-      for (const file of pendingFiles) {
+      const duplicates = []
+      for (const file of files) {
         try {
-          imported.push(await booksService.importFile(file, username || 'Unknown', false, useTitle))
+          imported.push(await booksService.importFile(file, username || 'Unknown', false, title, onDuplicate))
         } catch (error) {
-          failures.push(refusalSentence(importRefusal(error, file.name)))
+          const existing = duplicateOf(error)
+          if (existing) duplicates.push({ file, existing })
+          else failures.push(refusalSentence(importRefusal(error, file.name)))
         }
       }
-      setShowPreview(false)
-      setPreviewData(null)
-      setPendingFiles([])
       // Read again even when something failed: an earlier file may be in, and so
       // may a file whose answer was lost. Left stale, the library invited a retry
       // that made a duplicate (IMPORT-004).
@@ -198,10 +201,40 @@ export default function BookHome() {
         })
       }
       if (failures.length) setErrorMessage(failures)
-      setConfirmingImport(false)
+      return duplicates
     },
-    [username, pendingFiles, fetchBooks, t, refusalSentence]
+    [username, fetchBooks, t, refusalSentence]
   )
+
+  const handleConfirmImport = useCallback(
+    async (inputTitle) => {
+      setConfirmingImport(true)
+      const single = pendingFiles.length === 1
+      // One file whose preview already said "this is in your library": pressing
+      // the key ("Import a copy") is the reader's answer.
+      const answered = single && !!previewData?.duplicate_of
+      const duplicates = await importFiles(pendingFiles, {
+        title: single && inputTitle ? inputTitle : null,
+        onDuplicate: answered ? 'copy' : 'ask'
+      })
+      setShowPreview(false)
+      setPreviewData(null)
+      setPendingFiles([])
+      setConfirmingImport(false)
+      if (duplicates.length) setDuplicateAsk(duplicates)
+    },
+    [pendingFiles, previewData, importFiles]
+  )
+
+  const handleImportCopies = useCallback(async () => {
+    setImportingCopies(true)
+    await importFiles(
+      duplicateAsk.map(({ file }) => file),
+      { onDuplicate: 'copy' }
+    )
+    setImportingCopies(false)
+    setDuplicateAsk([])
+  }, [duplicateAsk, importFiles])
 
   const handleCancelPreview = useCallback(() => {
     dropRef.current += 1 // a preview still on its way belongs to a sheet that is gone
@@ -440,6 +473,18 @@ export default function BookHome() {
         loading={confirmingImport}
         preparing={preparingPreview}
         fileNames={pendingFiles.map((file) => file.name)}
+        formatWhen={relative}
+        onOpenExisting={(existing) => {
+          handleCancelPreview()
+          navigate(`/book/${existing._id}`)
+        }}
+      />
+
+      <DuplicateImportsDialog
+        duplicates={duplicateAsk}
+        loading={importingCopies}
+        onSkip={() => setDuplicateAsk([])}
+        onImportCopies={handleImportCopies}
       />
 
       {/* After the preview, so a refusal that arrives with one is in front of it */}

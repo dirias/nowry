@@ -56,3 +56,16 @@ export function importRefusal(error, fileName) {
   if (!error?.response) return { key: 'books.import.notReached', options: { name } }
   return { key: 'books.import.failed', options: { name } }
 }
+
+/** The API's code for a file this reader has already imported (ADR-066). */
+export const IMPORT_DUPLICATE_CODE = 'import_duplicate'
+
+/**
+ * The document a refused import would have copied, or null when the refusal is something else.
+ * @param {object} error - the axios error
+ * @returns {{_id: string, title: string, created_at: string|null}|null}
+ */
+export function duplicateOf(error) {
+  if (error?.response?.status !== 409 || refusalCode(error) !== IMPORT_DUPLICATE_CODE) return null
+  return error.response.data.detail.existing ?? null
+}

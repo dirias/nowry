@@ -30,7 +30,7 @@ describe('importFile', () => {
     await booksService.importFile({ name: 'notes.pdf' }, 'ana', false, 'Notes')
     const [url, form, config] = mockPost.mock.calls[0]
     expect(url).toBe('/book/import')
-    expect(form.fields).toEqual({ file: { name: 'notes.pdf' }, username: 'ana', preview: 'false', title: 'Notes' })
+    expect(form.fields).toEqual({ file: { name: 'notes.pdf' }, username: 'ana', preview: 'false', title: 'Notes', on_duplicate: 'ask' })
     expect(config.timeout).toBe(IMPORT_TIMEOUT_MS)
     expect(IMPORT_TIMEOUT_MS).toBeGreaterThanOrEqual(120000)
   })
@@ -38,7 +38,15 @@ describe('importFile', () => {
   it('gives the preview the same room, since it uploads and parses the same file', async () => {
     await booksService.importFile({ name: 'notes.pdf' }, 'ana', true)
     expect(mockPost.mock.calls[0][1].fields.preview).toBe('true')
+    expect(mockPost.mock.calls[0][1].fields.on_duplicate).toBeUndefined()
     expect(mockPost.mock.calls[0][2].timeout).toBe(IMPORT_TIMEOUT_MS)
+  })
+})
+
+describe('importFile and a file already in the library (ADR-066)', () => {
+  it('sends the answer the reader gave', async () => {
+    await booksService.importFile({ name: 'notes.pdf' }, 'ana', false, null, 'copy')
+    expect(mockPost.mock.calls[0][1].fields.on_duplicate).toBe('copy')
   })
 })
 

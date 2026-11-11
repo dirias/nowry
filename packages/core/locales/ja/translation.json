@@ -1041,7 +1041,18 @@
       "previousPage": "前のページ",
       "nextPage": "次のページ",
       "pageWithoutText": "このページにはテキストがありません。",
-      "previewLimited": "{{total}} ページ中、最初の {{shown}} ページを表示しています。"
+      "previewLimited": "{{total}} ページ中、最初の {{shown}} ページを表示しています。",
+      "duplicateNotice": "このファイルは「{{title}}」としてすでにライブラリにあります({{when}}に読み込み)。",
+      "duplicateOpen": "開く",
+      "actionCopy": "コピーとして読み込む",
+      "duplicatesTitle_one": "すでにライブラリにあります",
+      "duplicatesTitle_other": "すでにライブラリにあります",
+      "duplicatesBody_one": "このファイルは以前に読み込まれています。2 つ目のコピーとしてもう一度読み込みますか?",
+      "duplicatesBody_other": "これら {{count}} 個のファイルは以前に読み込まれています。コピーとしてもう一度読み込みますか?",
+      "duplicateRow": "{{name}} は「{{title}}」としてすでにあります",
+      "duplicatesSkip": "読み込まない",
+      "duplicatesImport_one": "コピーとして読み込む",
+      "duplicatesImport_other": "{{count}} 件をコピーとして読み込む"
     },
     "reader": {
       "empty": "このドキュメントにはまだ何もありません。",

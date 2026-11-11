@@ -89,6 +89,23 @@ describe('ImportPreviewModal', () => {
     expect(screen.getByText('books.import.sheetTitle(count=3)')).toBeInTheDocument()
   })
 
+  it('says when this very file is already in the library, offers to open it, and its key imports a copy (ADR-066)', () => {
+    const onOpenExisting = jest.fn()
+    const duplicate = { _id: 'old', title: 'Biology notes', created_at: '2026-11-01T10:00:00' }
+    const { onConfirm } = renderSheet({ previewData: { ...PREVIEW, duplicate_of: duplicate }, onOpenExisting, formatWhen: () => 'yesterday' })
+    expect(screen.getByTestId('import-duplicate')).toHaveTextContent('books.import.duplicateNotice(title=Biology notes,when=yesterday)')
+    fireEvent.click(screen.getByRole('button', { name: 'books.import.duplicateOpen' }))
+    expect(onOpenExisting).toHaveBeenCalledWith(duplicate)
+    fireEvent.click(screen.getByRole('button', { name: 'books.import.actionCopy' }))
+    expect(onConfirm).toHaveBeenCalled()
+  })
+
+  it('says nothing about duplicates for a drop of several files: that question comes after the import', () => {
+    renderSheet({ previewData: { ...PREVIEW, duplicate_of: { _id: 'old', title: 'x' } }, fileNames: ['a.pdf', 'b.pdf'] })
+    expect(screen.queryByTestId('import-duplicate')).toBeNull()
+    expect(screen.getByRole('button', { name: 'books.import.action(count=2)' })).toBeInTheDocument()
+  })
+
   it('is on screen while the file is being read: its name, a skeleton, and no import yet', () => {
     renderSheet({ previewData: null, preparing: true })
     expect(screen.getByText('books.import.reading(name=notes.pdf)')).toBeInTheDocument()

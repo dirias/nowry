@@ -162,12 +162,16 @@ export const booksService = {
     return data
   },
 
-  async importFile(file, username, preview = false, title = null) {
+  async importFile(file, username, preview = false, title = null, onDuplicate = 'ask') {
     const formData = new FormData()
     formData.append('file', file)
     formData.append('username', username)
     formData.append('preview', preview.toString())
     if (title) formData.append('title', title)
+    // ADR-066: a save says what to do with a file already in the library —
+    // 'ask' is refused with 409 `import_duplicate` so the reader can be asked,
+    // 'copy' imports it again. A preview only reports (`duplicate_of`).
+    if (!preview) formData.append('on_duplicate', onDuplicate)
 
     // An import uploads the file, parses it and stores its pictures inside one
     // request, which the 10-second default cannot cover: it gave up on a 1 MB

@@ -64,7 +64,17 @@ const Dot = () => (
   </Box>
 )
 
-export default function ImportPreviewModal({ open, onClose, previewData, onConfirm, loading = false, preparing = false, fileNames = [] }) {
+export default function ImportPreviewModal({
+  open,
+  onClose,
+  previewData,
+  onConfirm,
+  onOpenExisting,
+  formatWhen,
+  loading = false,
+  preparing = false,
+  fileNames = []
+}) {
   const { t } = useTranslation()
   const [editedTitle, setEditedTitle] = React.useState('')
   const [pageIndex, setPageIndex] = React.useState(0)
@@ -82,6 +92,9 @@ export default function ImportPreviewModal({ open, onClose, previewData, onConfi
   const totalPages = facts?.pages ?? previewData?.total_pages ?? pages.length
   const fileInfo = previewData?.file_info
   const fileName = fileInfo?.original_filename || fileNames[0] || ''
+  // ADR-066: this very file is already in the library. For one file the sheet
+  // says so and its key imports a copy; a drop of several asks after the import.
+  const duplicate = !isBatch && !preparing ? previewData?.duplicate_of : null
 
   // While the import runs the sheet stays: closing it never stopped the import,
   // it only hid it, so Close and Cancel wait until the answer is in.
@@ -125,7 +138,7 @@ export default function ImportPreviewModal({ open, onClose, previewData, onConfi
             {t('common.cancel')}
           </Button>
           <Button variant='solid' loading={loading} disabled={preparing} onClick={() => onConfirm(editedTitle)} sx={actionSx}>
-            {t('books.import.action', { count: fileCount })}
+            {duplicate ? t('books.import.actionCopy') : t('books.import.action', { count: fileCount })}
           </Button>
         </Stack>
       }
@@ -170,6 +183,24 @@ export default function ImportPreviewModal({ open, onClose, previewData, onConfi
               )}
             </Stack>
           )
+        )}
+
+        {duplicate && (
+          <Alert
+            color='neutral'
+            variant='soft'
+            data-testid='import-duplicate'
+            endDecorator={
+              <Button size='sm' variant='soft' color='neutral' onClick={() => onOpenExisting?.(duplicate)} sx={focusRing}>
+                {t('books.import.duplicateOpen')}
+              </Button>
+            }
+          >
+            {t('books.import.duplicateNotice', {
+              title: duplicate.title || t('books.untitled'),
+              when: formatWhen ? formatWhen(duplicate.created_at) : ''
+            })}
+          </Alert>
         )}
 
         {!preparing && facts?.scanned && (

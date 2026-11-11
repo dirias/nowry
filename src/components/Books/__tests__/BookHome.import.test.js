@@ -30,6 +30,11 @@ jest.mock('../ImportPreviewModal', () => (props) => {
   mockPreview = props
   return props.open ? <div data-testid='preview'>{props.previewData?.title}</div> : null
 })
+let mockDuplicates
+jest.mock('../DuplicateImportsDialog', () => (props) => {
+  mockDuplicates = props
+  return props.duplicates.length ? <div data-testid='duplicates'>{props.duplicates.map((d) => `${d.file.name}=${d.existing.title}`).join(',')}</div> : null
+})
 jest.mock('../../Messages', () => ({ Error: ({ error_msg }) => <div role='alert'>{error_msg}</div> }))
 const mockImportFile = jest.fn()
 jest.mock('@nowry/core/api/services', () => ({ booksService: { importFile: (...args) => mockImportFile(...args) } }))
@@ -145,6 +150,59 @@ describe('BookHome import', () => {
     })
     expect(mockPreview.open).toBe(false)
     expect(mockPreview.previewData).toBeNull()
+  })
+
+  it('asks about files already in the library instead of copying or dropping them (ADR-066)', async () => {
+    const duplicate = (title) => ({ response: { status: 409, data: { detail: { code: 'import_duplicate', existing: { _id: 'old', title } } } } })
+    renderPage()
+    mockImportFile.mockResolvedValue({ title: 'new' })
+    await act(() => mockDropzone.onDrop([file('new.txt'), file('seen.pdf'), file('seen.pdf')], []))
+    mockImportFile.mockReset().mockImplementation((f, _user, _preview, _title, onDuplicate) =>
+      f.name === 'seen.pdf' && onDuplicate === 'ask' ? Promise.reject(duplicate('Seen before')) : Promise.resolve({ _id: f.name })
+    )
+    await act(() => mockPreview.onConfirm(''))
+    expect(mockImportFile.mock.calls.map(([f, , , , onDuplicate]) => [f.name, onDuplicate])).toEqual([
+      ['new.txt', 'ask'],
+      ['seen.pdf', 'ask'],
+      ['seen.pdf', 'ask']
+    ])
+    expect(screen.getByText('books.lib.importedToast:1')).toBeInTheDocument()
+    expect(screen.getByTestId('duplicates')).toHaveTextContent('seen.pdf=Seen before,seen.pdf=Seen before')
+    expect(screen.queryByRole('alert')).toBeNull()
+
+    await act(() => mockDuplicates.onImportCopies())
+    expect(mockImportFile.mock.calls.slice(3).map(([f, , , , onDuplicate]) => [f.name, onDuplicate])).toEqual([
+      ['seen.pdf', 'copy'],
+      ['seen.pdf', 'copy']
+    ])
+    expect(screen.queryByTestId('duplicates')).toBeNull()
+    expect(screen.getByText('books.lib.importedToast:2')).toBeInTheDocument()
+  })
+
+  it('skipping the duplicates imports nothing more', async () => {
+    renderPage()
+    mockImportFile.mockResolvedValue({ title: 'seen' })
+    await act(() => mockDropzone.onDrop([file('seen.pdf'), file('other.txt')], []))
+    mockImportFile.mockReset().mockImplementation((f) =>
+      f.name === 'seen.pdf'
+        ? Promise.reject({ response: { status: 409, data: { detail: { code: 'import_duplicate', existing: { _id: 'old', title: 'Seen' } } } } })
+        : Promise.resolve({ _id: 'o' })
+    )
+    await act(() => mockPreview.onConfirm(''))
+    const calls = mockImportFile.mock.calls.length
+    act(() => mockDuplicates.onSkip())
+    expect(screen.queryByTestId('duplicates')).toBeNull()
+    expect(mockImportFile).toHaveBeenCalledTimes(calls)
+  })
+
+  it('one file the preview already called a duplicate is imported as a copy when the reader presses the key', async () => {
+    renderPage()
+    mockImportFile.mockResolvedValue({ title: 'seen', duplicate_of: { _id: 'old', title: 'Seen', created_at: null } })
+    await act(() => mockDropzone.onDrop([file('seen.pdf')], []))
+    mockImportFile.mockReset().mockResolvedValue({ _id: 'copy' })
+    await act(() => mockPreview.onConfirm('Seen (2)'))
+    expect(mockImportFile.mock.calls[0].slice(3)).toEqual(['Seen (2)', 'copy'])
+    expect(screen.queryByTestId('duplicates')).toBeNull()
   })
 
   it('says the connection failed, not the file, when no answer comes back', async () => {

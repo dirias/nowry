@@ -1,4 +1,4 @@
-import { IMPORT_EXTENSIONS, importRefusal, rejectedFileRefusal } from '../books/importRefusal'
+import { IMPORT_EXTENSIONS, duplicateOf, importRefusal, rejectedFileRefusal } from '../books/importRefusal'
 
 const refused = (status, detail) => ({ response: { status, data: { detail } } })
 
@@ -45,5 +45,15 @@ describe('importRefusal', () => {
   it('falls back to a generic sentence that still names the file', () => {
     expect(importRefusal(refused(500, 'Internal Server Error'), 'a.pdf')).toEqual({ key: 'books.import.failed', options: { name: 'a.pdf' } })
     expect(importRefusal(refused(422, [{ msg: 'Field required' }]), 'a.pdf').key).toBe('books.import.failed')
+  })
+})
+
+describe('duplicateOf (ADR-066)', () => {
+  it('reads the existing document from a duplicate refusal and nothing from any other', () => {
+    const existing = { _id: 'b1', title: 'notes', created_at: '2026-11-11T00:00:00' }
+    expect(duplicateOf(refused(409, { code: 'import_duplicate', existing }))).toEqual(existing)
+    expect(duplicateOf(refused(400, { code: 'import_empty' }))).toBeNull()
+    expect(duplicateOf(refused(409, 'conflict'))).toBeNull()
+    expect(duplicateOf({ code: 'ERR_NETWORK' })).toBeNull()
   })
 })
