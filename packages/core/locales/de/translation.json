@@ -231,7 +231,9 @@
     "links": {
       "library": "Bibliothek",
       "pricing": "Preise",
-      "copyright": "Urheberrecht"
+      "copyright": "Urheberrecht",
+      "privacy": "Datenschutzerklärung",
+      "terms": "Nutzungsbedingungen"
     },
     "support": {
       "title": "Support",

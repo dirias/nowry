@@ -216,7 +216,9 @@
     "links": {
       "library": "ライブラリ",
       "pricing": "料金",
-      "copyright": "著作権"
+      "copyright": "著作権",
+      "privacy": "プライバシーポリシー",
+      "terms": "利用規約"
     },
     "support": {
       "title": "サポート",
@@ -359,7 +361,7 @@
     "welcomeBack": "おかえりなさい",
     "signInSubtitle": "サインインして学習を続けましょう。",
     "createAccount": "アカウントを作成しましょう",
-    "createAccountSubtitle": "無料、カード登録不要。Nowry は早期アクセス中です。",
+    "createAccountSubtitle": "無料、カード登録不要。Nowry は先行アクセス中です。",
     "email": "メールアドレス",
     "password": "パスワード",
     "username": "ユーザー名",
@@ -505,7 +507,7 @@
       }
     },
     "note": {
-      "title": "Nowry は早期アクセス中です。",
+      "title": "Nowry は先行アクセス中です。",
       "body": "ご覧のものは今日時点の製品で、毎週変わっていきます。今参加して、次に作るべきものを教えてください。そしてスパイラルに会ってください。一年がそうであるように、一巻きずつ育ちます。",
       "cta": "無料でアカウントを作成"
     },

@@ -45,6 +45,7 @@ import {
   AutoAwesomeRounded,
   PublicRounded,
   SellRounded,
+  RocketLaunchRounded,
   MailOutlineRounded,
   SpaceDashboardRounded
 } from '@mui/icons-material'
@@ -233,7 +234,7 @@ const Header = () => {
       name: SHOW_PRICING ? t('header.pricing') : t('beta.earlyAccess'),
       to: { pathname: '/', hash: '#pricing' },
       path: '/#pricing',
-      icon: <SellRounded />
+      icon: SHOW_PRICING ? <SellRounded /> : <RocketLaunchRounded />
     },
     { name: t('header.contact'), to: '/contact', path: '/contact', icon: <MailOutlineRounded /> }
   ]
