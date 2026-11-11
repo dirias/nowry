@@ -90,7 +90,8 @@
     "deleteModal": {
       "whatWillHappen": "Qué va a pasar:",
       "recoveryNotice": "Los datos se pueden recuperar durante 30 días escribiendo a soporte"
-    }
+    },
+    "errorGeneric": "Algo salió mal."
   },
   "news": {
     "title": "Últimas Noticias",
@@ -411,7 +412,8 @@
         "codeLength": "El código debe tener 6 dígitos"
       }
     },
-    "newHere": "¿Eres nuevo aquí?"
+    "newHere": "¿Eres nuevo aquí?",
+    "loginRequired": "Inicia sesión para continuar."
   },
   "landing": {
     "hero": {
@@ -1421,7 +1423,14 @@
     },
     "tableOfContents": "Índice",
     "noHeadings": "Aún no hay encabezados",
-    "useHeadings": "Usa /h1, /h2, /h3 para crear la estructura"
+    "useHeadings": "Usa /h1, /h2, /h3 para crear la estructura",
+    "status": {
+      "saving": "Guardando…",
+      "saved": "Guardado",
+      "manualSave": "Guardado manual",
+      "saveFailed": "No se pudo guardar",
+      "unsaved": "Cambios sin guardar…"
+    }
   },
   "cards": {
     "archived": {
@@ -1883,6 +1892,9 @@
       "cardOf": "{{current}} de {{total}}",
       "clickToFlip": "Haz clic para voltear",
       "description": "Descripción"
+    },
+    "setup": {
+      "next": "Siguiente"
     }
   },
   "filters": {
@@ -2346,7 +2358,9 @@
       "routineCompletion": "elementos completados",
       "allYear": "Todo el año",
       "reviewNow": "Revisar ahora",
-      "quarterEndingIn_one": "El trimestre {{quarter}} termina en {{count}} día"
+      "quarterEndingIn_one": "El trimestre {{quarter}} termina en {{count}} día",
+      "closeQuarter": "Cerrar el T{{quarter}} de {{year}}",
+      "closeQuarterDesc": "Revisa tu progreso y pasa las metas pendientes al siguiente trimestre."
     },
     "quarterReport": {
       "report": "Informe",
@@ -2428,7 +2442,8 @@
       "areaGoalCount_one": "{{count}} objetivo",
       "areaGoalCount_other": "{{count}} objetivos"
     },
-    "back": "Volver al plan"
+    "back": "Volver al plan",
+    "searchGoals": "Buscar metas…"
   },
   "focusBar": {
     "overdue": "Atrasado",
@@ -2648,7 +2663,8 @@
       "minutesAgo": "hace {{count}} min",
       "hoursAgo": "hace {{count}} h",
       "daysAgo": "hace {{count}} d"
-    }
+    },
+    "bubbleAriaLabel": "Nota: {{preview}}"
   },
   "public": {
     "publishInstant": "Compartir con la comunidad",
@@ -2789,7 +2805,10 @@
     "discoverRow": "Descubrir mazos y libros",
     "discoverMeta": "Compartidos por otros estudiantes",
     "nothingShared": "Aún no hay nada compartido",
-    "nothingSharedHint": "Aquí aparecen los mazos y libros que publican otros estudiantes."
+    "nothingSharedHint": "Aquí aparecen los mazos y libros que publican otros estudiantes.",
+    "gridView": "Vista de cuadrícula",
+    "listView": "Vista de lista",
+    "unpublishConfirm": "¿Retirar este libro? Dejará de aparecer en la biblioteca pública."
   },
   "publish": {
     "openSheet": "Compartir con la comunidad",
@@ -4596,7 +4615,8 @@
       "timeout": "La solicitud tardó demasiado. Revisa tu conexión e inténtalo de nuevo.",
       "forbidden": "No tienes permiso para realizar esta acción.",
       "server": "Ocurrió un error en el servidor. Inténtalo de nuevo más tarde."
-    }
+    },
+    "generic": "Algo salió mal. Inténtalo de nuevo."
   },
   "beta": {
     "mark": "Beta",

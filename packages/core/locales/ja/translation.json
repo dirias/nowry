@@ -151,7 +151,8 @@
     "add": "追加",
     "back": "戻る",
     "optional": "任意",
-    "select": "選択"
+    "select": "選択",
+    "errorGeneric": "問題が発生しました。"
   },
   "news": {
     "title": "最新ニュース",
@@ -439,7 +440,8 @@
         "codeLength": "コードは6桁である必要があります"
       }
     },
-    "newHere": "はじめての方ですか？"
+    "newHere": "はじめての方ですか？",
+    "loginRequired": "続けるにはサインインしてください。"
   },
   "landing": {
     "hero": {
@@ -1076,6 +1078,13 @@
       "imageUnnamed": "画像",
       "legacyOnly": "このドキュメントは古い形式で書かれているため、スマートフォンではまだ表示できません。ウェブで開いてお読みください。",
       "unsupported": "{{name}} ブロックは、スマートフォンではまだ描画できません。"
+    },
+    "status": {
+      "saving": "保存中…",
+      "saved": "保存済み",
+      "manualSave": "手動保存",
+      "saveFailed": "保存できませんでした",
+      "unsaved": "未保存の変更…"
     }
   },
   "sidemenu": {
@@ -1735,7 +1744,9 @@
       "startDescription": "年間プランを作成して、目標を立て、進捗を記録し、今年の夢を実現しましょう。",
       "startJourney": "{{year}}年の歩みを始めましょう",
       "totalProgress": "完了",
-      "focusAreas": "重点分野"
+      "focusAreas": "重点分野",
+      "closeQuarter": "{{year}}年 第{{quarter}}四半期を締める",
+      "closeQuarterDesc": "進み具合を振り返り、未完了の目標を次の四半期に移します。"
     },
     "quarterReport": {
       "report": "Report",
@@ -1809,7 +1820,8 @@
       "prioritiesEmptyTitle": "優先事項はまだありません",
       "prioritiesEmptyBody": "今年もっとも大切な数少ないこと。タスクやマイルストーンに旗を立てて優先事項にしましょう。",
       "areaGoalCount_other": "{{count}} 件の目標"
-    }
+    },
+    "searchGoals": "目標を検索…"
   },
   "deckSettings": {
     "menuItem": "設定",
@@ -2817,6 +2829,9 @@
       "split": "分割する",
       "rested": "1週間休憩中。{{date}}に戻ります。",
       "prompt": "このカードを4回も間違えました。別の言い方で説明して、何と混同しているのか教えてください。"
+    },
+    "setup": {
+      "next": "次へ"
     }
   },
   "subscription": {
@@ -3056,7 +3071,10 @@
     "discoverRow": "デッキと本を見つける",
     "discoverMeta": "他の学習者が共有",
     "nothingShared": "まだ共有されたものはありません",
-    "nothingSharedHint": "他の学習者が公開したデッキや本がここに表示されます。"
+    "nothingSharedHint": "他の学習者が公開したデッキや本がここに表示されます。",
+    "gridView": "グリッド表示",
+    "listView": "リスト表示",
+    "unpublishConfirm": "このブックの公開を取り消しますか？公開ライブラリに表示されなくなります。"
   },
   "editor": {
     "mode": {
@@ -3901,10 +3919,12 @@
       "timeout": "リクエストがタイムアウトしました。接続を確認して、もう一度お試しください。",
       "forbidden": "この操作を行う権限がありません。",
       "server": "サーバーでエラーが発生しました。しばらくしてからもう一度お試しください。"
-    }
+    },
+    "generic": "問題が発生しました。もう一度お試しください。"
   },
   "comments": {
-    "moreNotesAriaLabel_other": "下に{{count}}件のメモを表示"
+    "moreNotesAriaLabel_other": "下に{{count}}件のメモを表示",
+    "bubbleAriaLabel": "メモ: {{preview}}"
   },
   "focusBar": {
     "daysLeft_other": "残り {{count}} 日",

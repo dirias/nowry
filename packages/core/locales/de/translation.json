@@ -166,7 +166,8 @@
     "add": "Hinzufügen",
     "back": "Zurück",
     "optional": "Optional",
-    "select": "Auswählen"
+    "select": "Auswählen",
+    "errorGeneric": "Etwas ist schiefgelaufen."
   },
   "news": {
     "title": "Aktuelle Nachrichten",
@@ -475,7 +476,8 @@
         "codeLength": "Code muss 6 Ziffern haben"
       }
     },
-    "newHere": "Neu hier?"
+    "newHere": "Neu hier?",
+    "loginRequired": "Melde dich an, um fortzufahren."
   },
   "landing": {
     "hero": {
@@ -1575,7 +1577,9 @@
       "startDescription": "Erstellen Sie Ihren Jahresplan, um Ziele zu setzen, Fortschritte zu verfolgen und Ihre Träume dieses Jahr zu verwirklichen.",
       "startJourney": "Starten Sie Ihr Jahr {{year}}",
       "totalProgress": "abgeschlossen",
-      "focusAreas": "Schwerpunkte"
+      "focusAreas": "Schwerpunkte",
+      "closeQuarter": "Q{{quarter}} {{year}} abschließen",
+      "closeQuarterDesc": "Sieh dir deinen Fortschritt an und übertrage offene Ziele ins nächste Quartal."
     },
     "quarterReport": {
       "report": "Report",
@@ -1656,7 +1660,8 @@
       "prioritiesEmptyBody": "Die wenigen Dinge, die dieses Jahr am meisten zählen. Markiere eine Aufgabe oder einen Meilenstein, um eine Priorität daraus zu machen.",
       "areaGoalCount_one": "{{count}} Ziel",
       "areaGoalCount_other": "{{count}} Ziele"
-    }
+    },
+    "searchGoals": "Ziele suchen…"
   },
   "deckSettings": {
     "menuItem": "Einstellungen",
@@ -2697,6 +2702,9 @@
       "split": "Aufteilen",
       "rested": "Ruht eine Woche. Zurück am {{date}}.",
       "prompt": "Ich habe diese Karte jetzt viermal verfehlt. Erkläre sie mir anders und sag mir, womit ich sie verwechseln könnte."
+    },
+    "setup": {
+      "next": "Weiter"
     }
   },
   "books": {
@@ -2926,6 +2934,13 @@
       "imageUnnamed": "Bild",
       "legacyOnly": "Dieses Dokument wurde in einem älteren Format geschrieben, das das Telefon noch nicht anzeigen kann. Öffne es im Web, um es zu lesen.",
       "unsupported": "Ein {{name}}-Block, den das Telefon noch nicht darstellen kann."
+    },
+    "status": {
+      "saving": "Wird gespeichert…",
+      "saved": "Gespeichert",
+      "manualSave": "Manuelles Speichern",
+      "saveFailed": "Speichern fehlgeschlagen",
+      "unsaved": "Ungespeicherte Änderungen…"
     }
   },
   "reports": {
@@ -3177,7 +3192,10 @@
     "discoverRow": "Decks und Bücher entdecken",
     "discoverMeta": "Von anderen Lernenden geteilt",
     "nothingShared": "Noch nichts geteilt",
-    "nothingSharedHint": "Decks und Bücher, die andere Lernende veröffentlichen, erscheinen hier."
+    "nothingSharedHint": "Decks und Bücher, die andere Lernende veröffentlichen, erscheinen hier.",
+    "gridView": "Rasteransicht",
+    "listView": "Listenansicht",
+    "unpublishConfirm": "Veröffentlichung dieses Buchs aufheben? Es erscheint dann nicht mehr in der öffentlichen Bibliothek."
   },
   "editor": {
     "mode": {
@@ -4050,11 +4068,13 @@
       "timeout": "Die Anfrage hat zu lange gedauert. Prüfe deine Verbindung und versuch es erneut.",
       "forbidden": "Du hast keine Berechtigung für diese Aktion.",
       "server": "Ein Serverfehler ist aufgetreten. Versuch es später noch einmal."
-    }
+    },
+    "generic": "Etwas ist schiefgelaufen. Versuch es erneut."
   },
   "comments": {
     "moreNotesAriaLabel_one": "{{count}} weitere Notiz unten anzeigen",
-    "moreNotesAriaLabel_other": "{{count}} weitere Notizen unten anzeigen"
+    "moreNotesAriaLabel_other": "{{count}} weitere Notizen unten anzeigen",
+    "bubbleAriaLabel": "Notiz: {{preview}}"
   },
   "focusBar": {
     "daysLeft_one": "Noch {{count}} Tag",

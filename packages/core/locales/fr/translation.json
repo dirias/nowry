@@ -166,7 +166,8 @@
     "add": "Ajouter",
     "back": "Retour",
     "optional": "Facultatif",
-    "select": "Sélectionner"
+    "select": "Sélectionner",
+    "errorGeneric": "Une erreur s'est produite."
   },
   "news": {
     "title": "Dernières Actualités",
@@ -486,7 +487,8 @@
         "codeLength": "Le code doit comporter 6 chiffres"
       }
     },
-    "newHere": "Nouveau ici ?"
+    "newHere": "Nouveau ici ?",
+    "loginRequired": "Connectez-vous pour continuer."
   },
   "landing": {
     "hero": {
@@ -1586,7 +1588,9 @@
       "startDescription": "Créez votre plan annuel pour définir vos objectifs, suivre vos progrès et réaliser vos rêves cette année.",
       "startJourney": "Commencez votre parcours {{year}}",
       "totalProgress": "terminé",
-      "focusAreas": "Domaines clés"
+      "focusAreas": "Domaines clés",
+      "closeQuarter": "Clôturer le T{{quarter}} {{year}}",
+      "closeQuarterDesc": "Passez en revue vos progrès et reportez les objectifs en cours au trimestre suivant."
     },
     "quarterReport": {
       "report": "Report",
@@ -1667,7 +1671,8 @@
       "prioritiesEmptyBody": "Les quelques choses qui comptent le plus cette année. Marquez une tâche ou un jalon pour en faire une priorité.",
       "areaGoalCount_one": "{{count}} objectif",
       "areaGoalCount_other": "{{count}} objectifs"
-    }
+    },
+    "searchGoals": "Rechercher des objectifs…"
   },
   "deckSettings": {
     "menuItem": "Paramètres",
@@ -2708,6 +2713,9 @@
       "split": "Scinder",
       "rested": "Au repos une semaine. De retour le {{date}}.",
       "prompt": "J'ai raté cette carte quatre fois. Explique-la-moi autrement et dis-moi avec quoi je pourrais la confondre."
+    },
+    "setup": {
+      "next": "Suivant"
     }
   },
   "books": {
@@ -2937,6 +2945,13 @@
       "imageUnnamed": "Image",
       "legacyOnly": "Ce document a été écrit dans un ancien format que le téléphone ne peut pas encore afficher. Ouvrez-le sur le web pour le lire.",
       "unsupported": "Un bloc {{name}}, que le téléphone ne sait pas encore dessiner."
+    },
+    "status": {
+      "saving": "Enregistrement…",
+      "saved": "Enregistré",
+      "manualSave": "Enregistrement manuel",
+      "saveFailed": "Échec de l'enregistrement",
+      "unsaved": "Modifications non enregistrées…"
     }
   },
   "reports": {
@@ -3188,7 +3203,10 @@
     "discoverRow": "Découvrir des paquets et des livres",
     "discoverMeta": "Partagés par d’autres apprenants",
     "nothingShared": "Rien n’est encore partagé",
-    "nothingSharedHint": "Les paquets et livres publiés par d’autres apprenants apparaissent ici."
+    "nothingSharedHint": "Les paquets et livres publiés par d’autres apprenants apparaissent ici.",
+    "gridView": "Vue en grille",
+    "listView": "Vue en liste",
+    "unpublishConfirm": "Dépublier ce livre ? Il n'apparaîtra plus dans la bibliothèque publique."
   },
   "editor": {
     "mode": {
@@ -4061,11 +4079,13 @@
       "timeout": "La requête a expiré. Vérifiez votre connexion et réessayez.",
       "forbidden": "Vous n'avez pas l'autorisation d'effectuer cette action.",
       "server": "Une erreur serveur s'est produite. Réessayez plus tard."
-    }
+    },
+    "generic": "Une erreur s'est produite. Réessayez."
   },
   "comments": {
     "moreNotesAriaLabel_one": "Afficher {{count}} note de plus ci-dessous",
-    "moreNotesAriaLabel_other": "Afficher {{count}} notes de plus ci-dessous"
+    "moreNotesAriaLabel_other": "Afficher {{count}} notes de plus ci-dessous",
+    "bubbleAriaLabel": "Note : {{preview}}"
   },
   "focusBar": {
     "daysLeft_one": "{{count}} jour restant",

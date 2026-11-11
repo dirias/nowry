@@ -90,7 +90,8 @@
     "language": "Language",
     "studyBuddy": "Study Buddy",
     "moreActions": "More actions",
-    "retry": "Retry"
+    "retry": "Retry",
+    "errorGeneric": "Something went wrong."
   },
   "news": {
     "title": "Latest News",
@@ -411,7 +412,8 @@
         "codeLength": "Code must be 6 digits"
       }
     },
-    "newHere": "New here?"
+    "newHere": "New here?",
+    "loginRequired": "Sign in to continue."
   },
   "landing": {
     "hero": {
@@ -1793,6 +1795,13 @@
       "imageUnnamed": "Image",
       "legacyOnly": "This document was written in an older format that the phone can't display yet. Open it on the web to read it.",
       "unsupported": "A {{name}} block, which the phone can't draw yet."
+    },
+    "status": {
+      "saving": "Saving…",
+      "saved": "Saved",
+      "manualSave": "Manual save",
+      "saveFailed": "Save failed",
+      "unsaved": "Unsaved changes…"
     }
   },
   "cards": {
@@ -2255,6 +2264,9 @@
       "split": "Split",
       "rested": "Resting for a week. Back on {{date}}.",
       "prompt": "I've missed this card four times now. Explain it a different way, and tell me what I might be mixing it up with."
+    },
+    "setup": {
+      "next": "Next"
     }
   },
   "filters": {
@@ -2762,7 +2774,9 @@
       "quarterEndingIn_other": "Quarter {{quarter}} ends in {{count}} days",
       "quarterEndingIn_one": "Quarter {{quarter}} ends in {{count}} day",
       "routineCompletion": "items done",
-      "allYear": "All year"
+      "allYear": "All year",
+      "closeQuarter": "Close Q{{quarter}} {{year}}",
+      "closeQuarterDesc": "Review your progress and move unfinished goals to the next quarter."
     },
     "quarterReport": {
       "report": "Report",
@@ -2843,7 +2857,8 @@
       "prioritiesEmptyBody": "The few things that matter most this year. Flag a task or a milestone to make it one.",
       "areaGoalCount_one": "{{count}} goal",
       "areaGoalCount_other": "{{count}} goals"
-    }
+    },
+    "searchGoals": "Search goals…"
   },
   "editor": {
     "mode": {
@@ -3004,7 +3019,8 @@
       "minutesAgo": "{{count}}m ago",
       "hoursAgo": "{{count}}h ago",
       "daysAgo": "{{count}}d ago"
-    }
+    },
+    "bubbleAriaLabel": "Note: {{preview}}"
   },
   "public": {
     "publishInstant": "Share with community",
@@ -3145,7 +3161,10 @@
     "discoverRow": "Discover decks and books",
     "discoverMeta": "Shared by other learners",
     "nothingShared": "Nothing shared yet",
-    "nothingSharedHint": "Decks and books other learners publish show up here."
+    "nothingSharedHint": "Decks and books other learners publish show up here.",
+    "gridView": "Grid view",
+    "listView": "List view",
+    "unpublishConfirm": "Unpublish this book? It will no longer appear in the public library."
   },
   "focusBar": {
     "overdue": "Overdue",
@@ -4589,7 +4608,8 @@
       "timeout": "Request timed out. Please check your connection and try again.",
       "forbidden": "You do not have permission to perform this action.",
       "server": "A server error occurred. Please try again later."
-    }
+    },
+    "generic": "Something went wrong. Try again."
   },
   "beta": {
     "mark": "Beta",
