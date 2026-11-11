@@ -22,6 +22,7 @@ import {
   Checkbox,
   Chip,
   Divider,
+  EvolutionReveal,
   FormField,
   Icon,
   IconButton,
@@ -267,8 +268,31 @@ function Panel({ title }) {
             </Typography>
           </Stack>
         </Section>
+
+        {/* The staged evolution (ADR-075), replayed without levelling up. A
+            development build only: it is a tool for looking, not a screen. */}
+        {__DEV__ ? (
+          <Section label='Evolution reveal (ADR-075)'>
+            <EvolutionDemo />
+          </Section>
+        ) : null}
       </Stack>
     </Box>
+  )
+}
+
+/** Every stage change there is, each replayed in this panel's scheme. */
+function EvolutionDemo() {
+  const [pair, setPair] = useState(null)
+  return (
+    <Stack direction='row' spacing={1} style={{ flexWrap: 'wrap' }}>
+      {[1, 2, 3, 4, 5].map((from) => (
+        <Button key={from} size='sm' variant='soft' color='neutral' onPress={() => setPair({ from, to: from + 1 })}>
+          {`${from} → ${from + 1}`}
+        </Button>
+      ))}
+      {pair ? <EvolutionReveal fromStage={pair.from} toStage={pair.to} level={pair.to * 3} onClose={() => setPair(null)} /> : null}
+    </Stack>
   )
 }
 

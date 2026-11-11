@@ -35,4 +35,14 @@ export function bestLevelUp(responses = []) {
     .reduce((best, next) => (best === null || next.level > best.level ? next : best), null)
 }
 
+/**
+ * The evolution in a level-up, or `null` when the level changed and the form
+ * did not (ADR-075). `stageBefore` is the stage the client held before the
+ * grant; without it nothing can be said to have changed, so nothing is staged.
+ */
+export function evolutionFrom(stageBefore, levelUp) {
+  if (!levelUp || !Number.isInteger(stageBefore) || stageBefore < 1) return null
+  return levelUp.stage > stageBefore ? { fromStage: stageBefore, toStage: levelUp.stage, level: levelUp.level } : null
+}
+
 export default levelUpFrom

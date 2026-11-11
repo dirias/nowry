@@ -106,6 +106,24 @@ export const spiralPath = (options = {}, steps = 96) => {
   }).join(' ')
 }
 
+/** The spiral's length, for a client that draws it by offsetting a dash. */
+export const spiralLength = (options = {}, steps = 96) => {
+  let length = 0
+  let previous = spiralPoint(0, options)
+  for (let index = 1; index <= steps; index += 1) {
+    const point = spiralPoint(index / steps, options)
+    length += Math.hypot(point.x - previous.x, point.y - previous.y)
+    previous = point
+  }
+  return length
+}
+
+/** A mote's way inward: `steps + 1` points from where it joins the spiral to the centre end. */
+export const motePath = (index, options = {}, steps = 8) => {
+  const start = index / MOTE_COUNT
+  return Array.from({ length: steps + 1 }, (_, step) => spiralPoint(start + ((1 - start) * step) / steps, options))
+}
+
 // ── When the month's generations come back ─────────────────────────────────
 /**
  * The instant the count resets: the first of next month at 00:00 UTC, which is

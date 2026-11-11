@@ -12,9 +12,12 @@ import {
   nextBeat,
   showsGenerationsLeft,
   showsNewForm,
+  motePath,
+  spiralLength,
   spiralPath,
   spiralPoint
 } from '../petEvolution'
+import { evolutionFrom } from '../petLevelUp'
 import { MOTION } from '../../tokens/tokens'
 
 describe('which variant plays (ADR-075)', () => {
@@ -117,6 +120,37 @@ describe('the spiral', () => {
     expect(path.match(/M/g)).toHaveLength(1)
     expect(path.match(/L/g).length).toBeGreaterThan(40)
     expect(path).not.toMatch(/NaN/)
+  })
+})
+
+describe('what the phone draws with', () => {
+  it('measures the spiral, so a dash can draw it', () => {
+    const small = spiralLength({ size: 100 })
+    const large = spiralLength({ size: 200 })
+    expect(small).toBeGreaterThan(100)
+    expect(large / small).toBeCloseTo(2, 5)
+  })
+
+  it('sends each mote inward along the spiral, to its centre end', () => {
+    const end = spiralPoint(1, { size: 200 })
+    for (let index = 0; index < MOTE_COUNT; index += 1) {
+      const points = motePath(index, { size: 200 })
+      expect(points).toHaveLength(9)
+      expect(points[8].x).toBeCloseTo(end.x, 6)
+      expect(points[8].y).toBeCloseTo(end.y, 6)
+    }
+  })
+})
+
+describe('an evolution inside a level-up', () => {
+  it('is a stage higher than the one held before the grant', () => {
+    expect(evolutionFrom(2, { level: 6, stage: 3 })).toEqual({ fromStage: 2, toStage: 3, level: 6 })
+  })
+
+  it('is nothing when only the level changed, or when the stage before is unknown', () => {
+    expect(evolutionFrom(3, { level: 7, stage: 3 })).toBeNull()
+    expect(evolutionFrom(undefined, { level: 6, stage: 3 })).toBeNull()
+    expect(evolutionFrom(2, null)).toBeNull()
   })
 })
 

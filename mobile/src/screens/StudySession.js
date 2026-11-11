@@ -34,7 +34,7 @@ import { useTranslation } from 'react-i18next'
 import { agentService, cardsService, studySessionsService } from '@nowry/core/api/services'
 import { queryClient } from '@nowry/core/api/queryClient'
 import { useSessionCards } from '@nowry/core/hooks/useSessionCards'
-import { bestLevelUp } from '@nowry/core/domain/petLevelUp'
+import { bestLevelUp, evolutionFrom } from '@nowry/core/domain/petLevelUp'
 import { sessionSummaryEvent, wrongAnswerEvent } from '@nowry/core/domain/interventionPolicy'
 import { studyCardContext } from '@nowry/core/domain/screenContext'
 import { usePetState } from '@nowry/core/hooks/usePetState'
@@ -75,6 +75,7 @@ import {
   IconButton,
   MarkToggle,
   PetLevelUp,
+  EvolutionReveal,
   Progress,
   Screen,
   Skeleton,
@@ -206,6 +207,8 @@ export function StudySession() {
   const [hinted, setHinted] = useState(false)
   // What the two XP grants at the end of the session reached, if anything.
   const [levelUp, setLevelUp] = useState(null)
+  // A level-up that changed the form (ADR-075): shown once as the reveal, then the row.
+  const [evolution, setEvolution] = useState(null)
   // The grants themselves, read into the ending's state line (ADR-060 §2).
   const [grants, setGrants] = useState(null)
   // The record's id once the log is written: how the ledger is read (ADR-060 §1).
@@ -453,6 +456,12 @@ export function StudySession() {
    * not one: the summary after the last card interrupts nothing.
    */
   const pet = usePetState()
+  // The form held BEFORE this session's grants: the grants refresh the pet, so
+  // once they settle `pet.stage` is already the new one and says nothing changed.
+  const stageBeforeRef = useRef(null)
+  // Only a stage the server actually reported: while the pet is loading, or failed to, the hook
+  // answers stage 1, and "evolved from 1" would be invented.
+  if (grants === null && !pet.loading && !pet.error && Number.isInteger(pet.stage)) stageBeforeRef.current = pet.stage
   const buddy = useInterventions({ settings: pet.interventions, inSession: !complete })
 
   /*
@@ -559,7 +568,9 @@ export function StudySession() {
        * phone was silent (PEND-001). Either grant can cross the line and only
        * the furthest one is shown: two celebrations for one session is a bug.
        */
-      setLevelUp(bestLevelUp(replies))
+      const best = bestLevelUp(replies)
+      setLevelUp(best)
+      setEvolution(evolutionFrom(stageBeforeRef.current, best))
     })
   }, [complete, id, isDaily, isDrill, deckNames, graded])
 
@@ -1102,7 +1113,16 @@ export function StudySession() {
           {/* The companion, at the stage this session reached: its own moment,
               before the object (ADR-060). It arrives a moment after the summary
               does, because the grants are settled rather than awaited. */}
-          {levelUp ? <PetLevelUp level={levelUp.level} stage={levelUp.stage} accent={accent} /> : null}
+          {evolution ? (
+            <EvolutionReveal
+              fromStage={evolution.fromStage}
+              toStage={evolution.toStage}
+              level={evolution.level}
+              accent={accent}
+              onClose={() => setEvolution(null)}
+            />
+          ) : null}
+          {levelUp && !evolution ? <PetLevelUp level={levelUp.level} stage={levelUp.stage} accent={accent} /> : null}
           <SessionEnd
             end={end}
             onKey={openKey}

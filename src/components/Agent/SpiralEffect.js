@@ -2,7 +2,7 @@ import React, { useMemo } from 'react'
 import { Box } from '@mui/joy'
 import { motion } from 'framer-motion'
 import { MOTION } from '@nowry/core/tokens/tokens'
-import { MOTE_COUNT, beatDuration, spiralPath, spiralPoint } from '@nowry/core/domain/petEvolution'
+import { MOTE_COUNT, beatDuration, motePath, spiralPath } from '@nowry/core/domain/petEvolution'
 
 /**
  * The spiral of light around an evolving companion (ADR-075, EVO-012).
@@ -25,7 +25,6 @@ import { MOTE_COUNT, beatDuration, spiralPath, spiralPoint } from '@nowry/core/d
  */
 const STROKE = 3
 const MOTE_RADIUS = 2.5
-const MOTE_STEPS = 8
 const seconds = (ms) => ms / 1000
 const EASE = MOTION.easing.standard.match(/[\d.]+/g).map(Number)
 
@@ -44,10 +43,7 @@ const SpiralEffect = ({ beat, variant, size }) => {
   const motes = useMemo(
     () =>
       Array.from({ length: MOTE_COUNT }, (_, index) => {
-        const start = index / MOTE_COUNT
-        const points = Array.from({ length: MOTE_STEPS + 1 }, (__, step) =>
-          spiralPoint(start + ((1 - start) * step) / MOTE_STEPS, { size })
-        )
+        const points = motePath(index, { size })
         return { key: index, cx: points.map((point) => point.x), cy: points.map((point) => point.y) }
       }),
     [size]
