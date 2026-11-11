@@ -2849,6 +2849,7 @@
       "pictures_one": "{{count}} Bild",
       "pictures_other": "{{count}} Bilder",
       "scanned": "Das sieht nach einem Scan aus: Die Seiten sind Bilder, es gibt also keinen Text zum Vorlesen oder für Karten.",
+      "damaged": "Diese Datei ist beschädigt. Unten steht, was gelesen werden konnte; ein Teil kann fehlen.",
       "preview": "Vorschau",
       "previousPage": "Vorherige Seite",
       "nextPage": "Nächste Seite",

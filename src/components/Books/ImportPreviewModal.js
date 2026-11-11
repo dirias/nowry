@@ -203,6 +203,12 @@ export default function ImportPreviewModal({
           </Alert>
         )}
 
+        {!preparing && facts?.damaged && (
+          <Alert color='warning' variant='soft' data-testid='import-damaged'>
+            {t('books.import.damaged')}
+          </Alert>
+        )}
+
         {!preparing && facts?.scanned && (
           <Alert color='warning' variant='soft'>
             {t('books.import.scanned')}

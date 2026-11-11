@@ -1341,6 +1341,7 @@
       "pictures_one": "{{count}} imagen",
       "pictures_other": "{{count}} imágenes",
       "scanned": "Parece un documento escaneado: sus páginas son imágenes, así que no hay texto para escuchar ni para crear tarjetas.",
+      "damaged": "Este archivo está dañado. Abajo se muestra lo que se pudo leer; puede que falte una parte.",
       "preview": "Vista previa",
       "previousPage": "Página anterior",
       "nextPage": "Página siguiente",

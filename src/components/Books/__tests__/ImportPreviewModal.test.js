@@ -57,6 +57,11 @@ describe('ImportPreviewModal', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('books.import.scanned')
   })
 
+  it('warns when the file was damaged and only part of it could be read (IMPORT-021)', () => {
+    renderSheet({ previewData: { ...PREVIEW, facts: { ...PREVIEW.facts, damaged: true } } })
+    expect(screen.getByTestId('import-damaged')).toHaveTextContent('books.import.damaged')
+  })
+
   it('pages through the preview and says when a page has no text', () => {
     renderSheet()
     expect(screen.getByText('First')).toBeInTheDocument()
