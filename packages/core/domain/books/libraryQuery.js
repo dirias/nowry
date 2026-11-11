@@ -107,3 +107,24 @@ export const sortDocuments = (books = [], sort = 'edited') => {
   else rows.sort((a, b) => time(b.updated_at) - time(a.updated_at))
   return rows
 }
+
+/**
+ * One page of the library, answered from a whole list (ADR-068).
+ *
+ * The library is the server's to page (ADR-063). This is what the client falls
+ * back to when the server it talks to does not have that route yet — a web
+ * build that reached production before its API did — so the page still opens,
+ * from the list route every server has. The shape is the server's.
+ */
+export const libraryPageFromList = (books = [], { kind = 'all', search = '', tags = [], sort = 'edited', offset = 0, limit = 24 } = {}) => {
+  const matching = sortDocuments(filterDocuments(books, { kind, search, tags }), sort)
+  return {
+    items: matching.slice(offset, offset + limit),
+    total: matching.length,
+    offset,
+    limit,
+    counts: kindCounts(books),
+    tags: tagCounts(books),
+    continue_book: pickContinue(books)
+  }
+}

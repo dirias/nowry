@@ -8,7 +8,7 @@ jest.mock('../client', () => ({
   apiClient: { post: (...args) => mockPost(...args) }
 }))
 
-const { booksService, IMPORT_TIMEOUT_MS } = require('./books.service')
+const { booksService, IMPORT_TIMEOUT_MS, resetLibraryRoute } = require('./books.service')
 
 class FakeFormData {
   constructor() {
@@ -30,7 +30,7 @@ describe('importFile', () => {
     await booksService.importFile({ name: 'notes.pdf' }, 'ana', false, 'Notes')
     const [url, form, config] = mockPost.mock.calls[0]
     expect(url).toBe('/book/import')
-    expect(form.fields).toEqual({ file: { name: 'notes.pdf' }, username: 'ana', preview: 'false', title: 'Notes', on_duplicate: 'ask' })
+    expect(form.fields).toEqual({ file: { name: 'notes.pdf' }, username: 'ana', preview: 'false', title: 'Notes', on_duplicate: 'ask', error_format: 'coded' })
     expect(config.timeout).toBe(IMPORT_TIMEOUT_MS)
     expect(IMPORT_TIMEOUT_MS).toBeGreaterThanOrEqual(120000)
   })
@@ -65,5 +65,42 @@ describe('getLibrary (ADR-063)', () => {
   it('asks for the first page of everything by default', async () => {
     await booksService.getLibrary()
     expect(mockGet).toHaveBeenCalledWith('/book/library?kind=all&sort=edited&offset=0&limit=24')
+  })
+})
+
+describe('getLibrary against a server from before the paged library (ADR-068)', () => {
+  const mockGet = jest.fn()
+  const BOOKS = [
+    { _id: 'a', title: 'Álgebra', updated_at: '2026-11-01T00:00:00Z', source: 'written', tags: ['math'] },
+    { _id: 'b', title: 'Biology', updated_at: '2026-11-03T00:00:00Z', source: 'imported', author: 'Ana' },
+    { _id: 'c', title: 'Chemistry', updated_at: '2026-11-02T00:00:00Z', source: 'written' }
+  ]
+  beforeEach(() => {
+    resetLibraryRoute()
+    mockGet.mockReset().mockImplementation((url) =>
+      url.startsWith('/book/library') ? Promise.reject({ response: { status: 404 } }) : Promise.resolve({ data: BOOKS })
+    )
+    require('../client').apiClient.get = (...args) => mockGet(...args)
+  })
+
+  it('opens the library from the list route, in the server\'s shape', async () => {
+    const page = await booksService.getLibrary({ limit: 2 })
+    expect(page.items.map((b) => b._id)).toEqual(['b', 'c'])
+    expect(page).toMatchObject({ total: 3, offset: 0, limit: 2, counts: { all: 3, written: 2, imported: 1 }, continue_book: { _id: 'b' } })
+    expect(page.tags).toEqual([{ tag: 'math', count: 1 }])
+    expect((await booksService.getLibrary({ offset: 2, limit: 2 })).items.map((b) => b._id)).toEqual(['a'])
+  })
+
+  it('asks the missing route once per session, not once per page', async () => {
+    await booksService.getLibrary()
+    await booksService.getLibrary({ kind: 'imported' })
+    expect(mockGet.mock.calls.filter(([url]) => url.startsWith('/book/library'))).toHaveLength(1)
+  })
+
+  it('does not hide a real failure behind the fallback', async () => {
+    mockGet.mockReset().mockRejectedValue({ response: { status: 500 } })
+    await expect(booksService.getLibrary()).rejects.toEqual({ response: { status: 500 } })
+    mockGet.mockReset().mockRejectedValue({ code: 'ERR_NETWORK' })
+    await expect(booksService.getLibrary()).rejects.toEqual({ code: 'ERR_NETWORK' })
   })
 })

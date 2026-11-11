@@ -1,5 +1,13 @@
 import { apiClient } from '../client'
 import { ENDPOINTS } from '../utils/endpoints'
+import { libraryPageFromList } from '../../domain/books/libraryQuery'
+
+// True once this session has learned its server has no `/book/library` (ADR-068).
+let libraryRouteMissing = false
+/** For tests: forget what was learned about the server. */
+export const resetLibraryRoute = () => {
+  libraryRouteMissing = false
+}
 
 /** How many documents the library asks for at a time. */
 export const LIBRARY_PAGE_SIZE = 24
@@ -34,11 +42,23 @@ export const booksService = {
    * @returns {Promise<{items: Array, total: number, offset: number, limit: number, counts: {all: number, written: number, imported: number}, tags: Array<{tag: string, count: number}>, continue_book: Object|null}>}
    */
   async getLibrary({ kind = 'all', search = '', tags = [], sort = 'edited', offset = 0, limit = LIBRARY_PAGE_SIZE } = {}) {
+    const question = { kind, search, tags, sort, offset, limit }
+    if (libraryRouteMissing) return libraryPageFromList(await this.getAll(), question)
     const params = new URLSearchParams({ kind, sort, offset: String(offset), limit: String(limit) })
     if (search.trim()) params.set('q', search.trim())
     tags.forEach((tag) => params.append('tags', tag))
-    const { data } = await apiClient.get(`${ENDPOINTS.books.library}?${params.toString()}`)
-    return data
+    try {
+      const { data } = await apiClient.get(`${ENDPOINTS.books.library}?${params.toString()}`)
+      return data
+    } catch (error) {
+      // ADR-068: a server from before the paged library answers 404 here (the
+      // path falls into its "book by id" route). The page must still open, so
+      // the list route every server has is read instead, and remembered for
+      // this session so each page does not pay for a failed request first.
+      if (![404, 405].includes(error?.response?.status)) throw error
+      libraryRouteMissing = true
+      return libraryPageFromList(await this.getAll(), question)
+    }
   },
 
   /**
@@ -172,6 +192,8 @@ export const booksService = {
     // 'ask' is refused with 409 `import_duplicate` so the reader can be asked,
     // 'copy' imports it again. A preview only reports (`duplicate_of`).
     if (!preview) formData.append('on_duplicate', onDuplicate)
+    // ADR-068: this client reads coded refusals; a client that does not say so gets a sentence.
+    formData.append('error_format', 'coded')
 
     // An import uploads the file, parses it and stores its pictures inside one
     // request, which the 10-second default cannot cover: it gave up on a 1 MB
