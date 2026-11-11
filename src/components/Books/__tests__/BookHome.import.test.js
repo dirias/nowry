@@ -39,6 +39,7 @@ jest.mock('../../Messages', () => ({ Error: ({ error_msg }) => <div role='alert'
 const mockImportFile = jest.fn()
 jest.mock('@nowry/core/api/services', () => ({ booksService: { importFile: (...args) => mockImportFile(...args) } }))
 const mockReload = jest.fn()
+let mockLibraryError = null
 jest.mock('@nowry/core/hooks/useLibrary', () => {
   const useLibrary = () => ({
     rows: [],
@@ -51,7 +52,7 @@ jest.mock('@nowry/core/hooks/useLibrary', () => {
     loadingMore: false,
     hasMore: false,
     loadMore: jest.fn(),
-    error: null,
+    error: mockLibraryError,
     reload: mockReload
   })
   return { __esModule: true, default: useLibrary, useLibrary }
@@ -72,6 +73,7 @@ const renderPage = () =>
 beforeEach(() => {
   mockImportFile.mockReset()
   mockReload.mockReset().mockResolvedValue(undefined)
+  mockLibraryError = null
 })
 
 describe('BookHome import', () => {
@@ -203,6 +205,28 @@ describe('BookHome import', () => {
     await act(() => mockPreview.onConfirm('Seen (2)'))
     expect(mockImportFile.mock.calls[0].slice(3)).toEqual(['Seen (2)', 'copy'])
     expect(screen.queryByTestId('duplicates')).toBeNull()
+  })
+
+  it('keeps the per-file report when the library cannot be reloaded either (IMPORT-023)', async () => {
+    renderPage()
+    mockImportFile.mockResolvedValue({ title: 'a' })
+    await act(() => mockDropzone.onDrop([file('a.pdf'), file('b.txt')], []))
+    // The server goes down after the first file: the second gets no answer, and neither does the reload.
+    mockImportFile.mockReset().mockImplementation((f) => (f.name === 'a.pdf' ? Promise.resolve({ _id: 'a' }) : Promise.reject({ code: 'ERR_NETWORK' })))
+    mockReload.mockImplementation(async () => {
+      mockLibraryError = new Error('Network Error')
+    })
+    await act(() => mockPreview.onConfirm(''))
+    const alert = screen.getByRole('alert')
+    expect(alert).toHaveTextContent('books.import.notReached(b.txt)')
+    expect(alert).not.toHaveTextContent('books.lib.loadError')
+    expect(screen.getByText('books.lib.importedToast:1')).toBeInTheDocument()
+  })
+
+  it('says the library could not be loaded when that is all that went wrong', () => {
+    mockLibraryError = new Error('Network Error')
+    renderPage()
+    expect(screen.getByRole('alert')).toHaveTextContent('books.lib.loadError')
   })
 
   it('says the connection failed, not the file, when no answer comes back', async () => {

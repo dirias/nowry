@@ -91,8 +91,12 @@ export default function BookHome() {
   } = useLibrary({ kind, search: searchTerm, tags: selectedTags, sort })
   const libraryCount = counts.all
 
+  // The library could not be read. An import's own report — which files went
+  // in and which did not, by name — is the more useful thing to be told, so it
+  // is never replaced by this sentence (IMPORT-023): when the server went down
+  // in the middle of a drop, "Couldn't load your books" used to be all that was said.
   useEffect(() => {
-    if (fetchError) setErrorMessage(t('books.lib.loadError'))
+    if (fetchError) setErrorMessage((current) => (Array.isArray(current) && current.length ? current : t('books.lib.loadError')))
   }, [fetchError, t])
 
   // The plan's book limit shows only when reached (D3): a readout on the title row,
@@ -200,6 +204,8 @@ export default function BookHome() {
           bookId: imported.length === 1 ? imported[0]._id : null
         })
       }
+      // Set last and unconditionally over a load error: the reload above may
+      // have failed for the same reason the imports did.
       if (failures.length) setErrorMessage(failures)
       return duplicates
     },
