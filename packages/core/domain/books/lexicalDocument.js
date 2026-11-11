@@ -1,3 +1,4 @@
+import { countWords } from '../text/wordCount'
 /**
  * A document's body, flattened into blocks a client can draw (MOB-056).
  *
@@ -204,5 +205,5 @@ export const documentWordCount = (blocks = []) =>
         : block.type === 'code'
           ? block.text
           : (block.spans ?? []).map((span) => span.text).join(' ')
-    return count + (text ? text.trim().split(/\s+/).filter(Boolean).length : 0)
+    return count + countWords(text) // any script (ADR-064)
   }, 0)

@@ -1,3 +1,4 @@
+import { countWords, readingMinutes } from '@nowry/core/domain/text/wordCount'
 /**
  * Lexical Content Utilities
  * Shared functions for parsing and extracting data from Lexical editor JSON
@@ -79,11 +80,9 @@ export const calculateReadingStats = (content) => {
     }
 
     const totalContent = extractText(parsedContent.root.children)
-    const wordCount = totalContent
-      .trim()
-      .split(/\s+/)
-      .filter((word) => word.length > 0).length
-    const readingTime = Math.ceil(wordCount / 200) // 200 words per minute
+    // Words in any script (ADR-064): the count the server enforces and stores.
+    const wordCount = countWords(totalContent)
+    const readingTime = readingMinutes(wordCount)
 
     return {
       wordCount,

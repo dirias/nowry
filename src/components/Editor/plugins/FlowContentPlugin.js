@@ -1,3 +1,4 @@
+import { countWords, readingMinutes } from '@nowry/core/domain/text/wordCount'
 import { useEffect, useRef, useState } from 'react'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { $getRoot } from 'lexical'
@@ -52,8 +53,8 @@ export default function FlowContentPlugin({ onTOCChange, onProgressChange }) {
       editor.getEditorState().read(() => {
         const root = $getRoot()
         const totalContent = root.getTextContent()
-        const wordCount = totalContent.trim().split(/\s+/).length
-        const readingTime = Math.ceil(wordCount / 200) // 200 words per minute
+        const wordCount = countWords(totalContent) // any script (ADR-064)
+        const readingTime = readingMinutes(wordCount)
 
         if (onProgressChange) {
           onProgressChange({

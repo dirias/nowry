@@ -1,3 +1,4 @@
+import { countWords } from '@nowry/core/domain/text/wordCount'
 import React, { useEffect, useState, useRef } from 'react'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { $getRoot } from 'lexical'
@@ -15,11 +16,7 @@ export default function WordCountPlugin({ onUpdate }) {
         const root = $getRoot()
         const text = root.getTextContent()
 
-        const words = text
-          .trim()
-          .split(/\s+/)
-          .filter((word) => word.length > 0)
-        const newWordCount = words.length
+        const newWordCount = countWords(text) // any script (ADR-064)
         const newCharCount = text.length
 
         // Only update if values actually changed
