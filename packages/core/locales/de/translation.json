@@ -2852,6 +2852,8 @@
       "pictures_other": "{{count}} Bilder",
       "scanned": "Das sieht nach einem Scan aus: Die Seiten sind Bilder, es gibt also keinen Text zum Vorlesen oder für Karten.",
       "damaged": "Diese Datei ist beschädigt. Unten steht, was gelesen werden konnte; ein Teil kann fehlen.",
+      "picturesTrimmed_one": "Diese Datei enthält {{count}} Bild; die ersten {{kept}} werden importiert. Der Text wird vollständig importiert.",
+      "picturesTrimmed_other": "Diese Datei enthält {{count}} Bilder; die ersten {{kept}} werden importiert. Der Text wird vollständig importiert.",
       "preview": "Vorschau",
       "previousPage": "Vorherige Seite",
       "nextPage": "Nächste Seite",

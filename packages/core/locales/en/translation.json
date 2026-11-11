@@ -1715,6 +1715,8 @@
       "pictures_other": "{{count}} pictures",
       "scanned": "This looks like a scan: its pages are pictures, so there is no text to read aloud or make cards from.",
       "damaged": "This file is damaged. What could be read is shown below; some of it may be missing.",
+      "picturesTrimmed_one": "This file has {{count}} picture; the first {{kept}} will be imported. All of the text is imported.",
+      "picturesTrimmed_other": "This file has {{count}} pictures; the first {{kept}} will be imported. All of the text is imported.",
       "preview": "Preview",
       "previousPage": "Previous page",
       "nextPage": "Next page",

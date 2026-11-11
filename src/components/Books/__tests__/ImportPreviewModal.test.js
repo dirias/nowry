@@ -62,6 +62,16 @@ describe('ImportPreviewModal', () => {
     expect(screen.getByTestId('import-damaged')).toHaveTextContent('books.import.damaged')
   })
 
+  it('says when a file has more pictures than one import keeps (ADR-067)', () => {
+    renderSheet({ previewData: { ...PREVIEW, facts: { ...PREVIEW.facts, pictures: 240, pictures_kept: 100, picture_limit: 100 } } })
+    expect(screen.getByTestId('import-pictures-trimmed')).toHaveTextContent('books.import.picturesTrimmed(count=240,kept=100)')
+  })
+
+  it('says nothing about a ceiling the file is under', () => {
+    renderSheet({ previewData: { ...PREVIEW, facts: { ...PREVIEW.facts, pictures: 2, pictures_kept: 2, picture_limit: 100 } } })
+    expect(screen.queryByTestId('import-pictures-trimmed')).toBeNull()
+  })
+
   it('pages through the preview and says when a page has no text', () => {
     renderSheet()
     expect(screen.getByText('First')).toBeInTheDocument()

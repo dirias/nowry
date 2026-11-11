@@ -2863,6 +2863,8 @@
       "pictures_other": "{{count}} images",
       "scanned": "Ce document semble numérisé : ses pages sont des images, il n'y a donc aucun texte à écouter ni à transformer en cartes.",
       "damaged": "Ce fichier est endommagé. Ce qui a pu être lu est affiché ci-dessous ; il peut en manquer une partie.",
+      "picturesTrimmed_one": "Ce fichier contient {{count}} image ; les {{kept}} premières seront importées. Le texte est importé en entier.",
+      "picturesTrimmed_other": "Ce fichier contient {{count}} images ; les {{kept}} premières seront importées. Le texte est importé en entier.",
       "preview": "Aperçu",
       "previousPage": "Page précédente",
       "nextPage": "Page suivante",

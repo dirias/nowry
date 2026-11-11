@@ -210,10 +210,17 @@ export default function ImportPreviewModal({
           <Typography level='body-sm' sx={{ color: 'text.secondary' }} aria-live='polite' data-testid='import-progress'>
             {progress && progress.total > 1
               ? t('books.import.importingCount', { done: progress.done + 1, total: progress.total, name: progress.name })
-              : facts?.pictures > 0
-                ? t('books.import.importingPictures', { count: facts.pictures })
+              : (facts?.pictures_kept ?? facts?.pictures) > 0
+                ? t('books.import.importingPictures', { count: facts.pictures_kept ?? facts.pictures })
                 : t('books.import.importing')}
           </Typography>
+        )}
+
+        {/* ADR-067: one import keeps a set number of pictures; the text is always whole. */}
+        {!preparing && facts && facts.pictures_kept < facts.pictures && (
+          <Alert color='neutral' variant='soft' data-testid='import-pictures-trimmed'>
+            {t('books.import.picturesTrimmed', { count: facts.pictures, kept: facts.pictures_kept })}
+          </Alert>
         )}
 
         {!preparing && facts?.damaged && (

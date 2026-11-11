@@ -1344,6 +1344,8 @@
       "pictures_other": "{{count}} imágenes",
       "scanned": "Parece un documento escaneado: sus páginas son imágenes, así que no hay texto para escuchar ni para crear tarjetas.",
       "damaged": "Este archivo está dañado. Abajo se muestra lo que se pudo leer; puede que falte una parte.",
+      "picturesTrimmed_one": "Este archivo tiene {{count}} imagen; se importarán las primeras {{kept}}. El texto se importa completo.",
+      "picturesTrimmed_other": "Este archivo tiene {{count}} imágenes; se importarán las primeras {{kept}}. El texto se importa completo.",
       "preview": "Vista previa",
       "previousPage": "Página anterior",
       "nextPage": "Página siguiente",
