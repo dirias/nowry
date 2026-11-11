@@ -11,7 +11,7 @@ export default function LastCardsAdded({ cards = [], onEdit, onDelete }) {
           borderRadius: 'lg',
           p: 4,
           textAlign: 'center',
-          backgroundColor: '#f1fbfb'
+          bgcolor: 'background.level1'
         }}
       >
         <Typography level='body-md' sx={{ color: 'text.tertiary' }}>
@@ -28,7 +28,7 @@ export default function LastCardsAdded({ cards = [], onEdit, onDelete }) {
         borderRadius: 'lg',
         p: 4,
         mb: 5,
-        backgroundColor: '#f1fbfb',
+        bgcolor: 'background.level1',
         boxShadow: 'lg',
         border: '1px solid',
         borderColor: 'primary.softActiveBg',
@@ -43,7 +43,7 @@ export default function LastCardsAdded({ cards = [], onEdit, onDelete }) {
           pb: 1,
           '&::-webkit-scrollbar': { height: 6 },
           '&::-webkit-scrollbar-thumb': {
-            backgroundColor: '#bbb',
+            bgcolor: 'neutral.outlinedBorder',
             borderRadius: 4
           }
         }}

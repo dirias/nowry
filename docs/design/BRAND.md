@@ -30,6 +30,9 @@ returns to January one ring wider. It is a snake only if you look — which is d
 ### Colour
 
 - **Brand surfaces** (icon, marketing): Coil Gold on Ink Teal. Nothing else.
+- **The header** (ADR-074): Ink Teal in both modes, signed in or not, with the coil in Coil Gold and
+  the wordmark in Paper. It renders in the dark scheme (`data-joy-color-scheme='dark'`), so its
+  controls read the dark tokens. The coil there is the mark, not an earned state.
 - **Product chrome:** one colour, the foreground of the ground it sits on — white on the web
   header, `primary.solidColor` in the phone's app bar. The mark never takes the learner's accent as
   its own fill on a neutral ground; the accent is theirs, the mark is ours.

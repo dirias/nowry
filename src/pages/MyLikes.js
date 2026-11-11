@@ -215,15 +215,19 @@ const LikedContentGrid = ({ items, loading, onItemClick, onUnlike }) => {
             </CardCover>
 
             {/* Overlay Content */}
+            {/* The words sit on a cover of any colour, so they sit on a scrim and
+                read the dark scheme whatever the page's mode. */}
             <CardCover
+              data-joy-color-scheme='dark'
               sx={{
-                background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 50%)',
+                background: 'linear-gradient(to top, var(--joy-palette-background-body) 0%, transparent 55%)',
                 cursor: 'pointer'
               }}
               onClick={() => onItemClick(item)}
             />
 
             <CardContent
+              data-joy-color-scheme='dark'
               sx={{
                 justifyContent: 'flex-end',
                 cursor: 'pointer'
@@ -248,7 +252,7 @@ const LikedContentGrid = ({ items, loading, onItemClick, onUnlike }) => {
               <Typography
                 level='h4'
                 sx={{
-                  color: 'white',
+                  color: 'text.primary',
                   mb: 0.5,
                   // Static sm (14), well below h4's own 20px default: this is an
                   // overlay title on a compact public-content thumbnail card, not
@@ -269,7 +273,7 @@ const LikedContentGrid = ({ items, loading, onItemClick, onUnlike }) => {
                 <Typography
                   level='body-xs'
                   sx={{
-                    color: 'rgba(255,255,255,0.7)',
+                    color: 'text.secondary',
                     mb: 1
                   }}
                 >
@@ -280,20 +284,20 @@ const LikedContentGrid = ({ items, loading, onItemClick, onUnlike }) => {
               {/* Stats */}
               <Stack direction='row' spacing={1.5} sx={{ mb: 1 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <ViewIcon sx={{ fontSize: 14, color: 'rgba(255,255,255,0.7)' }} />
-                  <Typography level='body-xs' sx={{ color: 'rgba(255,255,255,0.9)' }}>
+                  <ViewIcon sx={{ fontSize: 14, color: 'text.tertiary' }} />
+                  <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
                     {item.public_metadata?.views || 0}
                   </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <FavoriteIcon sx={{ fontSize: 14, color: 'rgba(255,255,255,0.7)' }} />
-                  <Typography level='body-xs' sx={{ color: 'rgba(255,255,255,0.9)' }}>
+                  <FavoriteIcon sx={{ fontSize: 14, color: 'text.tertiary' }} />
+                  <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
                     {item.public_metadata?.likes || 0}
                   </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <ForkIcon sx={{ fontSize: 14, color: 'rgba(255,255,255,0.7)' }} />
-                  <Typography level='body-xs' sx={{ color: 'rgba(255,255,255,0.9)' }}>
+                  <ForkIcon sx={{ fontSize: 14, color: 'text.tertiary' }} />
+                  <Typography level='body-xs' sx={{ color: 'text.secondary' }}>
                     {item.public_metadata?.forks || 0}
                   </Typography>
                 </Box>
@@ -307,8 +311,8 @@ const LikedContentGrid = ({ items, loading, onItemClick, onUnlike }) => {
                       key={tag}
                       size='sm'
                       sx={{
-                        bgcolor: 'rgba(255,255,255,0.2)',
-                        color: 'white'
+                        bgcolor: 'background.level2',
+                        color: 'text.primary'
                       }}
                     >
                       {tag}
@@ -318,8 +322,8 @@ const LikedContentGrid = ({ items, loading, onItemClick, onUnlike }) => {
                     <Chip
                       size='sm'
                       sx={{
-                        bgcolor: 'rgba(255,255,255,0.2)',
-                        color: 'white'
+                        bgcolor: 'background.level2',
+                        color: 'text.primary'
                       }}
                     >
                       +{item.public_metadata.tags.length - 2}

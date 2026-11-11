@@ -5,6 +5,7 @@ import { Box, Button, Chip, Stack, Typography } from '@mui/joy'
 import { ArrowForwardRounded } from '@mui/icons-material'
 import { useBeta } from '@nowry/core/context/BetaContext'
 import WaitlistForm from '../../Public/WaitlistForm'
+import { GEOMETRY } from '../../../theme/components'
 
 /**
  * The landing's first view (PRD public-site D1, D3, D11).
@@ -45,11 +46,20 @@ const Hero = ({ frame, phoneFrame }) => {
         <Typography level='body-lg' sx={{ color: 'text.secondary', maxWidth: 480 }}>
           {t('landing.hero.lead')}
         </Typography>
-        <Stack direction='row' spacing={2} alignItems='center' flexWrap='wrap' useFlexGap sx={{ pt: 1 }}>
+        {/* One left edge: the plain key's words sit under the solid key's edge,
+            so its padding hangs outside the column. */}
+        <Stack spacing={1} alignItems='flex-start' sx={{ pt: 1 }}>
           <Button component={Link} to='/register' size='lg'>
             {t('landing.hero.cta')}
           </Button>
-          <Button component={Link} to='/browse' variant='plain' size='lg' endDecorator={<ArrowForwardRounded />}>
+          <Button
+            component={Link}
+            to='/browse'
+            variant='plain'
+            size='lg'
+            endDecorator={<ArrowForwardRounded />}
+            sx={{ ml: `-${GEOMETRY.lg.paddingInline}px` }}
+          >
             {t('landing.hero.proof')}
           </Button>
         </Stack>

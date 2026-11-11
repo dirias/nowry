@@ -65,7 +65,7 @@ const MakeCardsFrame = ({ sx = {} }) => {
       ))}
       <Stack direction='row' alignItems='center' justifyContent='space-between' spacing={1} sx={{ mt: 'auto' }}>
         <Typography level='body-xs' sx={{ color: 'text.tertiary', fontSize: '0.6rem' }}>
-          {t('books.makeCards.budgetPro', { cards: 12, sections: picked })}
+          {t('books.makeCards.budgetPro', { cards: 12, count: picked })}
         </Typography>
         <Typography level='body-xs' sx={{ ...frameSolidChip, fontWeight: 'lg', fontSize: '0.6rem' }}>
           {t('books.makeCards.action', { count: picked })}

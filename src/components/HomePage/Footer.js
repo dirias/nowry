@@ -141,6 +141,7 @@ const Footer = () => {
                   color: 'text.secondary',
                   fontSize: 'sm',
                   px: 0.5,
+                  '--Select-minHeight': { xs: '44px', sm: '2rem' },
                   '&:hover': { bgcolor: 'background.level1' },
                   '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
                 }}

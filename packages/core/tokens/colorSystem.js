@@ -17,13 +17,16 @@ import { contrastRatio, hexToOklch, oklchToHex } from './oklch'
 
 const PAPER_HUE = 85
 const INK_HUE = 215
+/** The mark's own hue: the dark grounds sit on it (ADR-074). */
+const TEAL_HUE = 205
 
 const paper = (L, C) => oklchToHex(L, C, PAPER_HUE)
 const ink = (L, C) => oklchToHex(L, C, INK_HUE)
+const teal = (L, C) => oklchToHex(L, C, TEAL_HUE)
 
 // ── 1 · Brand ──────────────────────────────────────────────────────────────
 export const BRAND = Object.freeze({
-  inkTeal: oklchToHex(0.335, 0.052, 205),
+  inkTeal: teal(0.335, 0.052),
   coilGold: oklchToHex(0.815, 0.15, 80),
   paper: paper(0.96, 0.013)
 })
@@ -49,17 +52,19 @@ const NEUTRAL_SCALE = {
     800: ink(0.235, 0.018),
     900: ink(0.17, 0.018)
   },
+  // ADR-074: the dark grounds are the brand's teal. 900 is Ink Teal itself, so
+  // a card wears the logo's ground; the text steps are Paper and two below it.
   dark: {
-    50: paper(0.975, 0.006),
-    100: paper(0.945, 0.008),
-    200: paper(0.87, 0.009),
-    300: paper(0.79, 0.01),
-    400: paper(0.69, 0.01),
-    500: ink(0.45, 0.02),
-    600: ink(0.328, 0.022),
-    700: ink(0.286, 0.022),
-    800: ink(0.248, 0.021),
-    900: ink(0.224, 0.021)
+    50: paper(0.975, 0.008),
+    100: paper(0.96, 0.013),
+    200: paper(0.915, 0.012),
+    300: paper(0.87, 0.011),
+    400: paper(0.81, 0.011),
+    500: teal(0.56, 0.04),
+    600: teal(0.47, 0.046),
+    700: teal(0.405, 0.05),
+    800: teal(0.37, 0.05),
+    900: teal(0.335, 0.052)
   }
 }
 
@@ -79,9 +84,9 @@ const neutralRoles = (mode) => {
           tooltip: s[800]
         }
       : {
-          body: ink(0.188, 0.019),
+          body: teal(0.285, 0.047),
           surface: s[900],
-          popup: ink(0.258, 0.022),
+          popup: teal(0.375, 0.05),
           level1: s[800],
           level2: s[700],
           level3: s[600],
@@ -115,7 +120,10 @@ const textOn = (background, mode) => {
 
 const softSteps = (at, C, L) => [at(L[0], Math.min(C * 0.32, 0.03)), at(L[1], Math.min(C * 0.4, 0.04)), at(L[2], Math.min(C * 0.45, 0.05))]
 
-function lightTone({ C, h, solidL = 0.505 }) {
+/** How light an accent or status solid is in dark mode (ADR-074). */
+export const DARK_SOLID_L = 0.76
+
+function lightTone({ C, h, solidL = 0.505, plainL = 0.47, plainC = C }) {
   const at = (L, chroma = C) => oklchToHex(L, chroma, h)
   const solidBg = at(solidL)
   const [tint, tintHover, tintActive] = softSteps(at, C, [0.95, 0.92, 0.89])
@@ -128,11 +136,11 @@ function lightTone({ C, h, solidL = 0.505 }) {
     softBg: tint,
     softHoverBg: tintHover,
     softActiveBg: tintActive,
-    softColor: at(0.41),
-    plainColor: at(0.47),
+    softColor: at(Math.min(0.41, plainL)),
+    plainColor: at(plainL, plainC),
     plainHoverBg: tint,
     plainActiveBg: tintHover,
-    outlinedColor: at(0.47),
+    outlinedColor: at(plainL, plainC),
     outlinedBorder: at(0.62, C * 0.8),
     outlinedHoverBorder: at(0.7, C * 0.8),
     outlinedHoverBg: tint,
@@ -140,10 +148,11 @@ function lightTone({ C, h, solidL = 0.505 }) {
   }
 }
 
-function darkTone({ C, h, darkSolidL = 0.52 }) {
+function darkTone({ C, h, darkSolidL = DARK_SOLID_L }) {
   const at = (L, chroma = C) => oklchToHex(L, chroma, h)
   const solidBg = at(darkSolidL)
-  const [tint, tintHover, tintActive] = softSteps(at, C * 1.4, [0.27, 0.31, 0.35])
+  // Tints sit above the teal grounds (card L 0.335, level2 0.405), never below them.
+  const [tint, tintHover, tintActive] = softSteps(at, C * 1.4, [0.42, 0.455, 0.49])
   return {
     ...toneScale(C, h),
     solidBg,
@@ -153,13 +162,13 @@ function darkTone({ C, h, darkSolidL = 0.52 }) {
     softBg: tint,
     softHoverBg: tintHover,
     softActiveBg: tintActive,
-    softColor: at(0.85, C * 0.75),
-    plainColor: at(0.8, C * 0.85),
+    softColor: at(0.93, C * 0.6),
+    plainColor: at(0.84, C * 0.85),
     plainHoverBg: tint,
     plainActiveBg: tintHover,
-    outlinedColor: at(0.8, C * 0.85),
-    outlinedBorder: at(0.55, C * 0.7),
-    outlinedHoverBorder: at(0.62, C * 0.8),
+    outlinedColor: at(0.84, C * 0.85),
+    outlinedBorder: at(0.68, C * 0.75),
+    outlinedHoverBorder: at(0.74, C * 0.8),
     outlinedHoverBg: tint,
     outlinedActiveBg: tintHover
   }
@@ -168,13 +177,12 @@ function darkTone({ C, h, darkSolidL = 0.52 }) {
 /**
  * Every Joy variant key for one hue, plus its 50–900 scale.
  *
- * A solid is DARK in both modes, with paper text on it: L 0.505 in light, 0.52
- * in dark. The first cut of ADR-034 lifted the dark solid to L 0.70 with ink
- * text, and the audit found about fifteen places across both clients built on
- * white text over the accent — auth panels, checkboxes, badges, the phone's
- * status bar — each unreadable at 2.6:1. A dark solid keeps them all true and
- * still stands 3.5:1 off the dark page. Warning and gold are the exceptions by
- * nature (amber and gold cannot be dark), so they rest light with ink text.
+ * In light a solid is dark (L 0.505) with paper text. In dark it is LIGHT
+ * (L 0.76) with ink text (ADR-074): on the brand's teal grounds no colour can
+ * both carry paper text at 4.5:1 and stand 3:1 off the page, so a dark solid
+ * disappears into the ground. Text on a solid is therefore always `solidColor`,
+ * never a literal white. Warning and gold rest light with ink text in both
+ * modes, because amber and gold cannot be dark.
  */
 export const buildTone = (spec, mode) => (mode === 'light' ? lightTone(spec) : darkTone(spec))
 
@@ -192,11 +200,20 @@ export function accentTone(hex, mode) {
   return buildTone({ C: Math.min(C, ACCENT_MAX_CHROMA), h }, mode)
 }
 
+/**
+ * The brand's own tone, worn while nobody is signed in (ADR-074): Ink Teal
+ * solids and teal links on paper, Coil Gold solids and gold links on teal.
+ * Inside the app the primary is the learner's and gold means earned.
+ */
+export const BRAND_TEAL_SPEC = Object.freeze({ C: 0.052, h: TEAL_HUE, solidL: 0.335, plainL: 0.4, plainC: 0.06 })
+
+export const brandTone = (mode) => (mode === 'light' ? buildTone(BRAND_TEAL_SPEC, 'light') : buildTone(GOLD_SPEC, 'dark'))
+
 // ── 4 · Status and 5 · Gold ────────────────────────────────────────────────
 export const STATUS_SPEC = Object.freeze({
-  success: { C: 0.11, h: 152, solidL: 0.55, darkSolidL: 0.55 },
-  warning: { C: 0.145, h: 58, solidL: 0.76, darkSolidL: 0.78 },
-  danger: { C: 0.16, h: 28, solidL: 0.53, darkSolidL: 0.53 }
+  success: { C: 0.11, h: 152, solidL: 0.55, darkSolidL: 0.78 },
+  warning: { C: 0.145, h: 58, solidL: 0.76, darkSolidL: 0.8 },
+  danger: { C: 0.16, h: 28, solidL: 0.53, darkSolidL: 0.74 }
 })
 
 export const GOLD_SPEC = Object.freeze({ C: 0.15, h: 80, solidL: 0.815, darkSolidL: 0.815 })

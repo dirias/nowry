@@ -3,11 +3,13 @@ import {
   relativeLuminance,
   readableTextOn,
   generateColorScheme,
+  generateBrandScheme,
   getColorPresets,
   getColorName,
   STICKY_PALETTE
 } from '../colorSchemeGenerator'
 import { deltaE, hexToOklch } from '../oklch'
+import { BRAND } from '../colorSystem'
 
 const AA = 4.5
 const MODES = ['light', 'dark']
@@ -275,21 +277,67 @@ describe('getColorName', () => {
   })
 })
 
-// The audit's regression: a light dark-mode solid broke every screen built on
-// light text over the accent. A solid is dark in both modes, with light text,
-// and still reads as a shape on the dark page.
-describe('solids stay dark with light text in both modes', () => {
-  it.each(PRESET_COLORS)('keeps the %s solid dark, its text light, and the shape visible on the page', (color) => {
-    for (const mode of MODES) {
-      const { primary, background } = generateColorScheme(color)[mode]
-      expect(relativeLuminance(primary.solidColor)).toBeGreaterThan(relativeLuminance(primary.solidBg))
-      expect(contrastRatio('#ffffff', primary.solidBg)).toBeGreaterThanOrEqual(AA)
-      expect(contrastRatio(primary.solidBg, background.body)).toBeGreaterThanOrEqual(3)
+// ADR-074: on the brand's teal grounds a dark solid disappears, so the rule is
+// per mode. Light: a dark solid with light text. Dark: a light solid with ink
+// text. In both, the text on a solid is `solidColor` and the shape stands off
+// every ground it can sit on.
+const DARK_GROUNDS = ['body', 'surface', 'level1']
+
+describe('solids: dark with light text in light, light with ink text in dark (ADR-074)', () => {
+  it.each(PRESET_COLORS)('keeps %s readable and visible in both modes', (color) => {
+    const scheme = generateColorScheme(color)
+    const light = scheme.light
+    expect(relativeLuminance(light.primary.solidColor)).toBeGreaterThan(relativeLuminance(light.primary.solidBg))
+    expect(contrastRatio(light.primary.solidColor, light.primary.solidBg)).toBeGreaterThanOrEqual(AA)
+    expect(contrastRatio(light.primary.solidBg, light.background.body)).toBeGreaterThanOrEqual(3)
+
+    const dark = scheme.dark
+    expect(relativeLuminance(dark.primary.solidColor)).toBeLessThan(relativeLuminance(dark.primary.solidBg))
+    expect(contrastRatio(dark.primary.solidColor, dark.primary.solidBg)).toBeGreaterThanOrEqual(AA)
+    for (const ground of DARK_GROUNDS) {
+      expect(contrastRatio(dark.primary.solidBg, dark.background[ground])).toBeGreaterThanOrEqual(3)
     }
   })
 
-  it.each(['success', 'danger'])('keeps the %s solid dark with light text in dark mode', (group) => {
-    const tone = generateColorScheme('#2a6971').dark[group]
-    expect(contrastRatio('#ffffff', tone.solidBg)).toBeGreaterThanOrEqual(AA)
+  it.each(['success', 'danger', 'warning', 'gold'])('keeps the %s solid readable and off every dark ground', (group) => {
+    const dark = generateColorScheme('#2a6971').dark
+    expect(contrastRatio(dark[group].solidColor, dark[group].solidBg)).toBeGreaterThanOrEqual(AA)
+    for (const ground of DARK_GROUNDS) {
+      expect(contrastRatio(dark[group].solidBg, dark.background[ground])).toBeGreaterThanOrEqual(3)
+    }
+  })
+})
+
+describe('the eight presets and the brand tone on the teal grounds (ADR-074)', () => {
+  const tones = [...PRESET_COLORS.map((color) => [color, generateColorScheme(color)]), ['brand', generateBrandScheme()]]
+
+  it.each(tones)('%s: plain and soft text at 4.5:1 and the focus ring at 3:1, on every ground, in both modes', (_name, scheme) => {
+    for (const mode of MODES) {
+      const { primary, background } = scheme[mode]
+      for (const ground of DARK_GROUNDS) {
+        expect(contrastRatio(primary.plainColor, background[ground])).toBeGreaterThanOrEqual(AA)
+        expect(contrastRatio(primary.outlinedColor, background[ground])).toBeGreaterThanOrEqual(AA)
+        expect(contrastRatio(primary.outlinedBorder, background[ground])).toBeGreaterThanOrEqual(3)
+      }
+      expect(contrastRatio(primary.softColor, primary.softBg)).toBeGreaterThanOrEqual(AA)
+      expect(contrastRatio(primary.solidColor, primary.solidBg)).toBeGreaterThanOrEqual(AA)
+    }
+  })
+
+  it('puts the brand on a guest: Ink Teal on paper, Coil Gold on teal', () => {
+    const { light, dark } = generateBrandScheme()
+    expect(light.primary.solidBg).toBe(BRAND.inkTeal)
+    expect(dark.primary.solidBg).toBe(BRAND.coilGold)
+    expect(dark.background.surface).toBe(BRAND.inkTeal)
+    expect(light.primary.plainColor).toBe('#155157')
+  })
+
+  it('keeps text at 4.5:1 on every dark ground, level2 included', () => {
+    const { text, background } = generateBrandScheme().dark
+    for (const ground of [...DARK_GROUNDS, 'level2']) {
+      for (const role of ['primary', 'secondary', 'tertiary']) {
+        expect(contrastRatio(text[role], background[ground])).toBeGreaterThanOrEqual(AA)
+      }
+    }
   })
 })

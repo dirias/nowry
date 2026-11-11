@@ -76,11 +76,12 @@ describe('buildTheme', () => {
     expect(theme.palette.divider).toBe(BASE_PALETTE.light.divider)
   })
 
-  it('carries gold, and keeps the accent solid dark with light text in dark mode (ADR-034)', () => {
+  it('carries gold, and keeps the accent solid light with ink text, off the teal page, in dark mode (ADR-074)', () => {
     const { palette } = buildTheme('dark', DEFAULT_THEME_COLOR)
     expect(palette.gold.solidBg).toMatch(/^#[0-9a-f]{6}$/)
-    expect(contrastRatio('#ffffff', palette.primary.solidBg)).toBeGreaterThanOrEqual(4.5)
     expect(contrastRatio(palette.primary.solidColor, palette.primary.solidBg)).toBeGreaterThanOrEqual(4.5)
+    expect(contrastRatio(palette.primary.solidBg, palette.background.body)).toBeGreaterThanOrEqual(3)
+    expect(contrastRatio(palette.primary.solidBg, palette.background.surface)).toBeGreaterThanOrEqual(3)
   })
 
   it('regenerates when the account colour changes', () => {

@@ -164,7 +164,7 @@ export default function TodayObject({
       </Button>
     </Stack>
   ) : (
-    <Stack direction='row' spacing={1} className='today-keys'>
+    <Stack direction='row' spacing={1} useFlexGap className='today-keys'>
       {/* The one secondary (§15.10): the day's study time — plan one, or open
           the one that exists (PRD D4, FR-005). It replaced Quick 10, whose
           short session is still the review's `limit`. */}
@@ -195,6 +195,9 @@ export default function TodayObject({
         containerType: 'inline-size',
         borderRadius: 'lg',
         bgcolor: 'background.surface',
+        // The same edge as the panels it sits above (ADR-074 audit).
+        border: '1px solid',
+        borderColor: 'divider',
         px: { xs: 2, md: 3 },
         py: { xs: 2, md: 2.5 },
         mb: 4,

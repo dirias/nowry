@@ -11,7 +11,7 @@
  * any custom hex promise the same contrast without a per-hue exception.
  */
 import { contrastRatio, hexToOklch, relativeLuminance } from './oklch'
-import { CATEGORY_SPEC, GOLD_SPEC, NEUTRALS, STATUS_SPEC, accentTone, buildTone, categoryColors } from './colorSystem'
+import { CATEGORY_SPEC, GOLD_SPEC, NEUTRALS, STATUS_SPEC, accentTone, brandTone, buildTone, categoryColors } from './colorSystem'
 
 export { contrastRatio, relativeLuminance }
 
@@ -51,8 +51,8 @@ const neutralGroup = (mode) => {
   }
 }
 
-const buildMode = (primaryColor, mode) => ({
-  primary: accentTone(primaryColor, mode),
+const buildMode = (primary, mode) => ({
+  primary,
   success: buildTone(STATUS_SPEC.success, mode),
   warning: buildTone(STATUS_SPEC.warning, mode),
   danger: buildTone(STATUS_SPEC.danger, mode),
@@ -68,8 +68,19 @@ const buildMode = (primaryColor, mode) => ({
  */
 export function generateColorScheme(primaryColor) {
   return {
-    light: buildMode(primaryColor, 'light'),
-    dark: buildMode(primaryColor, 'dark')
+    light: buildMode(accentTone(primaryColor, 'light'), 'light'),
+    dark: buildMode(accentTone(primaryColor, 'dark'), 'dark')
+  }
+}
+
+/**
+ * The palette a guest sees (ADR-074): the same grounds, status and gold, with
+ * the brand's tone as the primary instead of a learner's accent.
+ */
+export function generateBrandScheme() {
+  return {
+    light: buildMode(brandTone('light'), 'light'),
+    dark: buildMode(brandTone('dark'), 'dark')
   }
 }
 

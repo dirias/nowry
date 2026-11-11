@@ -4,10 +4,13 @@ import { Box, Typography, useColorScheme } from '@mui/joy'
 import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded'
 import mermaid from 'mermaid'
 import DOMPurify from 'dompurify'
+import { diagramThemeVariables } from '@nowry/core/tokens/diagramTheme'
+import { useThemePreferences } from '../../theme/DynamicThemeProvider'
 
 export default function MermaidRenderer({ code }) {
   const { t } = useTranslation()
   const { mode } = useColorScheme()
+  const { themeColor } = useThemePreferences()
   const ref = useRef(null)
   const [svg, setSvg] = useState('')
   const [error, setError] = useState(null)
@@ -30,45 +33,9 @@ export default function MermaidRenderer({ code }) {
       mermaid.initialize({
         startOnLoad: false,
         theme: 'base',
-        themeVariables: isDark
-          ? {
-              // Dark mode palette — node boxes, text, edges
-              primaryColor: '#1e3a5f',
-              primaryTextColor: '#e0eaff',
-              primaryBorderColor: '#3b6ea8',
-              lineColor: '#7ba3d0',
-              secondaryColor: '#162d47',
-              tertiaryColor: '#0f1d2e',
-              background: '#0b1929',
-              mainBkg: '#1e3a5f',
-              nodeBorder: '#3b6ea8',
-              clusterBkg: '#162d47',
-              titleColor: '#e0eaff',
-              edgeLabelBackground: '#162d47',
-              nodeTextColor: '#e0eaff',
-              labelColor: '#e0eaff',
-              labelTextColor: '#e0eaff',
-              fontFamily: 'Inter, sans-serif'
-            }
-          : {
-              // Light mode palette
-              primaryColor: '#dbeafe',
-              primaryTextColor: '#1e3a5f',
-              primaryBorderColor: '#3b6ea8',
-              lineColor: '#3b6ea8',
-              secondaryColor: '#eff6ff',
-              tertiaryColor: '#f0f7ff',
-              background: '#ffffff',
-              mainBkg: '#dbeafe',
-              nodeBorder: '#3b6ea8',
-              clusterBkg: '#eff6ff',
-              titleColor: '#1e3a5f',
-              edgeLabelBackground: '#eff6ff',
-              nodeTextColor: '#1e3a5f',
-              labelColor: '#1e3a5f',
-              labelTextColor: '#1e3a5f',
-              fontFamily: 'Inter, sans-serif'
-            },
+        // The page's own colours (ADR-074): grounds and text of the mode, the
+        // learner's accent for a node. Values, because Mermaid cannot read a variable.
+        themeVariables: { ...diagramThemeVariables(isDark ? 'dark' : 'light', themeColor), fontFamily: 'Inter, sans-serif' },
         securityLevel: 'loose',
         fontFamily: 'Inter, sans-serif',
         // Mermaid v10+ defaults to htmlLabels:true for flowchart/mindmap/ER,
@@ -98,7 +65,7 @@ export default function MermaidRenderer({ code }) {
           setError(t('aiMagic.diagram.renderError'))
         })
     }
-  }, [code, mode, t])
+  }, [code, mode, themeColor, t])
 
   if (error) {
     return (

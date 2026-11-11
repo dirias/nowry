@@ -138,7 +138,37 @@ const iconRoot = ({ ownerState, theme }) => {
   }
 }
 
+// A link in a sentence is one line tall; at phone width its hit area is 44px
+// (§2) without moving the text: a centred, invisible box behind the glyphs.
+const linkRoot = ({ theme }) => ({
+  [theme.breakpoints.down('sm')]: {
+    position: 'relative',
+    '&::after': {
+      content: '""',
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      top: '50%',
+      height: 44,
+      minWidth: 44,
+      transform: 'translateY(-50%)'
+    }
+  }
+})
+
+// A field is 44px tall at phone width, like every other control (§2).
+const fieldRoot =
+  (name) =>
+  ({ theme }) => ({ [theme.breakpoints.down('sm')]: { [`--${name}-minHeight`]: '44px' } })
+
+// Controls the house button does not cover, held to the same 44px at phone width (§2).
+const touchRoot = ({ theme }) => ({ [theme.breakpoints.down('sm')]: { minHeight: 44 } })
+
 export const components = {
+  JoyMenuButton: { styleOverrides: { root: touchRoot } },
+  JoyTab: { styleOverrides: { root: touchRoot } },
+  JoyInput: { styleOverrides: { root: fieldRoot('Input') } },
+  JoyLink: { styleOverrides: { root: linkRoot } },
   JoyButton: { defaultProps: { size: 'md' }, styleOverrides: { root: keyRoot } },
   JoyIconButton: { defaultProps: { size: 'md' }, styleOverrides: { root: iconRoot } }
 }

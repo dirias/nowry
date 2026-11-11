@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Box, Stack, Typography } from '@mui/joy'
 import { PublicRounded, AutoStoriesRounded, MenuBookRounded, TimelineRounded, Brightness4 } from '@mui/icons-material'
 import { BrandLockup } from '../../Common/Brand/BrandMark'
+import { BRAND } from '@nowry/core/tokens/colorSystem'
 import { frameShell, framePanel, frameTrack, frameFill, frameSolidChip, frameSoftChip, frameSegment, frameSegmentItem } from './frameStyles'
 
 /**
@@ -150,14 +151,15 @@ const StudyCenterFrame = ({ sx = {} }) => {
 
   return (
     <Box aria-hidden sx={{ ...frameShell, ...sx }}>
-      {/* Header.js, signed in: the lockup, the four items, the theme toggle, the avatar — on the page ground (SITE-011). */}
+      {/* Header.js, signed in: the lockup, the four items, the theme toggle, the avatar — on Ink Teal, in the dark scheme, with the gold coil (ADR-074). */}
       <Stack
         direction='row'
         alignItems='center'
         spacing={1.5}
-        sx={{ px: 2, py: 1.25, borderBottom: '1px solid', borderColor: 'divider', color: 'text.primary' }}
+        data-joy-color-scheme='dark'
+        sx={{ px: 2, py: 1.25, borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'background.surface', color: 'text.primary' }}
       >
-        <BrandLockup markSize={20} level='title-sm' />
+        <BrandLockup markSize={20} level='title-sm' markSx={{ color: BRAND.coilGold }} />
         <Stack direction='row' spacing={0.25} sx={{ display: { xs: 'none', sm: 'flex' }, ml: 0.5 }}>
           {NAV.map(({ key, Icon, active }) => (
             <Stack

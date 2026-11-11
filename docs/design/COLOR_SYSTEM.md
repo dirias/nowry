@@ -3,6 +3,10 @@
 > The standard since ADR-034 (2026-09-13). It replaced a prototype that took its colours from four
 > libraries — Material presets, Joy's blue-grey neutrals, Tailwind tags and GitHub's dark theme — and
 > generated tints in HSL, whose lightness is not what the eye sees.
+>
+> **Amended by ADR-074 (2026-11-12):** the dark grounds are the brand's teal, the header is Ink Teal
+> with the gold coil in both modes, a guest wears the brand's tone, and a dark-mode solid is light
+> with ink text. The sections below describe the system as amended.
 
 ## The rule in one line
 
@@ -14,8 +18,8 @@ No component invents a colour; both clients read the same values; a test guards 
 | # | Role | What it is for | Never |
 |---|---|---|---|
 | 1 | **Brand** — Ink Teal, Coil Gold, Paper | The Spiral mark, the app icon, marketing | UI state |
-| 2 | **Neutrals** — Paper (light), Deep (dark) | Grounds, containers, borders, all text | Pure grey or pure black text |
-| 3 | **Accent** — the learner's colour | Primary actions, selection, focus ring, links, the companion's body | Meaning (it is chosen, so it cannot signal) |
+| 2 | **Neutrals** — Paper (light), Deep Teal (dark) | Grounds, containers, borders, all text | Pure grey or pure black text; a near-black ground |
+| 3 | **Accent** — the learner's colour; the brand's tone for a guest | Primary actions, selection, focus ring, links, the companion's body | Meaning (it is chosen, so it cannot signal) |
 | 4 | **Status** — moss, amber, brick | Done, attention, destructive | Decoration or identity |
 | 5 | **Gold** | What is earned: stage marks, motes, a finished year | A warning; decoration |
 | 6 | **Categories** — eight hues and graphite | What a learner tags: focus areas, events, sticky notes, covers | Status — always a dot plus a label |
@@ -47,17 +51,23 @@ packages/core/tokens/
 Every colour is a lightness **L**, a chroma **C** and a hue **h**. OKLCH's L is perceptual: hold it
 fixed, move the hue, and contrast stays put. That is the whole guarantee.
 
-- **Neutrals** are warm paper (h 85) in light and deep teal-ink (h 215) in dark, at chroma ≤ 0.022.
+- **Neutrals** are warm paper (h 85) in light. In dark they sit on the mark's hue (h 205) at chroma
+  about 0.05: the page is `#023135`, a card is Ink Teal itself (`#0b3e43`), and text is Paper.
   They carry a 50–900 scale so every Joy token nobody names — an input border, a soft neutral —
   still lands on the ladder.
 - **Tones** (`buildTone`) turn one `{C, h}` into every Joy variant key — solid, soft, plain,
-  outlined, their hover and active states — plus a 50–900 scale, for light and dark. Accent,
-  success and danger solids are **dark in both modes** (L 0.505 light, 0.52 dark) with paper text;
-  warning and gold solids are light with ink, because amber and gold cannot be dark. The first cut
-  lifted the dark solid to L 0.70 with ink; the audit found fifteen screens on both clients built
-  on light text over the accent, so it was lowered.
-- **The focus ring** is `primary.outlinedBorder`: L 0.62 in light (3.1:1 or better on body,
-  surface and level1), L 0.55 in dark.
+  outlined, their hover and active states — plus a 50–900 scale, for light and dark. In light a
+  solid is **dark** (L 0.505) with paper text. In dark it is **light** (L 0.76) with ink text,
+  because on teal grounds no colour can both carry paper text at 4.5:1 and stand 3:1 off the page.
+  Text on a solid is always `solidColor`, never a literal white. Warning and gold are light with
+  ink in both modes.
+- **The focus ring** is `primary.outlinedBorder`: L 0.62 in light, L 0.68 in dark, 3:1 or better
+  on body, surface and level1.
+- **The brand tone** (`brandTone`, `generateBrandScheme`) is what a guest wears: Ink Teal solids
+  and `#155157` links on paper; Coil Gold solids with ink text and gold links on teal. Signed in,
+  the primary is the learner's and gold means earned.
+- **Links and coloured text** read a tone's plain colour: the web theme points Joy's `mainChannel`
+  at `plainColor`, since Joy would otherwise draw them from the 500 step (3.4:1 on paper).
 - **The accent is normalised** (`accentTone`): the learner's hue, their chroma capped at 0.13, the
   ladder's lightness. Black, white, a neon and a preset all come out equally readable.
 
@@ -81,7 +91,9 @@ Names are localized under `onboarding.welcome.accent.names.<key>`.
 
 - 4.5:1 for solid, soft and plain text, for every preset and extreme accents (black, white, grey), in both modes
 - 3:1 for the outlined border (the focus ring) in both modes
-- every accent solid dark with light text, and 3:1 off the page, in both modes
+- a solid dark with light text in light, light with ink text in dark, and 3:1 off body, surface and level1
+- the eight presets and the brand tone: plain text at 4.5:1 and the focus ring at 3:1 on every ground, in both modes
+- `public/index.html`'s first-paint grounds and theme colours equal the tokens
 - text primary, secondary and tertiary at 4.5:1 on body, surface and level1, in both modes
 - every preset at least 0.08 apart (OKLab) from every status solid — a primary button never looks like Delete
 - every category ink at 4.5:1 on its tint; gold at 4.5:1 on Ink Teal

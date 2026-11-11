@@ -60,9 +60,9 @@ export const BrandMark = ({ size = 24, title = null, sx = {} }) => {
  * not copy, so it is the same in every locale; it is also the lockup's
  * accessible name, read once.
  */
-export const BrandLockup = ({ markSize = 28, level = 'h4', sx = {} }) => (
+export const BrandLockup = ({ markSize = 28, level = 'h4', sx = {}, markSx = {} }) => (
   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'inherit', ...sx }}>
-    <BrandMark size={markSize} />
+    <BrandMark size={markSize} sx={markSx} />
     <Typography level={level} component='span' sx={{ color: 'inherit', fontWeight: 'xl', letterSpacing: '-0.03em', lineHeight: 1 }}>
       nowry
     </Typography>

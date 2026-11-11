@@ -61,6 +61,7 @@ import { bugsService } from '@nowry/core/api/services/bugs.service'
 import { useAuth } from '@nowry/core/context/AuthContext'
 import { useBeta } from '@nowry/core/context/BetaContext'
 import { SHOW_PRICING } from '@nowry/core/domain/plans'
+import { BRAND } from '@nowry/core/tokens/colorSystem'
 
 const HeaderUtils = ({ variant = 'header' }) => {
   const { mode, setMode } = useColorScheme()
@@ -259,13 +260,15 @@ const Header = () => {
           py: 1.5,
           zIndex: Z_NAV,
           flexShrink: 0,
-          // The page ground with a hairline under it, signed in or not (ADR-035 §3,
-          // amended 2026-09-26). The header used to be the accent solid for
-          // members and changed ground at sign-in; the accent is spent on the
-          // Study key now, not on a bar.
-          backgroundColor: theme.palette.background.body,
-          color: theme.palette.text.primary
+          // Ink Teal in both modes, signed in or not (ADR-074 §2, reversing
+          // SITE-011). The bar is rendered in the dark scheme, so `surface` is
+          // Ink Teal and every control in it reads the dark tokens.
+          // Token names, not `theme.palette` values: a name resolves on this
+          // element, where the dark scheme's variables live.
+          bgcolor: 'background.surface',
+          color: 'text.primary'
         })}
+        data-joy-color-scheme='dark'
       >
         {/* Logo */}
         <Box
@@ -274,13 +277,14 @@ const Header = () => {
           sx={{
             display: 'flex',
             alignItems: 'center',
+            minHeight: 44,
             textDecoration: 'none',
             color: 'inherit',
             transition: 'opacity 0.2s',
             '&:hover': { opacity: 0.8 }
           }}
         >
-          <BrandLockup markSize={30} />
+          <BrandLockup markSize={30} markSx={{ color: BRAND.coilGold }} />
           {beta.active && (
             <Chip size='sm' variant='soft' color='primary' sx={{ ml: 1 }} aria-label={t('beta.mark')}>
               {t('beta.mark')}

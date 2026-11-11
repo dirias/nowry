@@ -5,7 +5,17 @@
   <meta charset="utf-8" />
   <link rel="icon" type="image/png" href="%PUBLIC_URL%/favicon.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#0b3e43" />
+  <!-- ADR-074: the page supports both schemes and says so before any script runs,
+       so a browser or an in-app webview does not darken it on its own. The header
+       is Ink Teal in both, and the two grounds are the document's first paint.
+       src/theme/__tests__/documentColors.test.js holds these to the tokens. -->
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#0b3e43" />
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b3e43" />
+  <style>
+    html { color-scheme: light dark; background-color: #fcfbf8; }
+    @media (prefers-color-scheme: dark) { html { background-color: #023135; } }
+  </style>
   <meta name="description" content="Write or import your notes, turn them into flashcards, and review them on a spaced schedule, next to your plan for the year. Web and Android." />
   <!--
       Link previews (Slack, WhatsApp, X, LinkedIn). This is a single-page app,
