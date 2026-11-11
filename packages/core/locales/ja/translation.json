@@ -2080,7 +2080,14 @@
       "evolving": "{{name}}が進化しています…",
       "became": "{{from}}が{{to}}に進化しました",
       "continue": "{{name}}に会う",
-      "almost": "もうすぐ{{name}}"
+      "almost": "もうすぐ{{name}}",
+      "skip": "タップでスキップ",
+      "portraitEyebrow": "新しいポートレート",
+      "portraitWorn": "ポートレートを変更しました",
+      "generationsLeft_one": "今月はあと{{count}}枚作成できます",
+      "generationsLeft_other": "今月はあと{{count}}枚作成できます",
+      "generationsNone": "今月の新しいポートレートはこれが最後です。",
+      "resetsOn": "新しいポートレートは{{date}}にまた作成できます。"
     }
   },
   "agent": {

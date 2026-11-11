@@ -3057,7 +3057,14 @@
       "evolving": "{{name}} está evolucionando…",
       "became": "{{from}} se convirtió en {{to}}",
       "continue": "Conoce a {{name}}",
-      "almost": "Casi {{name}}"
+      "almost": "Casi {{name}}",
+      "skip": "Toca para omitir",
+      "portraitEyebrow": "Retrato nuevo",
+      "portraitWorn": "Retrato cambiado",
+      "generationsLeft_one": "Te queda {{count}} retrato nuevo este mes",
+      "generationsLeft_other": "Te quedan {{count}} retratos nuevos este mes",
+      "generationsNone": "Ese fue el último retrato nuevo de este mes.",
+      "resetsOn": "Los retratos nuevos vuelven el {{date}}."
     }
   },
   "quiz": {

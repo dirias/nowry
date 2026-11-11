@@ -1922,7 +1922,14 @@
       "evolving": "{{name}} entwickelt sich…",
       "became": "Aus {{from}} wurde {{to}}",
       "continue": "{{name}} kennenlernen",
-      "almost": "Fast {{name}}"
+      "almost": "Fast {{name}}",
+      "skip": "Zum Überspringen tippen",
+      "portraitEyebrow": "Neues Porträt",
+      "portraitWorn": "Porträt gewechselt",
+      "generationsLeft_one": "Noch {{count}} neues Porträt in diesem Monat",
+      "generationsLeft_other": "Noch {{count}} neue Porträts in diesem Monat",
+      "generationsNone": "Das war das letzte neue Porträt in diesem Monat.",
+      "resetsOn": "Neue Porträts gibt es wieder am {{date}}."
     }
   },
   "agent": {

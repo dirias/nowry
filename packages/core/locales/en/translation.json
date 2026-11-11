@@ -3472,7 +3472,14 @@
       "evolving": "{{name}} is evolving…",
       "became": "{{from}} became {{to}}",
       "continue": "Meet {{name}}",
-      "almost": "Almost {{name}}"
+      "almost": "Almost {{name}}",
+      "skip": "Tap to skip",
+      "portraitEyebrow": "New portrait",
+      "portraitWorn": "Portrait changed",
+      "generationsLeft_one": "{{count}} new portrait left this month",
+      "generationsLeft_other": "{{count}} new portraits left this month",
+      "generationsNone": "That was this month's last new portrait.",
+      "resetsOn": "New portraits come back on {{date}}."
     }
   },
   "quiz": {

@@ -1933,7 +1933,14 @@
       "evolving": "{{name}} évolue…",
       "became": "{{from}} est devenu {{to}}",
       "continue": "Découvrir {{name}}",
-      "almost": "Bientôt {{name}}"
+      "almost": "Bientôt {{name}}",
+      "skip": "Touchez pour passer",
+      "portraitEyebrow": "Nouveau portrait",
+      "portraitWorn": "Portrait changé",
+      "generationsLeft_one": "Il vous reste {{count}} nouveau portrait ce mois-ci",
+      "generationsLeft_other": "Il vous reste {{count}} nouveaux portraits ce mois-ci",
+      "generationsNone": "C'était le dernier nouveau portrait de ce mois-ci.",
+      "resetsOn": "Les nouveaux portraits reviennent le {{date}}."
     }
   },
   "agent": {
