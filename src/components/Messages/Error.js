@@ -2,18 +2,6 @@ import React from 'react'
 import { Modal, ModalDialog, DialogContent, Typography, Stack, Button, Box } from '@mui/joy'
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
 
-/**
- * What the window may draw. A caller that hands over an API error's `detail`
- * can be handing over an object — a coded refusal — and React refuses to render
- * one: the whole page fell to its error boundary on a refused import (ADR-068).
- * Text, nodes and lists of nodes pass; an object is read for its own words.
- */
-export const renderableMessage = (message) => {
-  if (message === null || message === undefined || typeof message !== 'object') return message
-  if (Array.isArray(message) || React.isValidElement(message)) return message
-  return String(message.message || message.detail || message.code || '')
-}
-
 const ErrorWindow = ({ title, error_msg, onClose }) => {
   return (
     <Modal open={true} onClose={onClose}>
@@ -72,7 +60,7 @@ const ErrorWindow = ({ title, error_msg, onClose }) => {
         {/* Content */}
         <DialogContent sx={{ px: 3, py: 3 }}>
           <Typography level='body-md' sx={{ color: 'text.primary', lineHeight: 1.6 }}>
-            {renderableMessage(error_msg)}
+            {error_msg}
           </Typography>
         </DialogContent>
 
