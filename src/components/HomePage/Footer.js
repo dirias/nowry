@@ -88,8 +88,8 @@ const Footer = () => {
             {t('footer.copyright', { year: new Date().getFullYear() })}
           </Typography>
 
-          {/* Center: nav + support links */}
-          <Stack direction='row' spacing={0} alignItems='center' flexWrap='wrap'>
+          {/* Center: nav + support links. Their labels, not their 8px padding, sit on the page's edge. */}
+          <Stack direction='row' spacing={0} alignItems='center' flexWrap='wrap' sx={{ ml: -1 }}>
             {navLinks.map((link) => (
               <Button
                 key={link.key}
@@ -115,8 +115,9 @@ const Footer = () => {
             </Button>
           </Stack>
 
-          {/* Right: language + theme + social icons + optional bug report */}
-          <Stack direction='row' spacing={0} alignItems='center'>
+          {/* Right: language + theme + social icons + optional bug report. It wraps
+              rather than push the page sideways on a 320px phone. */}
+          <Stack direction='row' spacing={0} alignItems='center' flexWrap='wrap' sx={{ ml: { xs: -0.5, sm: 0 }, maxWidth: '100%' }}>
             {/* Language switcher */}
             <Tooltip title={t('footer.language')} placement='top'>
               <Select

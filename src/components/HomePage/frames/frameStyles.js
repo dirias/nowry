@@ -73,7 +73,10 @@ export const frameSegment = {
   bgcolor: 'background.level1',
   border: '1px solid',
   borderColor: 'divider',
-  overflow: 'hidden'
+  overflow: 'hidden',
+  // Never wider than what holds it: the items give way before the group
+  // crosses its panel's border.
+  maxWidth: '100%'
 }
 
 export const frameSegmentItem = (active, first) => ({
@@ -84,5 +87,8 @@ export const frameSegmentItem = (active, first) => ({
   bgcolor: active ? 'background.level2' : 'transparent',
   color: active ? 'text.primary' : 'text.secondary',
   fontWeight: 'md',
-  whiteSpace: 'nowrap'
+  whiteSpace: 'nowrap',
+  minWidth: 0,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis'
 })

@@ -6,6 +6,9 @@ import Loop from './landing/Loop'
 import Ledger from './landing/Ledger'
 import Pricing from './landing/Pricing'
 import Note from './landing/Note'
+import EarlyAccess from './landing/EarlyAccess'
+import { SHOW_PRICING } from '@nowry/core/domain/plans'
+import useIsMobile from '../../hooks/useIsMobile'
 import StudyCenterFrame from './frames/StudyCenterFrame'
 import PhoneFrame from './frames/PhoneFrame'
 import SectionFrame from './frames/SectionFrame'
@@ -25,6 +28,8 @@ import YearFrame from './frames/YearFrame'
  */
 const Landing = () => {
   const { hash } = useLocation()
+  const isMobile = useIsMobile()
+  const foldAccess = !SHOW_PRICING && isMobile
 
   // "Pricing" in the header and footer is `/#pricing`. The browser scrolls to a
   // hash on a full load; a client-side navigation to the same route does not.
@@ -46,8 +51,16 @@ const Landing = () => {
           }}
         />
         <Ledger />
-        <Pricing />
-        <Note />
+        {/* On a phone, with prices hidden, the early-access section and the
+            note are one section under the same anchor (ADR-073, BRAND-016). */}
+        {foldAccess ? (
+          <EarlyAccess id='pricing' folded />
+        ) : (
+          <>
+            <Pricing />
+            <Note />
+          </>
+        )}
       </Container>
     </Box>
   )

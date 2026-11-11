@@ -17,7 +17,9 @@ const AuthShell = ({ title, subtitle, lead = null, children }) => (
       <Box sx={{ color: 'text.primary' }}>
         <BrandWordmark fontSize={64} />
       </Box>
-      <Stack spacing={1} alignItems='flex-start'>
+      {/* `useFlexGap`: a Stack that spaces with margins resets its children's,
+          and the lead's offset onto the column's edge with them. */}
+      <Stack spacing={1} useFlexGap alignItems='flex-start'>
         {lead}
         <Typography level='h2' component='h1' sx={{ color: 'text.primary' }}>
           {title}

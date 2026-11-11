@@ -72,7 +72,8 @@ const ResetPassword = () => {
             startDecorator={<ArrowBackRounded />}
             component={RouterLink}
             to='/login'
-            sx={{ ml: -1.5 }}
+            // The arrow, not the key's padding, on the column's edge: 12px of padding less the glyph's own 3px pull.
+            sx={{ ml: '-9px' }}
           >
             {t('auth.resetPassword.backToLogin')}
           </Button>

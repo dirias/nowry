@@ -14,7 +14,7 @@ const Loop = ({ frames = {} }) => {
   const { t } = useTranslation()
 
   return (
-    <Box component='section' aria-labelledby='landing-loop-title' sx={{ py: { xs: 6, md: 10 } }}>
+    <Box component='section' aria-labelledby='landing-loop-title' sx={{ py: { xs: 4, md: 10 } }}>
       <Stack spacing={1.5} sx={{ maxWidth: 640, mb: { xs: 4, md: 6 } }}>
         <Typography id='landing-loop-title' level='h2' sx={{ color: 'text.primary' }}>
           {t('landing.loop.title')}
@@ -37,15 +37,37 @@ const Loop = ({ frames = {} }) => {
           // nothing is clipped) and the four captions sit on one line.
           gridAutoRows: { md: 'auto auto' },
           columnGap: 4,
-          rowGap: { xs: 4, md: 2 },
+          // On a phone a step reads words first, then its picture, close
+          // together, with the larger gap between steps — so a title never
+          // sits midway between two pictures.
+          rowGap: { xs: 2, sm: 4, md: 2 },
           '& > li': { display: 'contents' }
         }}
       >
         {LOOP_STEPS.map((step, index) => (
           <li key={step}>
-            <Box sx={{ minWidth: 0, gridRow: { md: 1 }, gridColumn: { md: index + 1 }, display: 'flex' }}>{frames[step]}</Box>
-            <Stack spacing={0.75} sx={{ minWidth: 0, gridRow: { md: 2 }, gridColumn: { md: index + 1 }, mb: { xs: 0, md: 2 } }}>
-              <Stack direction='row' spacing={1.25} alignItems='baseline'>
+            <Box
+              sx={{ minWidth: 0, order: { xs: index * 2 + 1, sm: 0 }, gridRow: { md: 1 }, gridColumn: { md: index + 1 }, display: 'flex' }}
+            >
+              {frames[step]}
+            </Box>
+            <Stack
+              spacing={0.75}
+              sx={{
+                minWidth: 0,
+                order: { xs: index * 2, sm: 0 },
+                mt: { xs: index === 0 ? 0 : 4, sm: 0 },
+                gridRow: { md: 2 },
+                gridColumn: { md: index + 1 },
+                mb: { xs: 0, md: 2 }
+              }}
+            >
+              {/* The number above the title on a phone, so title and text share the page's edge. */}
+              <Stack
+                direction={{ xs: 'column', sm: 'row' }}
+                spacing={{ xs: 0.25, sm: 1.25 }}
+                alignItems={{ xs: 'flex-start', sm: 'baseline' }}
+              >
                 <Typography level='title-sm' sx={{ color: 'text.tertiary', fontVariantNumeric: 'tabular-nums' }} aria-hidden>
                   {String(index + 1).padStart(2, '0')}
                 </Typography>

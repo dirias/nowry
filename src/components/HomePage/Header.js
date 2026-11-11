@@ -333,8 +333,10 @@ const Header = () => {
           )}
         </Stack>
 
-        {/* Right Section */}
-        <Stack direction='row' spacing={1.5} alignItems='center'>
+        {/* Right Section. Below `md` its last control is the menu key, whose
+            glyph sits 14px inside its 44px target; the row hangs that much past
+            the gutter so the glyph, not the target, ends on the page's edge. */}
+        <Stack direction='row' spacing={1.5} alignItems='center' sx={{ mr: { xs: '-14px', md: 0 } }}>
           {/* Mobile Menu Button */}
           <IconButton
             variant='plain'

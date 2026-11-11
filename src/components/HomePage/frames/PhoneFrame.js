@@ -23,7 +23,9 @@ const PhoneFrame = ({ sx = {} }) => {
   const done = TASKS.filter((x) => x.done).length
 
   return (
-    <Box aria-hidden sx={{ ...frameShell, width: 260, borderRadius: 'xl', p: 1.75, gap: 1.5, ...sx }}>
+    // The column's width on a phone, like every other frame on the page; capped
+    // so it stays a phone on a tablet.
+    <Box aria-hidden sx={{ ...frameShell, width: '100%', maxWidth: 420, borderRadius: 'xl', p: 1.75, gap: 1.5, ...sx }}>
       <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ color: 'text.primary' }}>
         <BrandLockup markSize={18} level='title-sm' />
         <Box

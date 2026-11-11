@@ -5,7 +5,6 @@ import { Box, Button, Chip, Stack, Typography } from '@mui/joy'
 import { ArrowForwardRounded } from '@mui/icons-material'
 import { useBeta } from '@nowry/core/context/BetaContext'
 import WaitlistForm from '../../Public/WaitlistForm'
-import { GEOMETRY } from '../../../theme/components'
 
 /**
  * The landing's first view (PRD public-site D1, D3, D11).
@@ -31,7 +30,7 @@ const Hero = ({ frame, phoneFrame }) => {
         alignItems: 'center',
         columnGap: { md: 8 },
         rowGap: 5,
-        py: { xs: 6, md: 12 }
+        py: { xs: 4, md: 12 }
       }}
     >
       <Stack spacing={3} alignItems='flex-start'>
@@ -47,8 +46,10 @@ const Hero = ({ frame, phoneFrame }) => {
           {t('landing.hero.lead')}
         </Typography>
         {/* One left edge: the plain key's words sit under the solid key's edge,
-            so its padding hangs outside the column. */}
-        <Stack spacing={1} alignItems='flex-start' sx={{ pt: 1 }}>
+            so its padding hangs outside the column. `useFlexGap`, because a
+            Stack that spaces with margins resets every child's margin to 0 and
+            the offset below with it. */}
+        <Stack spacing={1} useFlexGap alignItems='flex-start' sx={{ pt: 1 }}>
           <Button component={Link} to='/register' size='lg'>
             {t('landing.hero.cta')}
           </Button>
@@ -58,7 +59,8 @@ const Hero = ({ frame, phoneFrame }) => {
             variant='plain'
             size='lg'
             endDecorator={<ArrowForwardRounded />}
-            sx={{ ml: `-${GEOMETRY.lg.paddingInline}px` }}
+            // Its words on the page's edge, its padding in the gutter and no further.
+            sx={{ ml: -2, pl: 2 }}
           >
             {t('landing.hero.proof')}
           </Button>
@@ -75,7 +77,7 @@ const Hero = ({ frame, phoneFrame }) => {
           {t('landing.hero.frameCaption')}
         </Typography>
       </Stack>
-      <Stack spacing={1.5} alignItems='flex-start' sx={{ minWidth: 0, display: { xs: 'flex', md: 'none' } }}>
+      <Stack spacing={1.5} sx={{ minWidth: 0, display: { xs: 'flex', md: 'none' } }}>
         {phoneFrame}
         <Typography level='body-xs' sx={{ color: 'text.tertiary' }}>
           {t('landing.hero.phoneCaption')}

@@ -22,7 +22,7 @@ const Note = () => {
         alignItems: 'center',
         columnGap: 4,
         rowGap: 3,
-        py: { xs: 6, md: 10 }
+        py: { xs: 4, md: 10 }
       }}
     >
       <Box sx={{ color: 'primary.plainColor' }}>
