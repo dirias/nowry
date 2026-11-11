@@ -49,6 +49,8 @@ const previewSx = {
   '& table': { borderCollapse: 'collapse', my: 1.5 },
   '& td, & th': { border: '1px solid', borderColor: 'divider', px: 1, py: 0.5, textAlign: 'left', verticalAlign: 'top' },
   '& td p, & th p': { m: 0 },
+  // A link in the imported text wears the accent, as links do everywhere else, not the browser's blue.
+  '& a': { color: 'primary.plainColor', textDecorationColor: 'currentcolor' },
   // Columns are imported in reading order, so the preview reads that way too.
   '& div': { display: 'block' }
 }
