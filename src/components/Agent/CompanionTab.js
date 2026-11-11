@@ -21,6 +21,7 @@ import { useTranslation } from 'react-i18next'
 import { Link as RouterLink } from 'react-router-dom'
 import useGenerationProgress from '@nowry/core/hooks/useGenerationProgress'
 import { canCustomizeCompanion } from '@nowry/core/domain/petPortrait'
+import { formatGenerationReset, generationResetAt } from '@nowry/core/domain/petEvolution'
 import useUpgradesOpen from '@nowry/core/hooks/useUpgradesOpen'
 import GenerationProgress from '../Common/GenerationProgress'
 import StageJourney from './StageJourney'
@@ -68,7 +69,7 @@ const CompanionTab = ({
   generationsRemaining,
   onGenerateAvatar
 }) => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   // ADR-073: no upgrade key while prices are hidden or upgrades are closed.
   const upgradesOpen = useUpgradesOpen()
 
@@ -335,6 +336,12 @@ const CompanionTab = ({
                 </Typography>
               )}
             </Stack>
+            {/* None left: when they come back, on the learner's own clock (ADR-075 §4). */}
+            {generationsRemaining === 0 && (
+              <Typography level='body-xs' data-testid='portrait-resets-on' sx={{ color: 'text.tertiary' }}>
+                {t('pet.evolution.resetsOn', { date: formatGenerationReset(generationResetAt(), i18n?.language) })}
+              </Typography>
+            )}
 
             <GenerationProgress progress={avatarStatus} label={t('agent.companion.regenerating')} sx={{ width: '100%' }} />
 

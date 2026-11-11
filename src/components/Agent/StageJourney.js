@@ -25,6 +25,8 @@ import { useThemePreferences } from '../../theme/DynamicThemeProvider'
 import { PetOrb } from './StudyPet'
 import { CompanionArt } from './CompanionArt'
 import StagePortraits from './StagePortraits'
+import PortraitReveal from './PortraitReveal'
+import { EVOLUTION_KIND } from '@nowry/core/domain/petEvolution'
 
 const STAGE_COUNT = 6
 
@@ -170,6 +172,8 @@ const StageJourney = () => {
   // reached form with more than one portrait can be inspected, so nothing the
   // user paid for is stored-but-unreachable.
   const [openStage, setOpenStage] = useState(null)
+  const [portraitReveal, setPortraitReveal] = useState(null)
+  const closePortraitReveal = useCallback(() => setPortraitReveal(null), [])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
 
@@ -296,12 +300,17 @@ const StageJourney = () => {
             portraits={shownStage.portraits}
             wornUrl={shownStage.art_url}
             onWear={async (stage, url) => {
+              const previousUrl = shownStage.art_url
               const ok = await wearPortrait(stage, url)
-              if (ok) load()
+              if (!ok) return
+              // The short version: a portrait already made costs nothing and says so by saying nothing (ADR-075 §4).
+              if (url !== previousUrl) setPortraitReveal({ kind: EVOLUTION_KIND.worn, stage, fromUrl: previousUrl, toUrl: url })
+              load()
             }}
           />
         </Box>
       )}
+      <PortraitReveal reveal={portraitReveal} onClose={closePortraitReveal} />
     </Box>
   )
 }

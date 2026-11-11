@@ -169,6 +169,17 @@ describe('CompanionTab — generation progress', () => {
   })
 })
 
+describe('CompanionTab — when the month has no portrait left (ADR-075, FR-10)', () => {
+  it('says when they come back, and only then', () => {
+    const { unmount } = renderTab({ tier: 'pro', avatarUrl: 'https://example.test/p.png', generationsRemaining: 0 })
+    expect(screen.getByTestId('portrait-resets-on')).toHaveTextContent('pet.evolution.resetsOn')
+    expect(screen.getByRole('button', { name: 'agent.companion.regenerateAriaLabel' })).toBeDisabled()
+    unmount()
+    renderTab({ tier: 'pro', avatarUrl: 'https://example.test/p.png', generationsRemaining: 2 })
+    expect(screen.queryByTestId('portrait-resets-on')).not.toBeInTheDocument()
+  })
+})
+
 describe('CompanionTab — a portrait is a paid feature (EVO-009, ADR-053)', () => {
   const generate = () => screen.queryByText('agent.companion.generateAvatar')
   const upgrade = () => screen.queryByText('agent.companion.upgradePlus')

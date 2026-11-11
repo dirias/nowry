@@ -33,6 +33,9 @@ jest.mock('@nowry/core/context/AgentContext', () => ({
 // PetOrb drags in framer-motion, the pet context and the whole StudyPet tree.
 // This suite is about the ladder's logic, not the orb's rendering — which has
 // its own coverage in stageSilhouette.test.js.
+// The reveal a worn portrait plays has its own suite (PortraitReveal.test.js).
+jest.mock('../PortraitReveal', () => () => null)
+
 jest.mock('../StudyPet', () => ({
   PetOrb: ({ stage, avatarUrl, blankFace }) => (
     <div data-testid={`orb-stage-${stage}`}>

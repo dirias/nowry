@@ -470,6 +470,8 @@ export const AgentProvider = ({ children }) => {
     try {
       const data = await agentService.generateAvatar(trigger)
       dispatch({ type: 'AVATAR_GENERATED', payload: data })
+      // The server's answer, for a caller that marks the moment (ADR-075 §5).
+      return data
     } catch (err) {
       const code = err?.response?.data?.detail
       const errorKey =
@@ -481,6 +483,7 @@ export const AgentProvider = ({ children }) => {
           avatar_regen_not_pending: 'agent.avatar.generateError'
         }[code] || 'agent.avatar.generateError'
       dispatch({ type: 'AVATAR_GENERATE_ERROR', payload: errorKey })
+      return null
     }
   }, [])
 

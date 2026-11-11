@@ -55,6 +55,8 @@ import { useSubscription } from '@nowry/core/hooks/useSubscription'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
 import CompanionTab from './CompanionTab'
 import OrbPreviewPanel from './OrbPreviewPanel'
+import PortraitReveal from './PortraitReveal'
+import { EVOLUTION_KIND } from '@nowry/core/domain/petEvolution'
 import petService from '@nowry/core/api/services/petService'
 import { TEACHING_STYLE, agentPref } from '@nowry/core/domain/agentPrefs'
 import { suggestFromInterests } from '@nowry/core/utils/petColor'
@@ -466,6 +468,22 @@ export default function AgentSettings() {
   )
 
   // Handlers
+  // A new portrait is revealed only once the server has answered with it
+  // (ADR-075 §5); a failure leaves the existing error and plays nothing.
+  const [portraitReveal, setPortraitReveal] = useState(null)
+  const handleGenerateAvatar = async (trigger) => {
+    const previousUrl = avatarUrl
+    const data = await generateAvatar(trigger)
+    if (!data?.avatar_url) return
+    setPortraitReveal({
+      kind: EVOLUTION_KIND.generated,
+      stage: data.avatar_stage,
+      fromUrl: previousUrl,
+      toUrl: data.avatar_url,
+      generationsRemaining: data.generations_remaining
+    })
+  }
+
   const handleConciseness = (val) => {
     setConciseness(val)
     save('agent_conciseness', val)
@@ -1110,7 +1128,7 @@ export default function AgentSettings() {
                 avatarStartedAt={avatarStartedAt}
                 avatarError={avatarError}
                 generationsRemaining={generationsRemaining}
-                onGenerateAvatar={generateAvatar}
+                onGenerateAvatar={handleGenerateAvatar}
               />
             </Grid>
             <Grid xs={12} md={5}>
@@ -1234,6 +1252,8 @@ export default function AgentSettings() {
       >
         {t('agent.errors.settingsLoadFailed')}
       </Snackbar>
+
+      <PortraitReveal reveal={portraitReveal} onClose={() => setPortraitReveal(null)} />
     </Container>
   )
 }
