@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useDropzone } from 'react-dropzone'
@@ -12,7 +12,7 @@ import ImportPreviewModal from './ImportPreviewModal'
 import { useAuth } from '@nowry/core/context/AuthContext'
 import { useSubscription } from '@nowry/core/hooks/useSubscription'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
-import useBooks from '@nowry/core/hooks/useBooks'
+import useLibrary from '@nowry/core/hooks/useLibrary'
 import formatRelativeDate from '@nowry/core/utils/formatRelativeDate'
 import { listRow, readout } from '../Common/Form/formStyles'
 import ContinueObject from './ContinueObject'
@@ -22,7 +22,7 @@ import DocumentRow from './DocumentRow'
 import DocumentTile from './DocumentTile'
 import DocumentActionsMenu from './DocumentActionsMenu'
 import DeleteDocumentDialog from './DeleteDocumentDialog'
-import { filterDocuments, kindCounts, pickContinue, resumeHref, sortDocuments, tagCounts } from '@nowry/core/domain/books/libraryQuery'
+import { resumeHref } from '@nowry/core/domain/books/libraryQuery'
 import { BOOK_LIMITS, NEXT_PLAN, bookLimitFor } from '../../config/planLimits'
 import { importRefusal, rejectedFileRefusal } from '@nowry/core/domain/books/importRefusal'
 
@@ -34,7 +34,6 @@ const VIEW_KEY = 'book_view_mode'
  * on open — the list already carries counts — and no request per row.
  */
 export default function BookHome() {
-  const { books: allBooks, loading, error: fetchError, reload: fetchBooks } = useBooks()
   const navigate = useNavigate()
   const { t } = useTranslation()
   const { user } = useAuth()
@@ -65,27 +64,39 @@ export default function BookHome() {
   const relative = useCallback((value) => formatRelativeDate(t, value), [t])
   const username = user?.username || null
 
-  useEffect(() => {
-    if (fetchError) setErrorMessage(t('books.lib.loadError'))
-  }, [fetchError, t])
-
   const handleViewChange = useCallback((mode) => {
     setViewMode(mode)
     localStorage.setItem(VIEW_KEY, mode)
   }, [])
 
-  const continueDoc = useMemo(() => pickContinue(allBooks), [allBooks])
+  // The library is asked a question and answers a page of it (ADR-063): the
+  // server filters, searches and orders, and the counts, the tags and the
+  // document to continue describe the whole library. Nothing here holds the
+  // whole list, so a library of any size shows its newest document first.
+  const {
+    rows: documents,
+    total: matching,
+    counts,
+    tags,
+    continueBook: continueDoc,
+    loading,
+    loadingMore,
+    hasMore,
+    loadMore,
+    error: fetchError,
+    reload: fetchBooks
+  } = useLibrary({ kind, search: searchTerm, tags: selectedTags, sort })
+  const libraryCount = counts.all
+
+  useEffect(() => {
+    if (fetchError) setErrorMessage(t('books.lib.loadError'))
+  }, [fetchError, t])
+
   // The plan's book limit shows only when reached (D3): a readout on the title row,
   // never a gate — Add still opens and lands on the create sheet's plan-limit case.
   const limit = bookLimitFor(tier)
-  const atLimit = !loading && Number.isFinite(limit) && allBooks.length >= limit
+  const atLimit = !loading && Number.isFinite(limit) && libraryCount >= limit
   const nextPlan = NEXT_PLAN[tier]
-  const counts = useMemo(() => kindCounts(allBooks), [allBooks])
-  const tags = useMemo(() => tagCounts(allBooks), [allBooks])
-  const documents = useMemo(
-    () => sortDocuments(filterDocuments(allBooks, { kind, search: searchTerm, tags: selectedTags }), sort),
-    [allBooks, kind, searchTerm, selectedTags, sort]
-  )
 
   const openCreate = useCallback(() => setShowCreate(true), [])
   const openDocument = useCallback((book, extra) => navigate(resumeHref(book, extra)), [navigate])
@@ -269,7 +280,7 @@ export default function BookHome() {
           {atLimit && (
             <Typography level='body-sm' sx={{ ...readout, color: 'text.secondary' }} data-testid='book-limit'>
               {t('books.lib.limitReadout', {
-                count: allBooks.length,
+                count: libraryCount,
                 limit,
                 plan: t(`plans.${nextPlan}`),
                 next: Number.isFinite(BOOK_LIMITS[nextPlan]) ? BOOK_LIMITS[nextPlan] : t('books.lib.unlimited')
@@ -295,7 +306,7 @@ export default function BookHome() {
         onUpgrade={handleUpgrade}
       />
 
-      {(loading || allBooks.length > 0) && (
+      {(loading || libraryCount > 0) && (
         <DocumentsToolbar
           kind={kind}
           onKind={setKind}
@@ -333,7 +344,7 @@ export default function BookHome() {
         </Stack>
       )}
 
-      {!loading && allBooks.length > 0 && documents.length === 0 && (
+      {!loading && libraryCount > 0 && documents.length === 0 && (
         <Typography level='body-sm' sx={{ color: 'text.tertiary', py: 3 }}>
           {t('books.lib.noMatches')}
         </Typography>
@@ -380,6 +391,15 @@ export default function BookHome() {
             ))}
           </Box>
         ))}
+
+      {/* The rest of the answer, asked for when wanted: the count says how much there is */}
+      {!loading && hasMore && (
+        <Stack alignItems='center' sx={{ mt: 3 }}>
+          <Button variant='soft' color='neutral' loading={loadingMore} onClick={loadMore} data-testid='library-more'>
+            {t('books.lib.showMore', { shown: documents.length, total: matching })}
+          </Button>
+        </Stack>
+      )}
 
       <DeleteDocumentDialog
         book={bookToDelete}

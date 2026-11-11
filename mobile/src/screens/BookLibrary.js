@@ -26,26 +26,21 @@
  * the tile is for recognising a cover, and which one you want depends on what
  * you came for.
  */
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { FlatList, Pressable, View } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
-import { useBooks } from '@nowry/core/hooks/useBooks'
+import { useLibrary } from '@nowry/core/hooks/useLibrary'
 import { cardsReadout, metaLine } from '@nowry/core/domain/books/documentCopy'
 import {
   KINDS,
   SORTS,
   cardsFrom,
   coverage,
-  filterDocuments,
-  kindCounts,
   kindOf,
-  pickContinue,
   readingPage,
   resumeHref,
-  sectionsWithoutCards,
-  sortDocuments,
-  tagCounts
+  sectionsWithoutCards
 } from '@nowry/core/domain/books/libraryQuery'
 import { useTheme } from '../theme'
 import { LibraryFilterSheet } from './BookLibraryFilters'
@@ -103,12 +98,25 @@ export function BookLibrary() {
   const openMenu = (book) => setActing({ book, step: 'menu' })
   const closeActing = () => setActing({ book: null, step: null })
 
-  const { books, loading, error, reload } = useBooks()
-
-  const counts = useMemo(() => kindCounts(books), [books])
-  const allTags = useMemo(() => tagCounts(books), [books])
-  const rows = useMemo(() => sortDocuments(filterDocuments(books, { kind, search, tags }), sort), [books, kind, search, tags, sort])
-  const continues = useMemo(() => pickContinue(books), [books])
+  /*
+   * The library, a page at a time (ADR-063). The server filters, searches and
+   * orders; the counts, the tags and the document to continue describe the
+   * whole library and come with the first page. The phone used to filter the
+   * first hundred documents itself, so the hundred-and-first could not be
+   * reached from this screen.
+   */
+  const {
+    rows,
+    counts,
+    tags: allTags,
+    continueBook: continues,
+    loading,
+    loadingMore,
+    hasMore,
+    loadMore,
+    error,
+    reload
+  } = useLibrary({ kind, search, tags, sort })
 
   const when = (value) => (value ? new Intl.DateTimeFormat(language, { day: 'numeric', month: 'short' }).format(new Date(value)) : '')
 
@@ -141,7 +149,7 @@ export function BookLibrary() {
         {t('books.title')}
       </Typography>
 
-      {loading && books.length === 0 ? (
+      {loading && rows.length === 0 ? (
         <Skeleton width='100%' height={96} />
       ) : (
         <ContinueCard book={continues} onOpen={open} onMakeCards={() => setMaking(continues)} when={when} t={t} />
@@ -243,6 +251,20 @@ export function BookLibrary() {
               t={t}
             />
           )
+        }
+        // The next page is asked for as the reader nears the end of this one.
+        onEndReached={() => {
+          if (hasMore) loadMore()
+        }}
+        onEndReachedThreshold={0.6}
+        ListFooterComponent={
+          loadingMore ? (
+            <Stack spacing={2} style={{ paddingTop: theme.spacing[2] }}>
+              {[0, 1].map((i) => (
+                <Skeleton key={i} width='100%' height={56} />
+              ))}
+            </Stack>
+          ) : null
         }
         ListEmptyComponent={
           loading ? (
@@ -358,7 +380,9 @@ function ContinueCard({ book, onOpen, onMakeCards, when, t }) {
                 : t('books.lib.editedAt', { when: when(book.updated_at) })}
           </Readout>
           {unopened ? <Readout>{t('books.lib.pages', { count: position.total })}</Readout> : null}
-          {imported && position?.opened ? <Readout>{t('books.lib.pagesRead', { page: position.page, total: position.total })}</Readout> : null}
+          {imported && position?.opened ? (
+            <Readout>{t('books.lib.pagesRead', { page: position.page, total: position.total })}</Readout>
+          ) : null}
           {cardsFrom(book) ? <Readout>{t('books.lib.cardsFromDocument', { count: cardsFrom(book) })}</Readout> : null}
           {/*
            * What the document owes you TODAY, which this object dropped. Every

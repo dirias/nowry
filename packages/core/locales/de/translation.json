@@ -2747,6 +2747,7 @@
       "deleteKeepsHistory": "Sie behalten ihren Lernverlauf und zeigen „aus einem gelöschten Dokument“.",
       "deleteConfirm": "Dokument löschen",
       "noMatches": "Kein Dokument passt.",
+      "showMore": "Mehr anzeigen · {{shown}} von {{total}}",
       "deleteError": "Das Dokument konnte nicht gelöscht werden.",
       "add": "Hinzufügen",
       "addAria": "Ein Dokument hinzufügen",

@@ -1239,6 +1239,7 @@
       "deleteKeepsHistory": "Conservan su historial de repaso y dirán “de un documento que eliminaste”.",
       "deleteConfirm": "Eliminar documento",
       "noMatches": "Ningún documento coincide.",
+      "showMore": "Mostrar más · {{shown}} de {{total}}",
       "deleteError": "No se pudo eliminar el documento.",
       "add": "Añadir",
       "addAria": "Añadir un documento",

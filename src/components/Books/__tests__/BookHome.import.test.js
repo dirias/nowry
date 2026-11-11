@@ -34,9 +34,22 @@ jest.mock('../../Messages', () => ({ Error: ({ error_msg }) => <div role='alert'
 const mockImportFile = jest.fn()
 jest.mock('@nowry/core/api/services', () => ({ booksService: { importFile: (...args) => mockImportFile(...args) } }))
 const mockReload = jest.fn()
-jest.mock('@nowry/core/hooks/useBooks', () => {
-  const useBooks = () => ({ books: [], loading: false, error: null, reload: mockReload })
-  return { __esModule: true, default: useBooks, useBooks }
+jest.mock('@nowry/core/hooks/useLibrary', () => {
+  const useLibrary = () => ({
+    rows: [],
+    total: 0,
+    counts: { all: 0, written: 0, imported: 0 },
+    tags: [],
+    continueBook: null,
+    loading: false,
+    refreshing: false,
+    loadingMore: false,
+    hasMore: false,
+    loadMore: jest.fn(),
+    error: null,
+    reload: mockReload
+  })
+  return { __esModule: true, default: useLibrary, useLibrary }
 })
 
 const BookHome = require('../BookHome').default

@@ -899,6 +899,7 @@
       "deleteKeepsHistory": "カードは復習履歴を保ったまま「削除したドキュメントより」と表示されます。",
       "deleteConfirm": "ドキュメントを削除",
       "noMatches": "一致するドキュメントはありません。",
+      "showMore": "さらに表示 · {{total}} 件中 {{shown}} 件",
       "deleteError": "ドキュメントを削除できませんでした。",
       "add": "追加",
       "addAria": "ドキュメントを追加",

@@ -41,3 +41,21 @@ describe('importFile', () => {
     expect(mockPost.mock.calls[0][2].timeout).toBe(IMPORT_TIMEOUT_MS)
   })
 })
+
+describe('getLibrary (ADR-063)', () => {
+  const mockGet = jest.fn()
+  beforeEach(() => {
+    mockGet.mockReset().mockResolvedValue({ data: { items: [], total: 0 } })
+    require('../client').apiClient.get = (...args) => mockGet(...args)
+  })
+
+  it('states the whole question in the query string', async () => {
+    await booksService.getLibrary({ kind: 'imported', search: ' mito ', tags: ['bio', 'n3'], sort: 'title', offset: 48, limit: 24 })
+    expect(mockGet).toHaveBeenCalledWith('/book/library?kind=imported&sort=title&offset=48&limit=24&q=mito&tags=bio&tags=n3')
+  })
+
+  it('asks for the first page of everything by default', async () => {
+    await booksService.getLibrary()
+    expect(mockGet).toHaveBeenCalledWith('/book/library?kind=all&sort=edited&offset=0&limit=24')
+  })
+})

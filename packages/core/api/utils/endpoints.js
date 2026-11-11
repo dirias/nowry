@@ -6,6 +6,7 @@ export const ENDPOINTS = {
   books: {
     base: '/book',
     all: '/book/all',
+    library: '/book/library',
     byId: (id) => `/book/${id}`,
     create: '/book/create',
     update: (id) => `/book/edit/${id}`,

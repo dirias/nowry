@@ -2758,6 +2758,7 @@
       "deleteKeepsHistory": "Elles gardent leur historique de révision et indiqueront « d'un document que vous avez supprimé ».",
       "deleteConfirm": "Supprimer le document",
       "noMatches": "Aucun document ne correspond.",
+      "showMore": "Afficher plus · {{shown}} sur {{total}}",
       "deleteError": "Impossible de supprimer le document.",
       "add": "Ajouter",
       "addAria": "Ajouter un document",

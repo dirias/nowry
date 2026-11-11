@@ -28,7 +28,29 @@ jest.mock('../../Messages', () => ({ Error: ({ error_msg }) => <div role='alert'
 jest.mock('@nowry/core/api/services', () => ({ booksService: {} }))
 
 const mockUseBooks = jest.fn()
-jest.mock('@nowry/core/hooks/useBooks', () => ({ __esModule: true, default: () => mockUseBooks(), useBooks: () => mockUseBooks() }))
+// The paged library (ADR-063) answered from the same fixture the list used to
+// be: the pure query helpers stand in for the server, so every assertion below
+// still reads the screen, not the transport.
+const mockAsLibrary = (question) => {
+  const { filterDocuments, kindCounts, pickContinue, sortDocuments, tagCounts } = jest.requireActual('@nowry/core/domain/books/libraryQuery')
+  const { books = [], loading, error, reload, hasMore = false, loadMore = jest.fn(), loadingMore = false, total } = mockUseBooks()
+  const rows = sortDocuments(filterDocuments(books, question), question.sort)
+  return {
+    rows,
+    total: total ?? rows.length,
+    counts: kindCounts(books),
+    tags: tagCounts(books),
+    continueBook: pickContinue(books),
+    loading,
+    refreshing: false,
+    loadingMore,
+    hasMore,
+    loadMore,
+    error,
+    reload
+  }
+}
+jest.mock('@nowry/core/hooks/useLibrary', () => ({ __esModule: true, default: (question) => mockAsLibrary(question), useLibrary: (question) => mockAsLibrary(question) }))
 
 const BookHome = require('../BookHome').default
 
@@ -97,5 +119,20 @@ describe('BookHome (BOOK-008)', () => {
     mockUseBooks.mockReturnValue({ books: [], loading: false, error: new Error('down'), reload: jest.fn() })
     renderPage()
     expect(screen.getByRole('alert')).toHaveTextContent('books.lib.loadError')
+  })
+  it('offers the rest of a long library and asks for it when pressed (IMPORT-016)', () => {
+    const loadMore = jest.fn()
+    mockUseBooks.mockReturnValue({ books: BOOKS, loading: false, error: null, reload: jest.fn(), hasMore: true, loadMore, total: 130 })
+    renderPage()
+    const more = screen.getByTestId('library-more')
+    expect(more).toHaveTextContent('books.lib.showMore')
+    more.click()
+    expect(loadMore).toHaveBeenCalledTimes(1)
+  })
+
+  it('offers nothing more when the whole answer is on screen', () => {
+    mockUseBooks.mockReturnValue({ books: BOOKS, loading: false, error: null, reload: jest.fn() })
+    renderPage()
+    expect(screen.queryByTestId('library-more')).toBeNull()
   })
 })

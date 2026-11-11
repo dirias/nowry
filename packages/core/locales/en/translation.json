@@ -1610,6 +1610,7 @@
       "deleteKeepsHistory": "They keep their review history and will read “from a document you deleted”.",
       "deleteConfirm": "Delete document",
       "noMatches": "No documents match.",
+      "showMore": "Show more · {{shown}} of {{total}}",
       "deleteError": "Couldn't delete the document.",
       "add": "Add",
       "addAria": "Add a document",

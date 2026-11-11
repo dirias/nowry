@@ -1,6 +1,9 @@
 import { apiClient } from '../client'
 import { ENDPOINTS } from '../utils/endpoints'
 
+/** How many documents the library asks for at a time. */
+export const LIBRARY_PAGE_SIZE = 24
+
 /** How long an import may take before the client gives up: five minutes. */
 export const IMPORT_TIMEOUT_MS = 300000
 
@@ -15,6 +18,26 @@ export const booksService = {
    */
   async getAll() {
     const { data } = await apiClient.get(ENDPOINTS.books.all)
+    return data
+  },
+
+  /**
+   * One page of the library, with the counts the screen draws beside it (ADR-063).
+   * The server filters, searches and orders; a client never holds the whole list.
+   * @param {Object} question
+   * @param {'all'|'written'|'imported'} [question.kind]
+   * @param {string} [question.search]
+   * @param {string[]} [question.tags]
+   * @param {'edited'|'title'|'cards'} [question.sort]
+   * @param {number} [question.offset]
+   * @param {number} [question.limit]
+   * @returns {Promise<{items: Array, total: number, offset: number, limit: number, counts: {all: number, written: number, imported: number}, tags: Array<{tag: string, count: number}>, continue_book: Object|null}>}
+   */
+  async getLibrary({ kind = 'all', search = '', tags = [], sort = 'edited', offset = 0, limit = LIBRARY_PAGE_SIZE } = {}) {
+    const params = new URLSearchParams({ kind, sort, offset: String(offset), limit: String(limit) })
+    if (search.trim()) params.set('q', search.trim())
+    tags.forEach((tag) => params.append('tags', tag))
+    const { data } = await apiClient.get(`${ENDPOINTS.books.library}?${params.toString()}`)
     return data
   },
 
