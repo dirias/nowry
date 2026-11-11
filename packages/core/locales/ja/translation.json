@@ -957,8 +957,10 @@
       "loadError": "ドキュメントのセクションを読み込めませんでした。",
       "retry": "再試行",
       "pick": "カードを作るセクションにチェックを入れてください。",
-      "budget": "{{sections}} セクションから約 {{cards}} 枚 · 今月の生成残り {{left}} / {{limit}} 回",
-      "budgetPro": "{{sections}} セクションから約 {{cards}} 枚",
+      "budget_one": "{{count}} セクションから約 {{cards}} 枚 · 今月の生成残り {{left}} / {{limit}} 回",
+      "budget_other": "{{count}} セクションから約 {{cards}} 枚 · 今月の生成残り {{left}} / {{limit}} 回",
+      "budgetPro_one": "{{count}} セクションから約 {{cards}} 枚",
+      "budgetPro_other": "{{count}} セクションから約 {{cards}} 枚",
       "budgetSpent": "今月の生成回数を使い切りました · {{limit}} / {{limit}} 回",
       "action_one": "カードを作る · {{count}} セクション",
       "action_other": "カードを作る · {{count}} セクション",
@@ -1053,7 +1055,11 @@
       "duplicateRow": "{{name}} は「{{title}}」としてすでにあります",
       "duplicatesSkip": "読み込まない",
       "duplicatesImport_one": "コピーとして読み込む",
-      "duplicatesImport_other": "{{count}} 件をコピーとして読み込む"
+      "duplicatesImport_other": "{{count}} 件をコピーとして読み込む",
+      "importing": "読み込み中…",
+      "importingCount": "{{total}} 件中 {{done}} 件目を読み込み中 · {{name}}",
+      "importingPictures_one": "読み込み中… 画像 {{count}} 枚を保存しています。",
+      "importingPictures_other": "読み込み中… 画像 {{count}} 枚の保存には少し時間がかかります。"
     },
     "reader": {
       "empty": "このドキュメントにはまだ何もありません。",

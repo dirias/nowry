@@ -5,6 +5,7 @@ import { useDropzone } from 'react-dropzone'
 import { Box, Button, Container, Skeleton, Snackbar, Stack, Typography } from '@mui/joy'
 
 import { booksService } from '@nowry/core/api/services'
+import { notify } from '@nowry/core/platform'
 import { Error as ErrorWindow } from '../Messages'
 import BookEditSheet from './BookEditSheet'
 import BookCreateSheet from './BookCreateSheet'
@@ -63,6 +64,15 @@ export default function BookHome() {
   const [duplicateAsk, setDuplicateAsk] = useState([])
   const [importingCopies, setImportingCopies] = useState(false)
   const dropRef = useRef(0)
+  const [importProgress, setImportProgress] = useState(null)
+  const importingRef = useRef(false)
+  const mountedRef = useRef(true)
+  useEffect(() => {
+    mountedRef.current = true
+    return () => {
+      mountedRef.current = false
+    }
+  }, [])
 
   const relative = useCallback((value) => formatRelativeDate(t, value), [t])
   const username = user?.username || null
@@ -90,6 +100,7 @@ export default function BookHome() {
     reload: fetchBooks
   } = useLibrary({ kind, search: searchTerm, tags: selectedTags, sort })
   const libraryCount = counts.all
+  const loadFailed = !!fetchError && !loading && libraryCount === 0 && documents.length === 0
 
   // The library could not be read. An import's own report — which files went
   // in and which did not, by name — is the more useful thing to be told, so it
@@ -185,7 +196,9 @@ export default function BookHome() {
       const imported = []
       const failures = []
       const duplicates = []
-      for (const file of files) {
+      for (const [index, file] of files.entries()) {
+        // Which file of how many: a long drop used to show a spinner and nothing else.
+        if (mountedRef.current) setImportProgress({ done: index, total: files.length, name: file.name })
         try {
           imported.push(await booksService.importFile(file, username || 'Unknown', false, title, onDuplicate))
         } catch (error) {
@@ -198,6 +211,14 @@ export default function BookHome() {
       // may a file whose answer was lost. Left stale, the library invited a retry
       // that made a duplicate (IMPORT-004).
       await fetchBooks()
+      if (!mountedRef.current) {
+        // The reader went to another page while the import ran. It finished; say
+        // so where they are now, since this page's toast will never be seen.
+        if (imported.length) notify(t('books.lib.importedToast', { count: imported.length }), 'success')
+        failures.forEach((failure) => notify(failure, 'error'))
+        return []
+      }
+      setImportProgress(null)
       if (imported.length) {
         setToast({
           message: t('books.lib.importedToast', { count: imported.length }),
@@ -214,6 +235,10 @@ export default function BookHome() {
 
   const handleConfirmImport = useCallback(
     async (inputTitle) => {
+      // One import at a time. The key shows a spinner once the state has
+      // rendered; presses that land before that would each start an import.
+      if (importingRef.current) return
+      importingRef.current = true
       setConfirmingImport(true)
       const single = pendingFiles.length === 1
       // One file whose preview already said "this is in your library": pressing
@@ -225,6 +250,8 @@ export default function BookHome() {
       })
       setShowPreview(false)
       setPreviewData(null)
+      importingRef.current = false
+      if (!mountedRef.current) return
       setPendingFiles([])
       setConfirmingImport(false)
       if (duplicates.length) setDuplicateAsk(duplicates)
@@ -233,11 +260,15 @@ export default function BookHome() {
   )
 
   const handleImportCopies = useCallback(async () => {
+    if (importingRef.current) return
+    importingRef.current = true
     setImportingCopies(true)
     await importFiles(
       duplicateAsk.map(({ file }) => file),
       { onDuplicate: 'copy' }
     )
+    importingRef.current = false
+    if (!mountedRef.current) return
     setImportingCopies(false)
     setDuplicateAsk([])
   }, [duplicateAsk, importFiles])
@@ -330,20 +361,33 @@ export default function BookHome() {
         <AddMenu onNew={openCreate} onImport={openFilePicker} />
       </Box>
 
-      {/* The summary object (D1, D2, D12): where you were, and what your notes owe the deck */}
-      <ContinueObject
-        loading={loading}
-        book={continueDoc}
-        tier={tier}
-        isDragActive={isDragActive}
-        formatRelativeDate={relative}
-        onContinue={() => continueDoc && openDocument(continueDoc)}
-        onMakeCards={() => continueDoc && openDocument(continueDoc, { makeCards: 1 })}
-        onListen={() => continueDoc && openDocument(continueDoc, { listen: 1 })}
-        onNew={openCreate}
-        onImport={openFilePicker}
-        onUpgrade={handleUpgrade}
-      />
+      {/* The summary object (D1, D2, D12): where you were, and what your notes owe the deck. */}
+      {/* The library could not be read and there is nothing to show: say that, with a way
+          to try again — not "nothing here yet", which is a different fact (IMPORT-028). */}
+      {loadFailed ? (
+        <Stack spacing={1.5} alignItems='flex-start' sx={{ py: 3 }} data-testid='library-load-failed'>
+          <Typography level='body-md' sx={{ color: 'text.secondary' }}>
+            {t('books.lib.loadError')}
+          </Typography>
+          <Button variant='soft' color='neutral' onClick={fetchBooks}>
+            {t('books.lib.retry')}
+          </Button>
+        </Stack>
+      ) : (
+        <ContinueObject
+          loading={loading}
+          book={continueDoc}
+          tier={tier}
+          isDragActive={isDragActive}
+          formatRelativeDate={relative}
+          onContinue={() => continueDoc && openDocument(continueDoc)}
+          onMakeCards={() => continueDoc && openDocument(continueDoc, { makeCards: 1 })}
+          onListen={() => continueDoc && openDocument(continueDoc, { listen: 1 })}
+          onNew={openCreate}
+          onImport={openFilePicker}
+          onUpgrade={handleUpgrade}
+        />
+      )}
 
       {(loading || libraryCount > 0) && (
         <DocumentsToolbar
@@ -478,6 +522,7 @@ export default function BookHome() {
         onConfirm={handleConfirmImport}
         loading={confirmingImport}
         preparing={preparingPreview}
+        progress={importProgress}
         fileNames={pendingFiles.map((file) => file.name)}
         formatWhen={relative}
         onOpenExisting={(existing) => {

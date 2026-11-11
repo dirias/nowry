@@ -89,10 +89,10 @@ describe('the sheet', () => {
 
   it('on Plus, says what the run makes and what is left this month, then runs for the ticked sections', async () => {
     const { onGenerate } = await renderSheet()
-    expect(screen.getByText('books.makeCards.budget:cards=7,sections=2,left=93,limit=100')).toBeInTheDocument()
+    expect(screen.getByText('books.makeCards.budget:cards=7,count=2,left=93,limit=100')).toBeInTheDocument()
 
     fireEvent.click(screen.getAllByRole('checkbox')[0])
-    expect(screen.getByText('books.makeCards.budget:cards=10,sections=3,left=93,limit=100')).toBeInTheDocument()
+    expect(screen.getByText('books.makeCards.budget:cards=10,count=3,left=93,limit=100')).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'books.makeCards.action:count=3' }))
     expect(onGenerate).toHaveBeenCalledWith([1, 2, 0])

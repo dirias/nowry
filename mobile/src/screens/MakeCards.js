@@ -247,9 +247,7 @@ export function MakeCardsSheet({ open, book, onClose, onSaved }) {
             {/* The budget when something is ticked; the instruction when
                 nothing is, which is the web's own pair. */}
             <Typography level='body-xs' color='text.tertiary'>
-              {ticked.length === 0
-                ? t('books.makeCards.pick')
-                : t('books.makeCards.budgetPro', { cards: estimate, sections: ticked.length })}
+              {ticked.length === 0 ? t('books.makeCards.pick') : t('books.makeCards.budgetPro', { cards: estimate, count: ticked.length })}
             </Typography>
           </>
         ) : (

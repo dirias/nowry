@@ -73,6 +73,7 @@ export default function ImportPreviewModal({
   formatWhen,
   loading = false,
   preparing = false,
+  progress = null,
   fileNames = []
 }) {
   const { t } = useTranslation()
@@ -201,6 +202,18 @@ export default function ImportPreviewModal({
               when: formatWhen ? formatWhen(duplicate.created_at) : ''
             })}
           </Alert>
+        )}
+
+        {/* While it runs, say how far it is: a drop of ten files, or one file with
+            sixty pictures, is a wait of many seconds (IMPORT-028). */}
+        {loading && (
+          <Typography level='body-sm' sx={{ color: 'text.secondary' }} aria-live='polite' data-testid='import-progress'>
+            {progress && progress.total > 1
+              ? t('books.import.importingCount', { done: progress.done + 1, total: progress.total, name: progress.name })
+              : facts?.pictures > 0
+                ? t('books.import.importingPictures', { count: facts.pictures })
+                : t('books.import.importing')}
+          </Typography>
         )}
 
         {!preparing && facts?.damaged && (

@@ -107,10 +107,10 @@ const MakeCardsSheet = ({ open, onClose, book, tier = 'free', aiUsageCount = 0, 
   const budgetLine = () => {
     if (status !== 'ready' || sections.length === 0) return null
     if (count === 0) return t('books.makeCards.pick')
-    if (locked) return t('books.makeCards.budgetPro', { cards: estimate, sections: count })
+    if (locked) return t('books.makeCards.budgetPro', { cards: estimate, count })
     if (spent) return t('books.makeCards.budgetSpent', { limit: PLUS_MONTHLY_GENERATIONS })
-    if (tier === 'plus') return t('books.makeCards.budget', { cards: estimate, sections: count, left, limit: PLUS_MONTHLY_GENERATIONS })
-    return t('books.makeCards.budgetPro', { cards: estimate, sections: count })
+    if (tier === 'plus') return t('books.makeCards.budget', { cards: estimate, count, left, limit: PLUS_MONTHLY_GENERATIONS })
+    return t('books.makeCards.budgetPro', { cards: estimate, count })
   }
 
   const actionSx = { minHeight: { xs: 44, sm: 36 }, ...focusRing }

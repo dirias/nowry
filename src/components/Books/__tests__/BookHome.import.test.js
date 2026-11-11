@@ -37,6 +37,8 @@ jest.mock('../DuplicateImportsDialog', () => (props) => {
 })
 jest.mock('../../Messages', () => ({ Error: ({ error_msg }) => <div role='alert'>{error_msg}</div> }))
 const mockImportFile = jest.fn()
+const mockNotify = jest.fn()
+jest.mock('@nowry/core/platform', () => ({ notify: (...args) => mockNotify(...args) }))
 jest.mock('@nowry/core/api/services', () => ({ booksService: { importFile: (...args) => mockImportFile(...args) } }))
 const mockReload = jest.fn()
 let mockLibraryError = null
@@ -74,6 +76,7 @@ beforeEach(() => {
   mockImportFile.mockReset()
   mockReload.mockReset().mockResolvedValue(undefined)
   mockLibraryError = null
+  mockNotify.mockReset()
 })
 
 describe('BookHome import', () => {
@@ -227,6 +230,54 @@ describe('BookHome import', () => {
     mockLibraryError = new Error('Network Error')
     renderPage()
     expect(screen.getByRole('alert')).toHaveTextContent('books.lib.loadError')
+  })
+
+  it('starts one import however fast the key is pressed (IMPORT-028)', async () => {
+    renderPage()
+    mockImportFile.mockResolvedValue({ title: 'a' })
+    await act(() => mockDropzone.onDrop([file('a.pdf')], []))
+    let finish
+    mockImportFile.mockReset().mockImplementation(() => new Promise((resolve) => (finish = resolve)))
+    let first
+    act(() => {
+      first = mockPreview.onConfirm('')
+      mockPreview.onConfirm('')
+      mockPreview.onConfirm('')
+    })
+    expect(mockImportFile).toHaveBeenCalledTimes(1)
+    await act(async () => {
+      finish({ _id: 'a' })
+      await first
+    })
+    expect(screen.getByText('books.lib.importedToast:1')).toBeInTheDocument()
+  })
+
+  it('says the import finished on whatever page the reader went to', async () => {
+    const { unmount } = renderPage()
+    mockImportFile.mockResolvedValue({ title: 'a' })
+    await act(() => mockDropzone.onDrop([file('a.pdf')], []))
+    let finish
+    mockImportFile.mockReset().mockImplementation(() => new Promise((resolve) => (finish = resolve)))
+    let running
+    act(() => {
+      running = mockPreview.onConfirm('')
+    })
+    unmount()
+    await act(async () => {
+      finish({ _id: 'a' })
+      await running
+    })
+    expect(mockNotify).toHaveBeenCalledWith('books.lib.importedToast:1', 'success')
+  })
+
+  it('says the library could not be loaded, with a way to retry, instead of calling it empty', () => {
+    mockLibraryError = new Error('Network Error')
+    renderPage()
+    const failed = screen.getByTestId('library-load-failed')
+    expect(failed).toHaveTextContent('books.lib.loadError')
+    expect(screen.queryByText('books.lib.emptySentence')).toBeNull()
+    screen.getByRole('button', { name: 'books.lib.retry' }).click()
+    expect(mockReload).toHaveBeenCalled()
   })
 
   it('says the connection failed, not the file, when no answer comes back', async () => {

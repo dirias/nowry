@@ -119,6 +119,16 @@ describe('ImportPreviewModal', () => {
     expect(screen.queryByTestId('import-facts')).toBeNull()
   })
 
+  it('says how far a running import is (IMPORT-028)', () => {
+    renderSheet({ loading: true, fileNames: ['a.pdf', 'b.txt'], progress: { done: 1, total: 2, name: 'b.txt' } })
+    expect(screen.getByTestId('import-progress')).toHaveTextContent('books.import.importingCount(done=2,total=2,name=b.txt)')
+  })
+
+  it('says pictures are being stored when one file with pictures is importing', () => {
+    renderSheet({ loading: true, progress: { done: 0, total: 1, name: 'notes.pdf' } })
+    expect(screen.getByTestId('import-progress')).toHaveTextContent('books.import.importingPictures(count=2)')
+  })
+
   it('cannot be closed while the import is running', () => {
     const { onClose } = renderSheet({ loading: true })
     expect(screen.getByRole('button', { name: 'common.cancel' })).toBeDisabled()
