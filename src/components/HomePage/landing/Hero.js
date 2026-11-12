@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Box, Button, Chip, Stack, Typography } from '@mui/joy'
+import { Box, Button, Chip, Skeleton, Stack, Typography } from '@mui/joy'
 import { ArrowForwardRounded } from '@mui/icons-material'
 import { useBeta } from '@nowry/core/context/BetaContext'
 import WaitlistForm from '../../Public/WaitlistForm'
@@ -20,7 +20,21 @@ import WaitlistForm from '../../Public/WaitlistForm'
  * waitlist form, because that is the one thing a visitor without a code can
  * finish; a code holder gets a plain link to Register. With the gate off the
  * solid key is "Create a free account", as before.
+ *
+ * The hero does not guess (WAIT-011, FR-015). Until the server answers, the
+ * action slot is a placeholder; if it never answers, the hero is the gated
+ * one. "Create a free account" appears only once the server has said that no
+ * invite is required, so no visitor is sent to a code field by a slow call.
  */
+
+/** `pending` until the gate answers, `gated` on a required invite or no answer, else `open`. */
+export const heroGate = ({ config, loading, failed }) => {
+  if (loading) return 'pending'
+  return failed || config?.invite_required ? 'gated' : 'open'
+}
+
+// The form's own footprint: stacked on a phone, one row from `sm`.
+const pendingSlot = { width: '100%', maxWidth: 440, height: { xs: 176, sm: 116 }, borderRadius: 'sm' }
 
 // Its words on the page's edge, its padding in the gutter and no further.
 const plainEdge = { ml: -2, pl: 2 }
@@ -31,18 +45,20 @@ const plainEdge = { ml: -2, pl: 2 }
  * Stack that spaces with margins resets every child's margin to 0 and the
  * offset with it.
  */
-const HeroActions = ({ gated }) => {
+const HeroActions = ({ gate }) => {
   const { t } = useTranslation()
   return (
-    <Stack spacing={1} useFlexGap alignItems='flex-start' sx={{ pt: 1, width: '100%' }}>
-      {gated ? (
+    <Stack spacing={1} useFlexGap alignItems='flex-start' aria-busy={gate === 'pending'} sx={{ pt: 1, width: '100%' }}>
+      {gate === 'pending' && <Skeleton variant='rectangular' animation='wave' data-testid='hero-gate-pending' sx={pendingSlot} />}
+      {gate === 'gated' && (
         <>
           <WaitlistForm source='/' />
           <Button component={Link} to='/register' variant='plain' size='lg' sx={plainEdge}>
             {t('beta.haveCode')}
           </Button>
         </>
-      ) : (
+      )}
+      {gate === 'open' && (
         <Button component={Link} to='/register' size='lg'>
           {t('landing.hero.cta')}
         </Button>
@@ -55,8 +71,8 @@ const HeroActions = ({ gated }) => {
 }
 const Hero = ({ frame, phoneFrame }) => {
   const { t } = useTranslation()
-  const { config: beta } = useBeta()
-  const gated = Boolean(beta.invite_required)
+  const { config: beta, loading, failed } = useBeta()
+  const gate = heroGate({ config: beta, loading, failed })
 
   return (
     <Box
@@ -83,8 +99,8 @@ const Hero = ({ frame, phoneFrame }) => {
         <Typography level='body-lg' sx={{ color: 'text.secondary', maxWidth: 480 }}>
           {t('landing.hero.lead')}
         </Typography>
-        <HeroActions gated={gated} />
-        {!gated && (
+        <HeroActions gate={gate} />
+        {gate === 'open' && (
           <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
             {t('landing.hero.fineprint')}
           </Typography>
