@@ -231,7 +231,7 @@ export default function AccountSettings() {
 
   // ── Notifications ───────────────────────────────────────────────────────────
   const [notifications, setNotifications] = useState({
-    emailDigest: true,
+    emailDigest: false,
     studyReminders: true,
     newsUpdates: false,
     marketing: false
@@ -284,7 +284,7 @@ export default function AccountSettings() {
 
       if (profile.notification_preferences) {
         setNotifications({
-          emailDigest: profile.notification_preferences.email_digest ?? true,
+          emailDigest: profile.notification_preferences.email_digest ?? false,
           studyReminders: profile.notification_preferences.study_reminders ?? true,
           newsUpdates: profile.notification_preferences.news_updates ?? false,
           marketing: profile.notification_preferences.marketing ?? false
