@@ -23,7 +23,7 @@ import { Button, Checkbox, FormField, Input, Stack, Typography } from '../../src
 import { AuthDivider, AuthFooter, AuthShell } from '../../src/ui/patterns/AuthShell'
 
 export default function Register() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -60,7 +60,7 @@ export default function Register() {
           return
         }
       }
-      await authService.register(email.trim(), password, username.trim(), code)
+      await authService.register(email.trim(), password, username.trim(), code, i18n.language)
       // AuthGate moves us once the session resolves.
     } catch (error) {
       setErrors(

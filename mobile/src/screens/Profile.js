@@ -36,6 +36,7 @@ import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@nowry/core/context/AuthContext'
 import { useUserProfile } from '@nowry/core/hooks/useUserProfile'
+import { useEmailVerification } from '@nowry/core/hooks/useEmailVerification'
 import { userService } from '@nowry/core/api/services'
 import { queryClient } from '@nowry/core/api/queryClient'
 import { getUsernameValidationError } from '@nowry/core/utils/usernameValidation'
@@ -190,6 +191,8 @@ export function Profile() {
 
         <Divider />
 
+        <VerifyEmail />
+
         <Button variant='secondary' onPress={() => router.push('/settings')}>
           {t('nav.settings')}
         </Button>
@@ -213,6 +216,45 @@ export function Profile() {
 
 /** One count, under its name. A zero is a fact and is shown (ADR-012 is about
  *  a metric that does not apply, not about one that is genuinely nought). */
+const VERIFY_STATUS = { sent: 'auth.verify.sent', failed: 'auth.verify.failed', notYet: 'auth.verify.notYet', done: 'auth.verify.done' }
+
+/**
+ * "Confirm your email", for a password account whose address has not proved
+ * itself (ADR-076). Nothing is blocked; the line goes once the link is opened.
+ */
+function VerifyEmail() {
+  const { t, i18n } = useTranslation()
+  const { needed, email, status, send, check } = useEmailVerification(i18n.language)
+  if (!needed) return null
+  const done = status === 'done'
+  return (
+    <>
+      <Typography level='title-md'>{done ? t('auth.verify.done') : t('auth.verify.title')}</Typography>
+      {done ? null : (
+        <Typography level='body-sm' color='text.secondary'>
+          {t('auth.verify.body', { email })}
+        </Typography>
+      )}
+      {!done && VERIFY_STATUS[status] ? (
+        <Typography level='body-sm' accessibilityLiveRegion='polite'>
+          {t(VERIFY_STATUS[status])}
+        </Typography>
+      ) : null}
+      {done ? null : (
+        <>
+          <Button variant='secondary' loading={status === 'sending'} onPress={send}>
+            {t('auth.verify.resend')}
+          </Button>
+          <Button variant='tertiary' loading={status === 'checking'} onPress={check}>
+            {t('auth.verify.check')}
+          </Button>
+        </>
+      )}
+      <Divider />
+    </>
+  )
+}
+
 function Count({ label, value, loading }) {
   return (
     <Stack spacing={0.5} style={{ flex: 1, minWidth: 0 }}>
