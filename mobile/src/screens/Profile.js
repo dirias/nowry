@@ -41,6 +41,7 @@ import { userService } from '@nowry/core/api/services'
 import { queryClient } from '@nowry/core/api/queryClient'
 import { getUsernameValidationError } from '@nowry/core/utils/usernameValidation'
 import { membershipDays, planMeters, profileStats } from '@nowry/core/domain/accountProfile'
+import { betaBadgeTone, planBadge, planLabelKey } from '@nowry/core/domain/access'
 import { useTheme } from '../theme'
 import { unregisterFromPush } from '../platform/push'
 import { Avatar, Button, Divider, FormField, Input, Progress, Readout, Screen, Skeleton, Stack, Typography } from '../ui'
@@ -71,7 +72,6 @@ export function Profile() {
     setBio(profile.bio ?? '')
   }, [profile])
 
-  const tier = profile?.subscription?.tier ?? null
   const stats = profileStats(profile)
   const meters = planMeters(profile?.subscription)
   const days = membershipDays(profile?.created_at)
@@ -165,11 +165,7 @@ export function Profile() {
         <Divider />
 
         <Typography level='title-md'>{t('subscription.currentPlan')}</Typography>
-        {loading ? (
-          <Skeleton width='40%' height={20} />
-        ) : (
-          <Typography level='body-md'>{tier ? t(`subscription.tier.${tier}`, tier) : t('subscription.tier.free')}</Typography>
-        )}
+        {loading ? <Skeleton width='40%' height={20} /> : <PlanLine subscription={profile?.subscription} />}
 
         {/* A fact about this account, never an offer about another one. */}
         {meters.map((meter) => (
@@ -258,6 +254,42 @@ function VerifyEmail() {
       )}
       <Divider />
     </>
+  )
+}
+
+/**
+ * The plan, as a readout (ADR-079). An account that pays reads its plan's
+ * name, as before. A tester reads "Beta" on the brand's teal, and under it
+ * that everything is unlocked. Nothing here offers a purchase (ADR-030).
+ */
+function PlanLine({ subscription }) {
+  const { t } = useTranslation()
+  const theme = useTheme()
+  const badge = planBadge(subscription)
+
+  if (badge?.kind !== 'beta') return <Typography level='body-md'>{t(planLabelKey(subscription))}</Typography>
+
+  const tone = betaBadgeTone(theme.scheme)
+  return (
+    <View style={{ gap: theme.spacing[1], alignItems: 'flex-start' }}>
+      <View
+        accessibilityRole='text'
+        accessibilityLabel={t(badge.labelKey)}
+        style={{
+          backgroundColor: tone.bg,
+          borderRadius: theme.radius.full,
+          paddingHorizontal: theme.spacing[1.5],
+          paddingVertical: theme.spacing[0.5]
+        }}
+      >
+        <Typography level='body-xs' weight='lg' style={{ color: tone.color }}>
+          {t(badge.labelKey)}
+        </Typography>
+      </View>
+      <Typography level='body-sm' color='text.secondary'>
+        {t('beta.fullAccess')}
+      </Typography>
+    </View>
   )
 }
 
