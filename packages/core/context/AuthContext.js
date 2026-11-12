@@ -1,9 +1,10 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react'
-import { onAuthStateChanged } from 'firebase/auth'
-import { apiClient } from '../api/client'
+import { onAuthStateChanged, signOut } from 'firebase/auth'
+import { apiClient, onNoAccount } from '../api/client'
 import { authService, registration } from '../api/services'
 import { queryClient } from '../api/queryClient'
 import { auth as authPort, session, storage } from '../platform'
+import { isInviteRefusal, isVerifyEmailRefusal } from '../domain/beta'
 
 /*
  * The i18next singleton, not the client's `i18n.js`. Both clients initialise
@@ -21,9 +22,15 @@ const AuthContext = createContext(null)
  */
 const PROFILE_KEY = 'NOWRY_LAST_PROFILE'
 
-const rememberProfile = (profile) => {
+/*
+ * A profile is kept with the Firebase identity it was read for, and given back
+ * only to that identity (ADR-077). A profile is the app's proof that someone is
+ * in: one that outlives its identity would let the next identity on this
+ * device, account or no account, into the previous person's screens.
+ */
+const rememberProfile = (profile, uid) => {
   try {
-    if (profile) storage.set(PROFILE_KEY, JSON.stringify(profile))
+    if (profile && uid) storage.set(PROFILE_KEY, JSON.stringify({ uid, profile }))
   } catch {
     // A device that cannot write it simply has no offline profile.
   }
@@ -37,10 +44,10 @@ const forgetProfile = () => {
   }
 }
 
-const lastProfile = () => {
+const lastProfile = (uid) => {
   try {
-    const raw = storage.get(PROFILE_KEY)
-    return raw ? JSON.parse(raw) : null
+    const kept = JSON.parse(storage.get(PROFILE_KEY) || 'null')
+    return uid && kept?.uid === uid ? (kept.profile ?? null) : null
   } catch {
     return null
   }
@@ -50,6 +57,17 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const refreshingRef = useRef(false)
+  // The Firebase identity the profile in `user` was read for.
+  const profileUidRef = useRef(null)
+  // The Firebase identity the auth listener last announced.
+  const identityUidRef = useRef(null)
+  const currentUid = () => authPort.currentUser()?.uid ?? identityUidRef.current
+
+  const dropProfile = () => {
+    profileUidRef.current = null
+    setUser(null)
+    forgetProfile()
+  }
 
   /**
    * Fetch the backend user profile.
@@ -57,10 +75,12 @@ export const AuthProvider = ({ children }) => {
    * (i.e. inside onAuthStateChanged with a non-null firebaseUser).
    */
   const checkUser = async () => {
+    const uid = currentUid()
     try {
       const response = await apiClient.get('/users/me')
+      profileUidRef.current = uid
       setUser(response.data)
-      rememberProfile(response.data)
+      rememberProfile(response.data, uid)
       // Preferences are nested under preferences.general in the backend
       const lang = response.data?.preferences?.general?.language
       if (lang) {
@@ -83,8 +103,22 @@ export const AuthProvider = ({ children }) => {
        */
       const status = error?.response?.status
       if (status === 401 || status === 403) {
-        setUser(null)
-        forgetProfile()
+        dropProfile()
+        /*
+         * ADR-077: the gate's refusal means this Firebase identity has no
+         * Nowry account. Left signed in, it is a session that is nobody: sign
+         * it out, quietly, unless a sign-up is waiting on its email, which
+         * needs the identity to finish.
+         */
+        const noAccount = isInviteRefusal(error) || isVerifyEmailRefusal(error)
+        if (noAccount && !authService.heldSignUp()) {
+          storage.remove('firebase_token')
+          try {
+            await signOut(authPort.instance())
+          } catch {
+            // The profile is already gone; a session that could not be closed reaches nothing.
+          }
+        }
       } else {
         /*
          * A COLD start with no network is the case the rule above does not
@@ -99,7 +133,12 @@ export const AuthProvider = ({ children }) => {
          * decks and cards already persisted there, and it is erased on logout
          * and on the server saying the session is invalid.
          */
-        setUser((current) => current ?? lastProfile())
+        // Only ever this identity's own profile: the one in memory if it was
+        // read for this identity, else the one this device kept for it.
+        const mine = profileUidRef.current === uid
+        const kept = mine ? null : lastProfile(uid)
+        if (!mine) profileUidRef.current = kept ? uid : null
+        setUser((current) => (mine ? current : kept))
       }
     } finally {
       setLoading(false)
@@ -124,15 +163,19 @@ export const AuthProvider = ({ children }) => {
         // A sign-up in flight has created the Firebase account but not yet
         // the Nowry one: wait for it, or the read is refused while the beta
         // gate is on (QA-024).
+        identityUidRef.current = firebaseUser.uid
         if (registration?.pending) await registration.pending
+        // A profile read for another identity is not this one's, whatever the
+        // read below turns out to be (ADR-077).
+        if (profileUidRef.current && profileUidRef.current !== firebaseUser.uid) dropProfile()
         await checkUser()
       } else {
         // No Firebase session at all (new visit or after logout). Firebase
         // restores its own session from disk without a network, so this is a
         // genuine "not signed in" rather than an offline one — the offline
         // profile goes with it.
-        setUser(null)
-        forgetProfile()
+        identityUidRef.current = null
+        dropProfile()
         setLoading(false)
       }
     })
@@ -153,6 +196,11 @@ export const AuthProvider = ({ children }) => {
      */
     return session.onUnauthorizedSubscribe(handleUnauthorized)
   }, [])
+
+  // The server said, on some request, that this identity has no Nowry account.
+  // dropProfile touches only a ref and state setters, so the first one serves for good.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => onNoAccount(dropProfile), [])
 
   // Token refresh interval — redundant now that interceptor uses getIdToken(false),
   // kept as a safety net for long-running sessions (every 30 min)
@@ -209,10 +257,9 @@ export const AuthProvider = ({ children }) => {
       // from the previous session (tasks, plans, books, etc.) — every hook
       // reads through React Query now (ADR-008), so this is the single wipe.
       queryClient.clear()
-      setUser(null)
       // The offline profile goes with the cache: the next person to open this
       // device must not be greeted by the last person's name.
-      forgetProfile()
+      dropProfile()
     }
   }
 

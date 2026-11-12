@@ -4,6 +4,17 @@ import { auth, env, notify, session, storage, telemetry } from '../../platform'
 import { isInviteRefusal, isVerifyEmailRefusal } from '../../domain/beta'
 
 /**
+ * Told when the server answers that the signed-in identity has no Nowry
+ * account (the beta gate's two refusals, ADR-038 and ADR-077), on any request.
+ * The auth context listens: a profile held for such a session is not theirs.
+ */
+const noAccountListeners = new Set()
+export const onNoAccount = (listener) => {
+  noAccountListeners.add(listener)
+  return () => noAccountListeners.delete(listener)
+}
+
+/**
  * Main API client instance with configured defaults.
  *
  * `baseURL` and `timeout` are NOT set here. This module is imported long before
@@ -161,6 +172,9 @@ apiClient.interceptors.response.use(
      * or "private beta" says the wrong thing.
      */
     const isGateRefusal = isInviteRefusal(error) || isVerifyEmailRefusal(error)
+    // The gate refuses only an identity that has no Nowry account, so whoever
+    // holds a profile for this session is told to drop it (ADR-077).
+    if (isGateRefusal) noAccountListeners.forEach((listener) => listener())
     const suppressGlobalToast = isAiGenerationEndpoint || ownsItsErrorUi || isGateRefusal
 
     // Handle request timeout — suppress for endpoints that surface their own error UI

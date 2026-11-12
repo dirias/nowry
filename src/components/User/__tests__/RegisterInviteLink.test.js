@@ -150,11 +150,40 @@ describe('the confirm-your-email step', () => {
     expect(mockCheckUser).toHaveBeenCalled()
   })
 
-  it('says the invite cannot be used with this email when the server refuses it', async () => {
-    await reachConfirm()
+  /*
+   * The sequence that failed on dev, 12 November 2026: an invite for one
+   * address, a sign-up with another, that other address confirmed, then
+   * "I've confirmed". The server refuses. The person must see the refusal and
+   * the way out, and must not be taken to onboarding or anywhere else.
+   */
+  it('another address, confirmed, sees the refusal and the way out, and goes nowhere', async () => {
+    const { container } = await reachConfirm()
+    mockNavigate.mockClear()
     mockAuthService.finishHeldSignUp.mockRejectedValue(refusal('beta_invite_required'))
+
     fireEvent.click(screen.getByRole('button', { name: 'auth.verify.check' }))
+
     expect(await screen.findByText('beta.personal.notUsable')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'beta.personal.useAnother' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'auth.verify.title' })).toBeInTheDocument()
+    expect(container.querySelector('form')).toBeNull()
+    expect(mockNavigate).not.toHaveBeenCalled()
+    expect(mockCheckUser).not.toHaveBeenCalled()
+
+    // Pressing again changes nothing: still refused, still here.
+    fireEvent.click(screen.getByRole('button', { name: 'auth.verify.check' }))
+    await waitFor(() => expect(mockAuthService.finishHeldSignUp).toHaveBeenCalledTimes(2))
+    expect(await screen.findByText('beta.personal.notUsable')).toBeInTheDocument()
+    expect(mockNavigate).not.toHaveBeenCalled()
+  })
+
+  it('a server fault on that press says so and goes nowhere', async () => {
+    await reachConfirm()
+    mockNavigate.mockClear()
+    mockAuthService.finishHeldSignUp.mockRejectedValue({ response: { status: 500 } })
+    fireEvent.click(screen.getByRole('button', { name: 'auth.verify.check' }))
+    expect(await screen.findByText('auth.verify.failed')).toBeInTheDocument()
+    expect(mockNavigate).not.toHaveBeenCalled()
   })
 
   it('sends the link again in the page language, and says when that fails', async () => {

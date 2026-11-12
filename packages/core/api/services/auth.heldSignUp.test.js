@@ -9,11 +9,13 @@ const mockUser = { uid: 'u1', email: 'ana@x.io', displayName: 'ana', emailVerifi
 const mockAuth = { currentUser: mockUser, languageCode: null }
 const mockSendEmailVerification = jest.fn()
 const mockSignOut = jest.fn()
+const mockSignIn = jest.fn()
+const mockCreateUser = jest.fn()
 jest.mock('firebase/auth', () => ({
-  createUserWithEmailAndPassword: async () => ({ user: mockUser }),
+  createUserWithEmailAndPassword: (...args) => mockCreateUser(...args),
   updateProfile: async () => {},
   sendEmailVerification: (...args) => mockSendEmailVerification(...args),
-  signInWithEmailAndPassword: jest.fn(),
+  signInWithEmailAndPassword: (...args) => mockSignIn(...args),
   signOut: (...args) => mockSignOut(...args),
   sendPasswordResetEmail: jest.fn()
 }))
@@ -41,6 +43,8 @@ beforeEach(() => {
   mockStore.clear()
   mockSendEmailVerification.mockReset().mockResolvedValue(undefined)
   mockSignOut.mockReset().mockResolvedValue(undefined)
+  mockSignIn.mockReset()
+  mockCreateUser.mockReset().mockResolvedValue({ user: mockUser })
   mockPost.mockReset()
   mockUser.getIdToken.mockReset().mockResolvedValue('fresh-token')
   mockUser.reload.mockReset().mockResolvedValue(undefined)
@@ -142,4 +146,46 @@ it('walking away forgets the invite and signs out, without announcing an ended s
 it('reads a corrupt held value as nothing', () => {
   mockStore.set(HELD_KEY, '{not json')
   expect(authService.heldSignUp()).toBeNull()
+})
+
+/*
+ * The identity a refused sign-up leaves behind (ADR-077). Found on dev: an
+ * address that signed up with someone else's invite keeps a Firebase identity
+ * and no Nowry account. Invited later, Firebase says its email is in use.
+ */
+const inUse = () => Object.assign(new Error('Firebase: Error (auth/email-already-in-use).'), { code: 'auth/email-already-in-use' })
+
+it('lets a left-behind identity sign up again with an invite, when the password is its own', async () => {
+  mockCreateUser.mockRejectedValue(inUse())
+  mockSignIn.mockResolvedValue({ user: mockUser })
+  mockPost.mockResolvedValueOnce({ data: { user_id: 'm1' } })
+
+  const result = await authService.register('ana@x.io', 'secret-pass', 'ana_typed', TOKEN, 'es')
+
+  expect(mockSignIn).toHaveBeenCalledWith(mockAuth, 'ana@x.io', 'secret-pass')
+  expect(result.backendUser).toEqual({ user_id: 'm1' })
+  expect(mockPost.mock.calls[0][2].headers['X-Invite-Code']).toBe(TOKEN)
+})
+
+it('a left-behind identity whose address is still unconfirmed lands on the same waiting step', async () => {
+  mockCreateUser.mockRejectedValue(inUse())
+  mockSignIn.mockResolvedValue({ user: mockUser })
+  mockPost.mockRejectedValueOnce(refusal('invite_verify_email'))
+  await expect(authService.register('ana@x.io', 'secret-pass', 'ana_typed', TOKEN)).rejects.toEqual(refusal('invite_verify_email'))
+  expect(authService.heldSignUp()).toEqual({ inviteCode: TOKEN, username: 'ana_typed', email: 'ana@x.io' })
+})
+
+it("says the address is in use when the password is not that identity's", async () => {
+  mockCreateUser.mockRejectedValue(inUse())
+  mockSignIn.mockRejectedValue(Object.assign(new Error('wrong'), { code: 'auth/wrong-password' }))
+  await expect(authService.register('ana@x.io', 'not-the-password', 'ana', TOKEN)).rejects.toMatchObject({
+    code: 'auth/email-already-in-use'
+  })
+  expect(mockPost).not.toHaveBeenCalled()
+})
+
+it('does not try the password when there is no invite to use', async () => {
+  mockCreateUser.mockRejectedValue(inUse())
+  await expect(authService.register('ana@x.io', 'secret-pass', 'ana', '')).rejects.toMatchObject({ code: 'auth/email-already-in-use' })
+  expect(mockSignIn).not.toHaveBeenCalled()
 })
