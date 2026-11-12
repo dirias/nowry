@@ -216,7 +216,13 @@ export function Profile() {
 
 /** One count, under its name. A zero is a fact and is shown (ADR-012 is about
  *  a metric that does not apply, not about one that is genuinely nought). */
-const VERIFY_STATUS = { sent: 'auth.verify.sent', failed: 'auth.verify.failed', notYet: 'auth.verify.notYet', done: 'auth.verify.done' }
+const VERIFY_STATUS = {
+  sent: 'auth.verify.sent',
+  wait: 'auth.verify.wait',
+  failed: 'auth.verify.failed',
+  notYet: 'auth.verify.notYet',
+  done: 'auth.verify.done'
+}
 
 /**
  * "Confirm your email", for a password account whose address has not proved
@@ -224,7 +230,7 @@ const VERIFY_STATUS = { sent: 'auth.verify.sent', failed: 'auth.verify.failed', 
  */
 function VerifyEmail() {
   const { t, i18n } = useTranslation()
-  const { needed, email, status, send, check } = useEmailVerification(i18n.language)
+  const { needed, email, status, wait, send, check } = useEmailVerification(i18n.language)
   if (!needed) return null
   const done = status === 'done'
   return (
@@ -242,8 +248,8 @@ function VerifyEmail() {
       ) : null}
       {done ? null : (
         <>
-          <Button variant='secondary' loading={status === 'sending'} onPress={send}>
-            {t('auth.verify.resend')}
+          <Button variant='secondary' loading={status === 'sending'} disabled={wait > 0} onPress={send}>
+            {wait > 0 ? t('auth.verify.resendIn', { seconds: wait }) : t('auth.verify.resend')}
           </Button>
           <Button variant='tertiary' loading={status === 'checking'} onPress={check}>
             {t('auth.verify.check')}

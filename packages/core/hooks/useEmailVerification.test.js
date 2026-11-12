@@ -17,7 +17,7 @@ jest.mock('../platform', () => ({ auth: { instance: () => ({}) } }))
 const mockSend = jest.fn()
 const mockConfirm = jest.fn()
 jest.mock('../api/services', () => ({
-  authService: { sendVerification: (...args) => mockSend(...args), confirmVerification: (...args) => mockConfirm(...args) }
+  authService: { requestVerification: (...args) => mockSend(...args), confirmVerification: (...args) => mockConfirm(...args) }
 }))
 
 import { needsVerification, useEmailVerification } from './useEmailVerification'
@@ -46,12 +46,21 @@ it('asks only a password account whose email is unverified', () => {
 })
 
 it('reports the address and sends in the app language', async () => {
-  mockSend.mockResolvedValue(true)
+  mockSend.mockResolvedValue({ status: 'sent' })
   mount(mockFirebaseUser())
   expect(read()).toEqual({ needed: true, email: 'ana@x.io', status: 'idle' })
   await act(() => hook.send())
   expect(mockSend).toHaveBeenCalledWith('es-MX')
   expect(read().status).toBe('sent')
+  expect(hook.wait).toBe(60)
+})
+
+it('rests the key for as long as the API says when one was sent a moment ago (ADR-078)', async () => {
+  mockSend.mockResolvedValue({ status: 'wait', retryAfter: 42 })
+  mount(mockFirebaseUser())
+  await act(() => hook.send())
+  expect(read().status).toBe('wait')
+  expect(hook.wait).toBe(42)
 })
 
 it('says so when the send fails, and when the link was not opened yet', async () => {

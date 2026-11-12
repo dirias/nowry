@@ -11,11 +11,17 @@ import { useEmailVerification } from '@nowry/core/hooks/useEmailVerification'
  * Nothing here blocks the product; an unverified account studies as before.
  */
 
-const STATUS_KEYS = { sent: 'auth.verify.sent', failed: 'auth.verify.failed', notYet: 'auth.verify.notYet', done: 'auth.verify.done' }
+const STATUS_KEYS = {
+  sent: 'auth.verify.sent',
+  wait: 'auth.verify.wait',
+  failed: 'auth.verify.failed',
+  notYet: 'auth.verify.notYet',
+  done: 'auth.verify.done'
+}
 
 const EmailVerificationNotice = () => {
   const { t, i18n } = useTranslation()
-  const { needed, email, status, send, check } = useEmailVerification(i18n.language)
+  const { needed, email, status, wait, send, check } = useEmailVerification(i18n.language)
   if (!needed) return null
 
   const done = status === 'done'
@@ -37,8 +43,8 @@ const EmailVerificationNotice = () => {
         )}
         {!done && (
           <Stack direction='row' spacing={1} useFlexGap flexWrap='wrap'>
-            <Button size='sm' variant='outlined' color='neutral' loading={status === 'sending'} onClick={send}>
-              {t('auth.verify.resend')}
+            <Button size='sm' variant='outlined' color='neutral' loading={status === 'sending'} disabled={wait > 0} onClick={send}>
+              {wait > 0 ? t('auth.verify.resendIn', { seconds: wait }) : t('auth.verify.resend')}
             </Button>
             <Button size='sm' variant='plain' color='neutral' loading={status === 'checking'} onClick={check}>
               {t('auth.verify.check')}

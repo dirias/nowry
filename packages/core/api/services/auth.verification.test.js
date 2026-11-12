@@ -38,7 +38,10 @@ beforeEach(() => {
 it('sends the verification after the account is synced, in the app language', async () => {
   mockSendEmailVerification.mockResolvedValue(undefined)
   await authService.register('ana@x.io', 'secret-pass', 'ana', 'code', 'es-MX')
-  expect(mockPost).toHaveBeenCalledTimes(1)
+  await new Promise((resolve) => setTimeout(resolve, 0))
+  // The account first, then the email: asked of the API (ADR-078), and of Firebase when the API does not say "sent".
+  expect(mockPost.mock.calls.map(([url]) => url)).toEqual(['/auth/register', '/auth/email/verification'])
+  expect(mockPost.mock.calls[1][1]).toEqual({ language: 'es' })
   expect(mockSendEmailVerification).toHaveBeenCalledWith(mockUser)
   expect(mockAuth.languageCode).toBe('es')
   expect(mockPost.mock.invocationCallOrder[0]).toBeLessThan(mockSendEmailVerification.mock.invocationCallOrder[0])
