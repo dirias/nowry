@@ -18,7 +18,7 @@ const mockAuthService = {
   holdInviteForCurrentUser: jest.fn(),
   finishHeldSignUp: jest.fn(),
   abandonHeldSignUp: jest.fn(),
-  sendVerification: jest.fn()
+  requestVerification: jest.fn()
 }
 jest.mock('@nowry/core/api/services/auth.service', () => ({ authService: mockAuthService }))
 
@@ -186,16 +186,18 @@ describe('the confirm-your-email step', () => {
     expect(mockNavigate).not.toHaveBeenCalled()
   })
 
-  it('sends the link again in the page language, and says when that fails', async () => {
+  it('sends the link again in the page language, says when that fails, and rests the key after a send', async () => {
     await reachConfirm()
-    mockAuthService.sendVerification.mockResolvedValueOnce(true)
-    fireEvent.click(screen.getByRole('button', { name: 'auth.verify.resend' }))
-    expect(await screen.findByText('auth.verify.sent')).toBeInTheDocument()
-    expect(mockAuthService.sendVerification).toHaveBeenCalledWith('es')
-
-    mockAuthService.sendVerification.mockRejectedValueOnce(new Error('quota'))
+    mockAuthService.requestVerification.mockRejectedValueOnce(new Error('quota'))
     fireEvent.click(screen.getByRole('button', { name: 'auth.verify.resend' }))
     expect(await screen.findByText('auth.verify.failed')).toBeInTheDocument()
+
+    mockAuthService.requestVerification.mockResolvedValueOnce({ status: 'sent' })
+    fireEvent.click(screen.getByRole('button', { name: 'auth.verify.resend' }))
+    expect(await screen.findByText('auth.verify.sent')).toBeInTheDocument()
+    expect(mockAuthService.requestVerification).toHaveBeenCalledWith('es')
+    // ADR-078: one a minute, so the key counts the minute down and cannot be pressed.
+    expect(screen.getByRole('button', { name: 'auth.verify.resendIn' })).toBeDisabled()
   })
 
   it('"use a different email" signs the identity out and returns to the form', async () => {

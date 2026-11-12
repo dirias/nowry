@@ -4,7 +4,10 @@ import {
   signOut,
   sendPasswordResetEmail,
   sendEmailVerification,
-  updateProfile
+  updateProfile,
+  applyActionCode,
+  verifyPasswordResetCode,
+  confirmPasswordReset
 } from 'firebase/auth'
 import { auth as authPort, session, storage } from '../../platform'
 import { apiClient } from '../client'
@@ -80,6 +83,16 @@ const dropHeldSignUp = () => {
  * expo-auth-session. Callers keep one function name either way.
  */
 const firebaseAuth = () => authPort.instance()
+
+/** 'es-MX' reads as 'es': the API and Firebase both take the two letters. */
+const twoLetters = (langCode) => String(langCode || 'en').split('-')[0]
+
+/**
+ * Whether the API itself could not be asked (ADR-078): no answer at all, a
+ * server fault, or an API from before the route existed. Then Firebase sends
+ * its own email, as it did before.
+ */
+const apiCouldNotAnswer = (error) => !error?.response || error.response.status >= 500 || error.response.status === 404
 
 /**
  * Auth Service with Firebase Authentication
@@ -305,17 +318,66 @@ export const authService = {
   },
 
   /**
-   * Ask Firebase to send the verification email to the signed-in user (ADR-076).
+   * Ask for the verification email (ADR-078, FR-023). The API writes it on
+   * Nowry's layout; when the API says it cannot, or cannot be reached, Firebase
+   * sends its own, as before (ADR-076).
    * @param {string} [langCode] the app's language, e.g. 'es' or 'es-MX'
+   * @returns {Promise<{ status: 'sent' | 'verified' | 'none' | 'wait', retryAfter?: number }>}
+   *   'none' when nobody is signed in; 'wait' with the seconds before another may be sent
+   */
+  async requestVerification(langCode) {
+    const auth = firebaseAuth()
+    const user = auth.currentUser
+    if (!user) return { status: 'none' }
+    if (user.emailVerified) return { status: 'verified' }
+    const language = twoLetters(langCode)
+    try {
+      const idToken = await user.getIdToken()
+      const { data } = await apiClient.post(
+        '/auth/email/verification',
+        { language },
+        { headers: { Authorization: `Bearer ${idToken}` }, suppressErrorToast: true }
+      )
+      if (data?.status === 'sent' || data?.status === 'verified') return { status: data.status }
+      if (data?.status === 'wait') return { status: 'wait', retryAfter: data.retry_after || 60 }
+    } catch (error) {
+      if (!apiCouldNotAnswer(error)) throw error
+    }
+    auth.languageCode = language
+    await sendEmailVerification(user)
+    return { status: 'sent' }
+  },
+
+  /**
+   * The same request, for callers that only need to know whether one went out.
    * @returns {Promise<boolean>} true when one was sent; false when there is no one to ask or nothing to prove
    */
   async sendVerification(langCode) {
-    const auth = firebaseAuth()
-    const user = auth.currentUser
-    if (!user || user.emailVerified) return false
-    if (langCode) auth.languageCode = String(langCode).split('-')[0]
-    await sendEmailVerification(user)
-    return true
+    return (await this.requestVerification(langCode)).status === 'sent'
+  },
+
+  /**
+   * Hand a verification code from an email link to Firebase (ADR-078, FR-022).
+   * If the person is signed in here, their token is refreshed so the server sees it too.
+   * @throws Firebase's error when the code is used, expired or unknown
+   */
+  async applyEmailCode(code) {
+    await applyActionCode(firebaseAuth(), code)
+    await this.confirmVerification().catch(() => false)
+  },
+
+  /**
+   * Whose password a reset code would change.
+   * @returns {Promise<string>} the account's email
+   * @throws Firebase's error when the code is used, expired or unknown
+   */
+  async checkResetCode(code) {
+    return verifyPasswordResetCode(firebaseAuth(), code)
+  },
+
+  /** Set the new password a reset code allows. Nothing changes until this is called. */
+  async confirmReset(code, newPassword) {
+    await confirmPasswordReset(firebaseAuth(), code, newPassword)
   },
 
   /**
@@ -390,19 +452,33 @@ export const authService = {
   },
 
   /**
-   * Send password reset email
+   * Ask for a password reset email (ADR-078, FR-024). The API answers the same
+   * whatever the address is, so this resolves the same way too. When the API
+   * cannot be asked, Firebase sends its own.
    * @param {string} email
-   * @param {string} langCode - Optional language code (e.g., 'es', 'fr')
+   * @param {string} [langCode] the app's language, e.g. 'es' or 'es-MX'
    */
   async resetPassword(email, langCode = 'en') {
+    const language = twoLetters(langCode)
     try {
-      firebaseAuth().languageCode = langCode
-      await sendPasswordResetEmail(firebaseAuth(), email)
-      return { message: 'Password reset email sent' }
+      await apiClient.post('/auth/email/password-reset', { email, language }, { suppressErrorToast: true })
     } catch (error) {
-      console.error('Password reset error:', error)
-      throw error
+      if (!apiCouldNotAnswer(error)) throw error
+      firebaseAuth().languageCode = language
+      await sendPasswordResetEmail(firebaseAuth(), email)
     }
+    return { message: 'Password reset email sent' }
+  },
+
+  /**
+   * The signed-in identity once Firebase has restored it, or null. A page opened
+   * from an email link asks before Firebase has finished reading its session.
+   * @returns {Promise<Object|null>}
+   */
+  async whenReady() {
+    const auth = firebaseAuth()
+    if (typeof auth.authStateReady === 'function') await auth.authStateReady()
+    return auth.currentUser || null
   },
 
   /**

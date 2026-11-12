@@ -45,6 +45,7 @@ const EvolutionPreview = process.env.NODE_ENV === 'production' ? null : lazy(() 
 const Login = lazy(() => import('./components/User/Login'))
 const Register = lazy(() => import('./components/User/Register'))
 const ResetPassword = lazy(() => import('./components/User/ResetPassword'))
+const EmailAction = lazy(() => import('./components/User/EmailAction'))
 const OnboardingRoute = lazy(() => import('./components/User/OnboardingRoute'))
 const Home = lazy(() => import('./components/User/Home/Home'))
 const EditorHome = lazy(() => import('./components/Books/EditorHome'))
@@ -210,6 +211,9 @@ const AppContent = () => {
                   </PublicOnlyRoute>
                 }
               />
+
+              {/* Where a link in a Nowry email lands; open to a signed-in person too (ADR-078). */}
+              <Route path='/auth/action' element={<EmailAction />} />
 
               {/* Home Route */}
               <Route

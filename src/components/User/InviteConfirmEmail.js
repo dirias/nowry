@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { Alert, Button, Link, Stack, Typography } from '@mui/joy'
 import { authService } from '@nowry/core/api/services/auth.service'
 import { isInviteRefusal } from '@nowry/core/domain/beta'
+import { afterVerificationRequest } from '@nowry/core/hooks/useEmailVerification'
+import { useCountdown } from '@nowry/core/hooks/useCountdown'
 
 /**
  * "Confirm your email", between a personal invitation and the account it makes
@@ -18,6 +20,7 @@ import { isInviteRefusal } from '@nowry/core/domain/beta'
 
 const STATUS_KEYS = {
   sent: 'auth.verify.sent',
+  wait: 'auth.verify.wait',
   failed: 'auth.verify.failed',
   notYet: 'auth.verify.notYet',
   notUsable: 'beta.personal.notUsable'
@@ -26,6 +29,7 @@ const STATUS_KEYS = {
 const InviteConfirmEmail = ({ email, onDone, onLeave }) => {
   const { t, i18n } = useTranslation()
   const [status, setStatus] = useState('idle')
+  const { left: wait, start: startWait } = useCountdown()
 
   const check = async () => {
     setStatus('checking')
@@ -41,8 +45,9 @@ const InviteConfirmEmail = ({ email, onDone, onLeave }) => {
   const send = async () => {
     setStatus('sending')
     try {
-      await authService.sendVerification(i18n.language)
-      setStatus('sent')
+      const next = afterVerificationRequest(await authService.requestVerification(i18n.language))
+      startWait(next.pause)
+      setStatus(next.status)
     } catch (error) {
       setStatus('failed')
     }
@@ -70,8 +75,8 @@ const InviteConfirmEmail = ({ email, onDone, onLeave }) => {
       <Button size='lg' fullWidth loading={status === 'checking'} disabled={busy} onClick={check}>
         {t('auth.verify.check')}
       </Button>
-      <Button size='lg' fullWidth variant='soft' color='neutral' loading={status === 'sending'} disabled={busy} onClick={send}>
-        {t('auth.verify.resend')}
+      <Button size='lg' fullWidth variant='soft' color='neutral' loading={status === 'sending'} disabled={busy || wait > 0} onClick={send}>
+        {wait > 0 ? t('auth.verify.resendIn', { seconds: wait }) : t('auth.verify.resend')}
       </Button>
       <Link component='button' type='button' level='body-sm' onClick={leave} disabled={busy} sx={{ alignSelf: 'center' }}>
         {t('beta.personal.useAnother')}
