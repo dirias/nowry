@@ -1764,6 +1764,7 @@
         "items": {
           "identity": "<strong>Données d'Identité :</strong> Nom d'utilisateur ou identifiant similaire.",
           "contact": "<strong>Données de Contact :</strong> Adresse e-mail.",
+          "waitlist": "<strong>Données de la liste d'attente :</strong> Si vous rejoignez la liste d'attente, votre adresse e-mail, la langue dans laquelle vous lisiez et la page depuis laquelle vous vous êtes inscrit.",
           "technical": "<strong>Données Techniques :</strong> Type et version du navigateur, fuseau horaire et localisation.",
           "usage": "<strong>Données d'Utilisation :</strong> Informations sur la manière dont vous utilisez notre site web, y compris vos progrès d'apprentissage et le contenu généré par l'IA."
         }
@@ -1775,23 +1776,52 @@
           "Faciliter la création de votre compte et le processus de connexion via Firebase Authentication.",
           "Personnaliser votre expérience d'apprentissage à l'aide d'algorithmes d'IA.",
           "Améliorer notre site web, nos services et l'expérience utilisateur.",
-          "Envoyer des e-mails périodiques concernant votre compte ou d'autres produits et services."
+          "Envoyer des e-mails concernant votre compte : confirmer votre adresse, réinitialiser votre mot de passe et vous informer de la sécurité de votre compte."
+        ]
+      },
+      "emails": {
+        "title": "4. E-mails et liste d'attente",
+        "items": [
+          "Si vous rejoignez la liste d'attente, nous vous envoyons un e-mail de confirmation, puis un autre à l'ouverture de l'accès anticipé ou lorsque votre place est prête. Nous n'envoyons rien d'autre à cette adresse.",
+          "Chaque e-mail de la liste d'attente contient un lien pour quitter la liste. Si vous la quittez, nous cessons de vous écrire. Nous conservons votre adresse, marquée comme désinscrite, uniquement pour ne plus lui écrire. Pour la faire supprimer, écrivez à support@nowry.app.",
+          "Nous conservons les adresses de la liste d'attente jusqu'à 12 mois après l'ouverture de l'accès anticipé à tous. Nous supprimons ensuite celles qui n'ont jamais créé de compte.",
+          "Nos e-mails sont acheminés par Resend, qui reçoit votre adresse et le message afin de l'envoyer. Si un e-mail ne peut pas être remis, ou est signalé comme indésirable, Resend nous en informe et nous cessons d'écrire à cette adresse. Nous en gardons la trace sous une forme brouillée et irréversible de l'adresse, non l'adresse elle-même.",
+          "Pendant 90 jours, nous gardons la trace de l'envoi d'un e-mail : son type, le jour et la langue, avec cette même forme brouillée de l'adresse. Nos e-mails ne contiennent ni image de suivi ni lien tracé."
         ]
       },
       "ai": {
-        "title": "4. IA et Traitement des Données",
+        "title": "5. IA et Traitement des Données",
         "content": "Nowry utilise l'intelligence artificielle pour générer des supports d'apprentissage et fournir des informations. Tout contenu que vous fournissez peut être traité par nos modèles d'IA pour améliorer vos résultats d'apprentissage. Nous n'utilisons pas vos données d'identité personnelles pour entraîner des modèles d'IA publics."
       },
       "security": {
-        "title": "5. Sécurité des Données",
-        "content": "Nous avons mis en place des mesures de sécurité appropriées pour empêcher que vos données personnelles ne soient accidentellement perdues, utilisées ou consultées de manière non autorisée. Nous utilisons les protocoles de sécurité standards de l'industrie de Firebase pour l'authentification et le stockage des données."
+        "title": "6. Sécurité des données et lieu de conservation",
+        "content": "Nous avons mis en place des mesures de sécurité appropriées pour éviter que vos données personnelles ne soient accidentellement perdues, utilisées ou consultées de manière non autorisée. La connexion est assurée par Firebase Authentication, un service de Google. Votre compte et tout ce que vous créez sont stockés dans une base de données MongoDB Atlas."
+      },
+      "services": {
+        "title": "7. Services qui traitent vos données",
+        "content": "Nous faisons appel à d'autres entreprises pour faire fonctionner certaines parties de Nowry. Chacune ne reçoit que ce dont elle a besoin :",
+        "items": [
+          "<strong>Firebase Authentication (Google) :</strong> assure votre connexion. Il détient votre adresse e-mail et, si vous vous connectez avec Google, votre nom et votre photo.",
+          "<strong>MongoDB Atlas :</strong> stocke votre compte et tout ce que vous créez.",
+          "<strong>Railway et Vercel :</strong> hébergent nos serveurs et notre site web.",
+          "<strong>Google (Gemini) et Groq :</strong> produisent les cartes, les quiz, les explications et les réponses du compagnon à partir du texte que vous envoyez à ces fonctions.",
+          "<strong>Google Cloud Text-to-Speech :</strong> transforme en audio le texte que vous demandez à écouter.",
+          "<strong>fal.ai :</strong> dessine le portrait du compagnon à partir de sa description.",
+          "<strong>Langfuse :</strong> conserve un journal des demandes et des réponses de l'IA, avec un identifiant de compte, afin que nous puissions trouver et corriger les défauts.",
+          "<strong>Cloudinary :</strong> stocke les images que vous téléversez.",
+          "<strong>Stripe :</strong> gère les paiements. Votre adresse e-mail est enregistrée auprès de Stripe à la création de votre compte. Les données de carte vont uniquement à Stripe et ne nous parviennent jamais.",
+          "<strong>Resend :</strong> achemine nos e-mails.",
+          "<strong>Sentry :</strong> reçoit les rapports d'erreur du site web et de l'application. Sur le site web, un échantillon des visites est enregistré sous forme de relecture de l'écran afin que nous puissions voir ce qui n'a pas fonctionné.",
+          "<strong>Expo et Firebase Cloud Messaging (Google) :</strong> remettent les notifications sur votre téléphone, à l'aide d'un jeton qui identifie l'appareil."
+        ],
+        "closing": "Nous ne vendons pas vos données, et Nowry n'affiche aucune publicité."
       },
       "rights": {
-        "title": "6. Vos Droits Légaux",
+        "title": "8. Vos Droits Légaux",
         "content": "Dans certaines circonstances, vous avez des droits en vertu des lois sur la protection des données concernant vos données personnelles, y compris le droit de demander l'accès, la correction, l'effacement ou la restriction de vos données personnelles."
       },
       "contact": {
-        "title": "7. Contactez-nous",
+        "title": "9. Nous Contacter",
         "content": "Si vous avez des questions concernant cette politique de confidentialité, veuillez nous contacter à l'adresse suivante :",
         "email": "E-mail : support@nowry.app"
       }

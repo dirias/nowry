@@ -3303,6 +3303,7 @@
         "items": {
           "identity": "<strong>Identity Data:</strong> Username or similar identifier.",
           "contact": "<strong>Contact Data:</strong> Email address.",
+          "waitlist": "<strong>Waitlist Data:</strong> If you join the waitlist, your email address, the language you were reading in, and the page you joined from.",
           "technical": "<strong>Technical Data:</strong> Browser type and version, time zone setting, and location.",
           "usage": "<strong>Usage Data:</strong> Information about how you use our website, including your learning progress and AI-generated content."
         }
@@ -3314,23 +3315,52 @@
           "Facilitating your account creation and login process via Firebase Authentication.",
           "Personalizing your learning experience using AI algorithms.",
           "Improving our website, services, and user experience.",
-          "Sending periodic emails regarding your account or other products and services."
+          "Sending emails about your account: confirming your address, resetting your password, and notices about your account's security."
+        ]
+      },
+      "emails": {
+        "title": "4. Emails and the Waitlist",
+        "items": [
+          "If you join the waitlist, we send you one email to confirm, and one more when early access opens or your place is ready. We send nothing else to that address.",
+          "Every waitlist email has a link to leave the list. If you leave, we stop writing to you. We keep your address, marked as having left, only so that we do not write to it again. To have it deleted, write to support@nowry.app.",
+          "We keep waitlist addresses until 12 months after early access opens to everyone. Then we delete those that never created an account.",
+          "Our emails are delivered by Resend, which receives your address and the message in order to send it. If an email cannot be delivered, or is reported as unwanted, Resend tells us and we stop writing to that address. We keep a record of that as a scrambled form of the address, not the address itself.",
+          "For 90 days we keep a record that an email was sent: its kind, the day and the language, with the same scrambled form of the address. Our emails contain no tracking images and no tracked links."
         ]
       },
       "ai": {
-        "title": "4. AI and Data Processing",
+        "title": "5. AI and Data Processing",
         "content": "Nowry uses artificial intelligence to generate learning materials and provide insights. Any content you provide may be processed by our AI models to improve your learning outcomes. We do not use your personal identity data to train public AI models."
       },
       "security": {
-        "title": "5. Data Security",
-        "content": "We have put in place appropriate security measures to prevent your personal data from being accidentally lost, used, or accessed in an unauthorized way. We use Firebase's industry-standard security protocols for authentication and data storage."
+        "title": "6. Data Security and Where Your Data Is Kept",
+        "content": "We have put in place appropriate security measures to prevent your personal data from being accidentally lost, used, or accessed in an unauthorized way. Signing in is handled by Firebase Authentication, a Google service. Your account and everything you create are stored in a MongoDB Atlas database."
+      },
+      "services": {
+        "title": "7. Services That Handle Your Data",
+        "content": "We use other companies to run parts of Nowry. Each receives only what it needs for its part:",
+        "items": [
+          "<strong>Firebase Authentication (Google):</strong> signs you in. It holds your email address and, if you sign in with Google, your name and picture.",
+          "<strong>MongoDB Atlas:</strong> stores your account and everything you create.",
+          "<strong>Railway and Vercel:</strong> run our servers and our website.",
+          "<strong>Google (Gemini) and Groq:</strong> produce cards, quizzes, explanations and the companion's replies from the text you send to those features.",
+          "<strong>Google Cloud Text-to-Speech:</strong> turns the text you ask to hear into audio.",
+          "<strong>fal.ai:</strong> draws the companion's portrait from its description.",
+          "<strong>Langfuse:</strong> keeps a record of AI requests and answers, with an account identifier, so that we can find and fix faults.",
+          "<strong>Cloudinary:</strong> stores the images you upload.",
+          "<strong>Stripe:</strong> handles payments. Your email address is registered with Stripe when your account is created. Card details go to Stripe only and never reach us.",
+          "<strong>Resend:</strong> delivers our emails.",
+          "<strong>Sentry:</strong> receives error reports from the website and the app. On the website, a sample of visits is recorded as a replay of the screen so that we can see what went wrong.",
+          "<strong>Expo and Firebase Cloud Messaging (Google):</strong> deliver notifications to your phone, using a token that identifies the device."
+        ],
+        "closing": "We do not sell your data, and Nowry shows no advertising."
       },
       "rights": {
-        "title": "6. Your Legal Rights",
+        "title": "8. Your Legal Rights",
         "content": "Under certain circumstances, you have rights under data protection laws in relation to your personal data, including the right to request access, correction, erasure, or restriction of your personal data."
       },
       "contact": {
-        "title": "7. Contact Us",
+        "title": "9. Contact Us",
         "content": "If you have any questions about this Privacy Policy, please contact us at:",
         "email": "Email: support@nowry.app"
       }
