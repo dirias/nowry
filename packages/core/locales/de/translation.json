@@ -230,7 +230,8 @@
       "pricing": "Preise",
       "copyright": "Urheberrecht",
       "privacy": "Datenschutzerklärung",
-      "terms": "Nutzungsbedingungen"
+      "terms": "Nutzungsbedingungen",
+      "deleteAccount": "Konto löschen"
     },
     "support": {
       "title": "Support",
@@ -1111,14 +1112,14 @@
     },
     "deleteAccount": {
       "title": "Konto löschen",
-      "message": "Dadurch werden dein Konto und alle zugehörigen Daten (Bücher, Stapel, Karten, Pläne, Ziele) endgültig gelöscht. Deine Daten werden 30 Tage lang aufbewahrt, bevor sie endgültig entfernt werden.",
+      "message": "Damit löschst du dein Konto und alles darin: Bücher, Decks, Karten, Lernverlauf, Pläne, Ziele und Notizen. Du wirst sofort abgemeldet, und nach 30 Tagen ist alles endgültig gelöscht.",
       "emailLabel": "Bestätige deine E-Mail-Adresse",
       "emailPlaceholder": "Gib deine E-Mail zur Bestätigung ein",
       "emailRequired": "Zur Bestätigung der Löschung wird die E-Mail-Adresse benötigt",
       "emailMismatch": "Die E-Mail-Adresse stimmt nicht überein. Bitte versuche es erneut.",
       "confirmDisabled": "E-Mail zur Bestätigung eingeben",
       "confirmEnabled": "Endgültig löschen",
-      "recoveryNotice": "Deine Daten können innerhalb von 30 Tagen über den Support wiederhergestellt werden. Danach werden sie endgültig gelöscht."
+      "recoveryNotice": "Nach 30 Tagen gelöscht. Bis dahin: Wenn es ein Versehen war, schreib an support@nowry.app."
     },
     "exportData": {
       "error": "Failed to export data. Please try again."
@@ -1798,7 +1799,7 @@
           "<strong>fal.ai:</strong> zeichnet das Porträt des Begleiters nach dessen Beschreibung.",
           "<strong>Langfuse:</strong> führt ein Protokoll der KI-Anfragen und -Antworten mit einer Kontokennung, damit wir Fehler finden und beheben können.",
           "<strong>Cloudinary:</strong> speichert die Bilder, die Sie hochladen.",
-          "<strong>Stripe:</strong> wickelt Zahlungen ab. Ihre E-Mail-Adresse wird bei Stripe hinterlegt, wenn Ihr Konto erstellt wird. Kartendaten gehen nur an Stripe und erreichen uns nie.",
+          "<strong>Stripe:</strong> wickelt Zahlungen ab. Ihre E-Mail-Adresse wird bei Stripe hinterlegt, wenn Ihr Konto erstellt wird, und dieser Eintrag wird gelöscht, wenn Sie Ihr Konto löschen. Kartendaten gehen nur an Stripe und erreichen uns nie.",
           "<strong>Resend:</strong> stellt unsere E-Mails zu.",
           "<strong>Sentry:</strong> erhält Fehlerberichte von der Website und der App. Auf der Website wird eine Stichprobe der Besuche als Wiedergabe des Bildschirms aufgezeichnet, damit wir sehen können, was schiefgegangen ist; darin sind sämtlicher Text, alle Eingaben und alle Bilder verborgen.",
           "<strong>Expo und Firebase Cloud Messaging (Google):</strong> stellen Benachrichtigungen auf Ihrem Telefon zu, über ein Token, das das Gerät kennzeichnet."
@@ -1807,7 +1808,8 @@
       },
       "rights": {
         "title": "8. Ihre gesetzlichen Rechte",
-        "content": "Unter bestimmten Umständen haben Sie Rechte gemäß den Datenschutzgesetzen in Bezug auf Ihre personenbezogenen Daten, einschließlich des Rechts auf Auskunft, Berichtigung, Löschung oder Einschränkung Ihrer personenbezogenen Daten."
+        "content": "Unter bestimmten Umständen haben Sie Rechte gemäß den Datenschutzgesetzen in Bezug auf Ihre personenbezogenen Daten, einschließlich des Rechts auf Auskunft, Berichtigung, Löschung oder Einschränkung Ihrer personenbezogenen Daten.",
+        "deletion": "Wie Sie Ihr Konto löschen und was wann gelöscht wird, steht unter nowry.app/delete-account."
       },
       "contact": {
         "title": "9. Kontakt",
@@ -1900,6 +1902,43 @@
         "sent": "Deine Meldung ist eingegangen. Wir schreiben dir an die angegebene Adresse.",
         "failed": "Das hat nicht geklappt. Versuch es noch einmal oder schreib an die Adresse des Vertreters oben."
       }
+    },
+    "deleteAccount": {
+      "title": "Dein Nowry-Konto löschen",
+      "intro": "Nowry ist eine Lern-App im Web unter nowry.app und auf Android. Diese Seite erklärt, wie du dein Nowry-Konto löschst und was dabei mit deinen Daten geschieht.",
+      "webTitle": "Im Web",
+      "web": [
+        "Melde dich auf nowry.app an.",
+        "Öffne {{settings}} über das Menü unter deinem Bild.",
+        "Gib unter {{danger}} zur Bestätigung deine E-Mail-Adresse ein und drücke {{button}}."
+      ],
+      "androidTitle": "In der Android-App",
+      "android": [
+        "Öffne Nowry und tippe oben auf dein Bild.",
+        "Tippe auf {{settings}}.",
+        "Gib unter {{danger}} zur Bestätigung deine E-Mail-Adresse ein und tippe auf {{button}}."
+      ],
+      "emailTitle": "Wenn du dich nicht anmelden kannst",
+      "email": "Schreib von der E-Mail-Adresse deines Kontos an support@nowry.app, mit dem Betreff „Mein Konto löschen“. Wir antworten zur Bestätigung und löschen das Konto innerhalb von 7 Tagen nach deiner Antwort.",
+      "publicNote": "Wenn du ein Deck oder ein Buch öffentlich geteilt hast, nimm es zuerst zurück: Ein Konto mit öffentlichen Inhalten lässt sich erst löschen, wenn sie privat sind.",
+      "nowTitle": "Sofort entfernt",
+      "now": [
+        "Du wirst überall abgemeldet, und das Konto lässt sich nicht mehr öffnen.",
+        "Deine E-Mail-Adresse und dein Benutzername werden freigegeben: Du kannst dich mit derselben Adresse neu registrieren, und das neue Konto beginnt leer.",
+        "Die Bilder, die du hochgeladen hast.",
+        "Die Verknüpfungen, über die dein Telefon Benachrichtigungen erhält.",
+        "Der Eintrag deiner E-Mail-Adresse bei Stripe, unserem Zahlungsdienstleister."
+      ],
+      "laterTitle": "Nach 30 Tagen endgültig gelöscht",
+      "later": "Alles andere in deinem Konto: Bücher, Decks, Karten, Lernverlauf, Pläne, Ziele, Aufgaben, Routinen, Kalender, Boards, Notizen, dein Begleiter und der Kontoeintrag selbst. In diesen 30 Tagen ist alles verborgen und niemand kann es nutzen. Wenn du dein Konto versehentlich gelöscht hast, schreib an support@nowry.app, bevor die 30 Tage um sind. Nichts kommt von selbst zurück.",
+      "elsewhereTitle": "Was anderswo bleibt, und wie lange",
+      "elsewhere": [
+        "Ein Vermerk, dass dir eine E-Mail gesendet wurde: ihre Art, der Tag und die Sprache, mit einer verschlüsselten Form deiner Adresse. 90 Tage aufbewahrt.",
+        "Fehlerberichte von der Website und der App, bei Sentry: Sie enthalten keine Kontonummer, keinen Namen und keine E-Mail-Adresse. Bis zu {{sentryDays}} Tage aufbewahrt.",
+        "Protokolle der Anfragen an unsere KI-Funktionen, bei Langfuse: Sie enthalten deine Kontonummer und was du eingegeben hast, aber keinen Namen und keine E-Mail-Adresse. Bis zu {{langfuseDays}} Tage aufbewahrt."
+      ],
+      "waitlist": "Wenn du dich auch in die Warteliste eingetragen hast, ist das getrennt: Nutze den Link in einer beliebigen E-Mail der Warteliste, um sie zu verlassen.",
+      "contact": "Fragen: support@nowry.app"
     }
   },
   "home": {

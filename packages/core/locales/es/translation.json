@@ -154,7 +154,8 @@
       "pricing": "Precios",
       "copyright": "Derechos de autor",
       "privacy": "Política de privacidad",
-      "terms": "Términos del servicio"
+      "terms": "Términos del servicio",
+      "deleteAccount": "Eliminar cuenta"
     },
     "support": {
       "title": "Soporte",
@@ -1052,14 +1053,14 @@
     },
     "deleteAccount": {
       "title": "Eliminar tu cuenta",
-      "message": "Esto eliminará permanentemente tu cuenta y todos los datos asociados (libros, mazos, tarjetas, planes, objetivos). Tus datos se conservarán 30 días antes de su eliminación definitiva.",
+      "message": "Esto elimina tu cuenta y todo lo que contiene: libros, mazos, tarjetas, historial de estudio, planes, metas y notas. Se cierra tu sesión al instante, y todo se borra definitivamente a los 30 días.",
       "emailLabel": "Confirma tu dirección de correo",
       "emailPlaceholder": "Escribe tu correo para confirmar",
       "emailRequired": "Se necesita la dirección de correo para confirmar la eliminación",
       "emailMismatch": "La dirección de correo no coincide. Inténtalo de nuevo.",
       "confirmDisabled": "Escribe tu correo para confirmar",
       "confirmEnabled": "Eliminar permanentemente",
-      "recoveryNotice": "Tus datos se pueden recuperar en un plazo de 30 días escribiendo a soporte. Pasados los 30 días, se eliminarán permanentemente."
+      "recoveryNotice": "Se borra a los 30 días. Hasta entonces, si fue un error, escribe a support@nowry.app."
     },
     "exportData": {
       "error": "No se pudieron exportar los datos. Inténtalo de nuevo."
@@ -2933,7 +2934,7 @@
           "<strong>fal.ai:</strong> dibuja el retrato del compañero a partir de su descripción.",
           "<strong>Langfuse:</strong> guarda un registro de las solicitudes y respuestas de IA, con un identificador de cuenta, para que podamos encontrar y corregir fallos.",
           "<strong>Cloudinary:</strong> almacena las imágenes que usted sube.",
-          "<strong>Stripe:</strong> gestiona los pagos. Su dirección de correo se registra en Stripe cuando se crea su cuenta. Los datos de la tarjeta van solo a Stripe y nunca nos llegan.",
+          "<strong>Stripe:</strong> gestiona los pagos. Su dirección de correo se registra en Stripe cuando se crea su cuenta, y ese registro se elimina cuando usted elimina su cuenta. Los datos de la tarjeta van solo a Stripe y nunca nos llegan.",
           "<strong>Resend:</strong> entrega nuestros correos.",
           "<strong>Sentry:</strong> recibe informes de errores del sitio web y de la aplicación. En el sitio web, una muestra de las visitas se graba como una reproducción de la pantalla para que podamos ver qué falló; en ella se ocultan todo el texto, todo lo que se escribe y todas las imágenes.",
           "<strong>Expo y Firebase Cloud Messaging (Google):</strong> entregan las notificaciones a su teléfono mediante un identificador del dispositivo."
@@ -2942,7 +2943,8 @@
       },
       "rights": {
         "title": "8. Sus Derechos Legales",
-        "content": "En determinadas circunstancias, tiene derechos bajo las leyes de protección de datos en relación con sus datos personales, incluido el derecho a solicitar el acceso, la corrección, la eliminación o la restricción de sus datos personales."
+        "content": "En determinadas circunstancias, tiene derechos bajo las leyes de protección de datos en relación con sus datos personales, incluido el derecho a solicitar el acceso, la corrección, la eliminación o la restricción de sus datos personales.",
+        "deletion": "Para eliminar tu cuenta, y ver qué se borra y cuándo, consulta nowry.app/delete-account."
       },
       "contact": {
         "title": "9. Contáctenos",
@@ -3035,6 +3037,43 @@
         "sent": "Recibimos tu notificación. Te escribiremos a la dirección que indicaste.",
         "failed": "No se pudo enviar. Inténtalo de nuevo o escribe al correo del agente."
       }
+    },
+    "deleteAccount": {
+      "title": "Eliminar tu cuenta de Nowry",
+      "intro": "Nowry es una aplicación de estudio en la web, en nowry.app, y en Android. Esta página explica cómo eliminar tu cuenta de Nowry y qué pasa con tus datos cuando lo haces.",
+      "webTitle": "En la web",
+      "web": [
+        "Inicia sesión en nowry.app.",
+        "Abre {{settings}} desde el menú bajo tu foto.",
+        "En {{danger}}, escribe tu dirección de correo para confirmar y pulsa {{button}}."
+      ],
+      "androidTitle": "En la aplicación de Android",
+      "android": [
+        "Abre Nowry y toca tu foto en la parte superior de la pantalla.",
+        "Toca {{settings}}.",
+        "En {{danger}}, escribe tu dirección de correo para confirmar y toca {{button}}."
+      ],
+      "emailTitle": "Si no puedes iniciar sesión",
+      "email": "Escribe a support@nowry.app desde la dirección de correo de tu cuenta, con el asunto «Eliminar mi cuenta». Te respondemos para confirmar y eliminamos la cuenta en un plazo de 7 días desde tu respuesta.",
+      "publicNote": "Si compartiste un mazo o un libro públicamente, deja de publicarlo primero: una cuenta con contenido público no se puede eliminar hasta que sea privado.",
+      "nowTitle": "Se elimina al instante",
+      "now": [
+        "Se cierra tu sesión en todas partes y la cuenta ya no se puede abrir.",
+        "Tu dirección de correo y tu nombre de usuario quedan libres: puedes registrarte de nuevo con la misma dirección, y la cuenta nueva empieza vacía.",
+        "Las imágenes que subiste.",
+        "Los enlaces que envían notificaciones a tu teléfono.",
+        "El registro de tu dirección de correo en Stripe, nuestro proveedor de pagos."
+      ],
+      "laterTitle": "Se borra definitivamente a los 30 días",
+      "later": "Todo lo demás de tu cuenta: libros, mazos, tarjetas, historial de estudio, planes, metas, tareas, rutinas, calendario, pizarras, notas, tu compañero y el propio registro de la cuenta. Durante esos 30 días queda oculto y nadie puede usarlo. Si eliminaste tu cuenta por error, escribe a support@nowry.app antes de que pasen los 30 días. Nada vuelve por sí solo.",
+      "elsewhereTitle": "Lo que se conserva en otros servicios, y cuánto tiempo",
+      "elsewhere": [
+        "Constancia de que se te envió un correo: su tipo, el día y el idioma, con una forma cifrada de tu dirección. Se conserva 90 días.",
+        "Informes de errores del sitio web y de la aplicación, en Sentry: no llevan número de cuenta, nombre ni correo. Se conservan hasta {{sentryDays}} días.",
+        "Registros de las solicitudes a nuestras funciones de IA, en Langfuse: llevan tu número de cuenta y lo que escribiste, pero no tu nombre ni tu correo. Se conservan hasta {{langfuseDays}} días."
+      ],
+      "waitlist": "Si también te apuntaste a la lista de espera, eso es aparte: usa el enlace de cualquier correo de la lista para salir de ella.",
+      "contact": "Preguntas: support@nowry.app"
     }
   },
   "home": {

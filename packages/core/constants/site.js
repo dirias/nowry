@@ -28,6 +28,17 @@ export const LEGAL_PATH_ALIASES = Object.freeze({
   '/プライバシー': '/privacy'
 })
 
+/** The public page Google Play's account deletion link points at (ADR-081, FR-029). Works signed out. */
+export const DELETE_ACCOUNT_PATH = '/delete-account'
+
+/**
+ * How long other services keep what they hold, as the delete-account page states it.
+ * Sentry: fixed by its plan (30 days on Developer, 90 on paid), so 90 is true on either.
+ * Langfuse: the project's data retention setting; change both together.
+ */
+export const SENTRY_RETENTION_DAYS = 90
+export const LANGFUSE_RETENTION_DAYS = 30
+
 export const LEGAL_TERMS_UPDATED = '2026-10-03'
 export const LEGAL_PRIVACY_UPDATED = '2026-11-13'
 
