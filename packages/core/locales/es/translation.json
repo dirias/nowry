@@ -4625,6 +4625,7 @@
     "inviteInvalid": "Ese código no es nuestro. Revísalo o apúntate a la lista de espera.",
     "inviteRequired": "Nowry está en beta privada. Regístrate con un código de invitación o apúntate a la lista de espera.",
     "noCode": "¿No tienes código?",
+    "haveCode": "Tengo un código de invitación",
     "earlyAccess": "Acceso anticipado",
     "pricing": {
       "message": "Gratis durante la beta. Siempre habrá un plan gratuito.",
@@ -4633,10 +4634,14 @@
     "upgradesClosed": "Las mejoras de plan se abren después de la beta. Todo lo que puedes hacer hoy es gratis mientras probamos.",
     "waitlist": {
       "title": "Apúntate a la lista de espera",
-      "lead": "Déjanos tu correo y te escribiremos cuando haya sitio.",
       "cta": "Apuntarme",
-      "sent": "Ya estás en la lista. Te escribiremos cuando haya sitio.",
-      "failed": "No se pudo enviar. Inténtalo de nuevo en un momento."
+      "sent": "Ya estás en la lista. Te escribiremos cuando se abra el acceso anticipado.",
+      "failed": "No se pudo enviar. Inténtalo de nuevo en un momento.",
+      "purpose": "Usaremos tu correo solo para escribirte cuando se abra el acceso anticipado."
+    },
+    "phone": {
+      "inviteInvalid": "Ese código no es nuestro. Revísalo o apúntate a la lista de espera en nowry.app.",
+      "inviteRequired": "Nowry está en beta privada. Regístrate con un código de invitación o apúntate a la lista de espera en nowry.app."
     }
   },
   "blocks": {

@@ -9,18 +9,23 @@ import { focusRing } from '../Common/Form/formStyles'
  * The beta waitlist (ADR-038, docs/prd-road-to-market.md FR-004).
  *
  * One field and one key: a visitor who has no invite leaves an email and the
- * language they read in. Shown on the landing hero and on the register page
- * while invites are required; the same form in both places, the way the
- * contact form is one form.
+ * language they read in. Shown on the landing hero, where it is the main
+ * action (WAIT-003), and on the register page, while invites are required;
+ * the same form in both places, the way the contact form is one form.
+ *
+ * One line under the field says what the email is used for, and the field is
+ * described by it. Nothing here states how many places there are or how many
+ * people are waiting.
  *
  * Four states, like `Contact`: idle, sending, sent, failed. On success the
  * field is cleared and the acknowledgement stays; on failure the email stays
  * so it can be sent again.
  */
-const WaitlistForm = ({ source, compact = false }) => {
+const WaitlistForm = ({ source }) => {
   const { t, i18n } = useTranslation()
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState('idle') // idle | sending | sent | failed
+  const purposeId = `waitlist-purpose-${source || 'page'}`
 
   const submit = async (event) => {
     event.preventDefault()
@@ -37,17 +42,6 @@ const WaitlistForm = ({ source, compact = false }) => {
 
   return (
     <Stack component='form' onSubmit={submit} spacing={1.5} sx={{ width: '100%', maxWidth: 440 }} aria-label={t('beta.waitlist.title')}>
-      {!compact && (
-        <Stack spacing={0.5}>
-          <Typography level='title-md' sx={{ color: 'text.primary' }}>
-            {t('beta.waitlist.title')}
-          </Typography>
-          <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
-            {t('beta.waitlist.lead')}
-          </Typography>
-        </Stack>
-      )}
-
       {status === 'sent' && (
         <Alert color='success' variant='soft' size='sm'>
           {t('beta.waitlist.sent')}
@@ -72,12 +66,16 @@ const WaitlistForm = ({ source, compact = false }) => {
             required
             size='md'
             disabled={status === 'sending'}
+            slotProps={{ input: { 'aria-describedby': purposeId } }}
           />
         </FormControl>
         <Button type='submit' size='md' variant='solid' color='primary' loading={status === 'sending'} sx={{ minHeight: 44, ...focusRing }}>
           {t('beta.waitlist.cta')}
         </Button>
       </Stack>
+      <Typography id={purposeId} level='body-sm' sx={{ color: 'text.tertiary' }}>
+        {t('beta.waitlist.purpose')}
+      </Typography>
     </Stack>
   )
 }

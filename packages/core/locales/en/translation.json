@@ -4618,6 +4618,7 @@
     "inviteInvalid": "That code isn't one of ours. Check it, or join the waitlist below.",
     "inviteRequired": "Nowry is in private beta. Sign up with an invite code, or join the waitlist.",
     "noCode": "No invite code?",
+    "haveCode": "I have an invite code",
     "earlyAccess": "Early access",
     "pricing": {
       "message": "Free during the beta. There will always be a free plan.",
@@ -4626,10 +4627,14 @@
     "upgradesClosed": "Upgrades open after the beta. Everything you can do today is free while we test.",
     "waitlist": {
       "title": "Join the waitlist",
-      "lead": "Leave your email and we'll write when a place opens.",
       "cta": "Join the waitlist",
-      "sent": "You're on the list. We'll write when a place opens.",
-      "failed": "That didn't go through. Try again in a moment."
+      "sent": "You're on the list. We'll write when early access opens.",
+      "failed": "That didn't go through. Try again in a moment.",
+      "purpose": "We'll use your email only to write when early access opens."
+    },
+    "phone": {
+      "inviteInvalid": "That code isn't one of ours. Check it, or join the waitlist at nowry.app.",
+      "inviteRequired": "Nowry is in private beta. Sign up with an invite code, or join the waitlist at nowry.app."
     }
   },
   "blocks": {

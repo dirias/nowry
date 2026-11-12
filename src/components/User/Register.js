@@ -418,7 +418,7 @@ const Register = () => {
             <Typography level='body-sm' sx={{ color: 'text.secondary', mb: 1.5 }}>
               {t('beta.noCode')}
             </Typography>
-            <WaitlistForm source='/register' compact />
+            <WaitlistForm source='/register' />
           </Box>
         )}
 
