@@ -11,6 +11,8 @@ import React from 'react'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 
+// ADR-076: the verification line has its own test; here it is absent.
+jest.mock('@nowry/core/hooks/useEmailVerification', () => ({ useEmailVerification: () => ({ needed: false }) }))
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key) => key, i18n: { language: 'en', changeLanguage: jest.fn() } })
 }))

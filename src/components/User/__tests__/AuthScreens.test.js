@@ -117,7 +117,7 @@ describe('Register', () => {
   it('creates the account and heads for onboarding', async () => {
     mockAuthService.register.mockResolvedValue({})
     register()
-    await waitFor(() => expect(mockAuthService.register).toHaveBeenCalledWith('new@example.com', 'Str0ng-enough!', 'new_learner', ''))
+    await waitFor(() => expect(mockAuthService.register).toHaveBeenCalledWith('new@example.com', 'Str0ng-enough!', 'new_learner', '', 'en'))
     expect(mockNavigate).toHaveBeenCalledWith('/register?returnUrl=%2Fonboarding', { replace: true })
   })
 
@@ -166,7 +166,7 @@ describe('Register', () => {
       mockAuthService.register.mockResolvedValue({})
       register({ ...VALID, inviteCode: ' FRIENDS-1 ' })
       await waitFor(() =>
-        expect(mockAuthService.register).toHaveBeenCalledWith('new@example.com', 'Str0ng-enough!', 'new_learner', 'FRIENDS-1')
+        expect(mockAuthService.register).toHaveBeenCalledWith('new@example.com', 'Str0ng-enough!', 'new_learner', 'FRIENDS-1', 'en')
       )
     })
 

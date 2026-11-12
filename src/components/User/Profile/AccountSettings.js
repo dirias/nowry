@@ -72,6 +72,7 @@ import { EmailAuthProvider, reauthenticateWithCredential, updatePassword } from 
 import { useTranslation } from 'react-i18next'
 import { useBlockReminderSetting } from '@nowry/core/hooks/useBlockReminders'
 import LearningPreferencesSection from './LearningPreferencesSection'
+import EmailVerificationNotice from './EmailVerificationNotice'
 import { getUsernameValidationError } from '@nowry/core/utils/usernameValidation'
 import useUpgradesOpen from '@nowry/core/hooks/useUpgradesOpen'
 
@@ -1022,6 +1023,7 @@ export default function AccountSettings() {
             {/* ── Section 6: Security ────────────────────────────────────────────── */}
             <SectionBlock id='section-security' title={t('settings.security.title')} loading={pageLoading}>
               <Stack spacing={3}>
+                <EmailVerificationNotice />
                 {/* Success / error alerts */}
                 {passwordSuccess && (
                   <Alert color='success' variant='soft' size='sm'>
