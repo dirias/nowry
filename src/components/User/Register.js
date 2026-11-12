@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { Link as RouterLink, useNavigate } from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
+import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom'
 import { LEGAL_PATHS } from '@nowry/core/constants/site'
 import { useTranslation } from 'react-i18next'
 import {
@@ -33,18 +33,27 @@ import { authService } from '@nowry/core/api/services/auth.service'
 import { getUsernameValidationError } from '@nowry/core/utils/usernameValidation'
 import { authErrorKey, FALLBACK_KEY } from '@nowry/core/domain/authErrors'
 import { passwordLongEnough } from '@nowry/core/domain/authRules'
-import { isInviteRefusal } from '@nowry/core/domain/beta'
+import { inviteFromSearch, isInviteRefusal, isVerifyEmailRefusal } from '@nowry/core/domain/beta'
 import { betaService } from '@nowry/core/api/services/beta.service'
 import { useBeta } from '@nowry/core/context/BetaContext'
 import WaitlistForm from '../Public/WaitlistForm'
+import InviteConfirmEmail from './InviteConfirmEmail'
 
 const Register = () => {
+  const location = useLocation()
+  // ADR-077: an invite link carries its token and nothing else. It is read
+  // once, on arrival, and then taken out of the address bar.
+  const [linkInvite] = useState(() => inviteFromSearch(location.search))
+  const [inviteFromLink, setInviteFromLink] = useState(Boolean(linkInvite))
+  // A sign-up waiting for its email to be confirmed: { email } while it waits.
+  const [confirming, setConfirming] = useState(null)
   const [formData, setFormData] = useState({
     username: '',
     email: '',
     password: '',
     passwordConfirmation: '',
-    acceptedTerms: false
+    acceptedTerms: false,
+    inviteCode: linkInvite
   })
 
   const [showPassword, setShowPassword] = useState(false)
@@ -56,7 +65,34 @@ const Register = () => {
   const { t, i18n } = useTranslation()
   const { config: beta } = useBeta()
   const inviteRequired = beta.invite_required
-  const { login } = useAuth()
+  const { checkUser } = useAuth()
+
+  useEffect(() => {
+    // A Firebase identity with no Nowry account that opens an invite link, or
+    // comes back mid sign-up, goes straight to the confirm step.
+    if (linkInvite) authService.holdInviteForCurrentUser(linkInvite)
+    const held = authService.heldSignUp()
+    if (held) setConfirming({ email: held.email })
+    if (!linkInvite) return
+    navigate('/register', { replace: true })
+    betaService
+      .checkInvite(linkInvite)
+      .then((check) => {
+        if (check?.valid) return
+        setInviteFromLink(false)
+        setErrors((current) => ({ ...current, inviteCode: t('beta.inviteInvalid') }))
+      })
+      .catch(() => {
+        // Unreachable is not refused: the form's own check runs again on submit.
+      })
+    // On arrival only: the link is read once.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const finishConfirmed = async (backendUser) => {
+    await checkUser()
+    navigate(backendUser?.wizard_completed === false ? '/onboarding' : '/', { replace: true })
+  }
 
   // Password strength calculation
   const getPasswordStrength = (password) => {
@@ -181,6 +217,14 @@ const Register = () => {
         const usernameFormatRejected =
           error.response?.status === 422 && Array.isArray(detail) && detail.some((item) => (item?.loc || []).includes('username'))
 
+        if (isVerifyEmailRefusal(error)) {
+          // ADR-077: the invite is for this address, so the account waits for
+          // the address to be confirmed. The link has been sent.
+          setConfirming({ email: formData.email })
+          setLoading(false)
+          return
+        }
+
         if (usernameFormatRejected) {
           newErrors.username = t('settings.account.usernameInvalid')
         } else if (isInviteRefusal(error)) {
@@ -257,6 +301,14 @@ const Register = () => {
     )
   }
 
+  if (confirming) {
+    return (
+      <AuthShell title={t('auth.verify.title')}>
+        <InviteConfirmEmail email={confirming.email} onDone={finishConfirmed} onLeave={() => setConfirming(null)} />
+      </AuthShell>
+    )
+  }
+
   return (
     <>
       <AuthShell title={t('auth.createAccount')} subtitle={t('auth.createAccountSubtitle')}>
@@ -268,6 +320,11 @@ const Register = () => {
 
         <form onSubmit={handleSubmit}>
           <Stack spacing={2.5}>
+            {inviteRequired && inviteFromLink && (
+              <Alert color='success' variant='soft' role='status'>
+                {t('beta.personal.applied')}
+              </Alert>
+            )}
             {inviteRequired && (
               <FormControl error={!!errors.inviteCode}>
                 <FormLabel>{t('beta.inviteCode')}</FormLabel>
@@ -278,6 +335,8 @@ const Register = () => {
                   placeholder={t('beta.inviteCodePlaceholder')}
                   value={formData.inviteCode ?? ''}
                   onChange={handleChange}
+                  readOnly={inviteFromLink}
+                  variant={inviteFromLink ? 'soft' : 'outlined'}
                   size='lg'
                   autoComplete='one-time-code'
                 />
@@ -413,7 +472,7 @@ const Register = () => {
           </Button>
         </Stack>
 
-        {inviteRequired && (
+        {inviteRequired && !inviteFromLink && (
           <Box sx={{ mt: 3, pt: 3, borderTop: '1px solid', borderColor: 'divider' }}>
             <Typography level='body-sm' sx={{ color: 'text.secondary', mb: 1.5 }}>
               {t('beta.noCode')}

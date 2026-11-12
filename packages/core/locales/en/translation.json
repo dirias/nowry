@@ -4652,6 +4652,12 @@
     "phone": {
       "inviteInvalid": "That code isn't one of ours. Check it, or join the waitlist at nowry.app.",
       "inviteRequired": "Nowry is in private beta. Sign up with an invite code, or join the waitlist at nowry.app."
+    },
+    "personal": {
+      "applied": "Your invite is applied. Free during the beta.",
+      "confirmBody": "This invite is for one email address. We sent a link to {{email}}. Open it, then come back here to finish.",
+      "notUsable": "This invite can't be used with this email. Use the address it was sent to, or join the waitlist.",
+      "useAnother": "Use a different email"
     }
   },
   "blocks": {

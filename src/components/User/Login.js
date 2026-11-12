@@ -36,6 +36,13 @@ const Login = () => {
     } catch (error) {
       console.error('Login error:', error)
 
+      // ADR-077: a sign-up that is waiting for its email to be confirmed
+      // finishes on Register, where the confirm step is.
+      if (isInviteRefusal(error) && authService.heldSignUp()) {
+        window.location.href = '/register'
+        return
+      }
+
       /*
        * One table, shared with the mobile client (MOB-016). This switch used to
        * be written out here and again in Register.js, which is how

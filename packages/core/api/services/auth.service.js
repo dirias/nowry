@@ -9,7 +9,7 @@ import {
 import { auth as authPort, session, storage } from '../../platform'
 import { apiClient } from '../client'
 import { usernameFor } from '../../domain/username'
-import { inviteHeaders } from '../../domain/beta'
+import { inviteHeaders, isVerifyEmailRefusal } from '../../domain/beta'
 
 /**
  * The sign-up in flight, if any (QA-024).
@@ -32,6 +32,42 @@ const whileRegistering = async (work) => {
     return await run
   } finally {
     registration.pending = null
+  }
+}
+
+/**
+ * A sign-up waiting for its email to be confirmed (ADR-077).
+ *
+ * A personal invitation makes an account only for a verified address, so a
+ * password sign-up stops after Firebase has the identity and before Nowry has
+ * the account. The invite and the chosen username are kept here until the
+ * person confirms, so a reload or a second visit can finish what they started.
+ * Removed when the account exists or the person walks away.
+ */
+const HELD_SIGN_UP_KEY = 'NOWRY_HELD_SIGN_UP'
+
+const holdSignUp = (inviteCode, username) => {
+  try {
+    storage.set(HELD_SIGN_UP_KEY, JSON.stringify({ inviteCode, username: username || '' }))
+  } catch {
+    // A device that cannot keep it asks for the link again.
+  }
+}
+
+const readHeldSignUp = () => {
+  try {
+    const held = JSON.parse(storage.get(HELD_SIGN_UP_KEY) || 'null')
+    return held?.inviteCode ? held : null
+  } catch {
+    return null
+  }
+}
+
+const dropHeldSignUp = () => {
+  try {
+    storage.remove(HELD_SIGN_UP_KEY)
+  } catch {
+    // Nothing to do: the server refuses a spent invitation anyway.
   }
 }
 
@@ -80,20 +116,31 @@ export const authService = {
       const idToken = await user.getIdToken(true)
 
       // Sync user to backend MongoDB
-      const { data } = await apiClient.post(
-        '/auth/register',
-        {
-          firebase_uid: user.uid,
-          email: user.email,
-          username: username
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${idToken}`,
-            ...inviteHeaders(inviteCode)
+      const { data } = await apiClient
+        .post(
+          '/auth/register',
+          {
+            firebase_uid: user.uid,
+            email: user.email,
+            username: username
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${idToken}`,
+              ...inviteHeaders(inviteCode)
+            }
           }
-        }
-      )
+        )
+        .catch(async (error) => {
+          // ADR-077: a personal invitation waits for the address to be
+          // confirmed. Keep what was typed, send the link, and let the caller
+          // show the confirm step; the Firebase identity stays signed in.
+          if (isVerifyEmailRefusal(error)) {
+            holdSignUp(inviteCode, username)
+            await this.sendVerification(langCode).catch(() => {})
+          }
+          throw error
+        })
 
       // ADR-076: ask the address to prove itself. After the account exists on
       // the server, and never in its way: a failed send leaves a working
@@ -267,6 +314,62 @@ export const authService = {
     const idToken = await user.getIdToken(true)
     storage.set('firebase_token', idToken)
     return true
+  },
+
+  /**
+   * The sign-up waiting for its email to be confirmed, if any (ADR-077).
+   * @returns {{ inviteCode: string, username: string, email: string } | null} null without a held invite or a signed-in identity
+   */
+  heldSignUp() {
+    const held = readHeldSignUp()
+    const user = firebaseAuth().currentUser
+    return held && user ? { ...held, email: user.email || '' } : null
+  },
+
+  /**
+   * Keep an invite for the identity already signed in to Firebase, so opening
+   * an invite link without a Nowry account can finish the sign-up (ADR-077).
+   * @returns {boolean} whether there was an identity to keep it for
+   */
+  holdInviteForCurrentUser(inviteCode) {
+    const user = firebaseAuth().currentUser
+    if (!user || !inviteCode) return false
+    holdSignUp(inviteCode, readHeldSignUp()?.username || user.displayName || '')
+    return true
+  },
+
+  /**
+   * Finish a held sign-up once the email is confirmed (ADR-077).
+   * @returns {Promise<{ status: 'none' | 'unverified' | 'done', backendUser?: Object }>}
+   * @throws the server's refusal when the invite cannot be used with this address
+   */
+  async finishHeldSignUp() {
+    const held = readHeldSignUp()
+    const user = firebaseAuth().currentUser
+    if (!held || !user) return { status: 'none' }
+    await user.reload()
+    if (!user.emailVerified) return { status: 'unverified' }
+    const idToken = await user.getIdToken(true)
+    const username = held.username || usernameFor({ displayName: user.displayName, email: user.email, uid: user.uid })
+    const { data } = await apiClient.post(
+      '/auth/register',
+      { firebase_uid: user.uid, email: user.email, username },
+      { headers: { Authorization: `Bearer ${idToken}`, ...inviteHeaders(held.inviteCode) } }
+    )
+    dropHeldSignUp()
+    storage.set('firebase_token', idToken)
+    return { status: 'done', backendUser: data }
+  },
+
+  /**
+   * Walk away from a held sign-up: forget the invite and sign the identity out (ADR-077).
+   * Not `logout()`: that announces a signed-out session, which sends the web to
+   * the sign-in page, and this person is going back to the form they were on.
+   */
+  async abandonHeldSignUp() {
+    dropHeldSignUp()
+    await signOut(firebaseAuth()).catch(() => {})
+    storage.remove('firebase_token')
   },
 
   /**

@@ -4124,6 +4124,12 @@
     "phone": {
       "inviteInvalid": "Dieser Code ist keiner von uns. Prüfe ihn oder trag dich auf nowry.app in die Warteliste ein.",
       "inviteRequired": "Nowry ist in einer privaten Beta. Registriere dich mit einem Einladungscode oder trag dich auf nowry.app in die Warteliste ein."
+    },
+    "personal": {
+      "applied": "Deine Einladung ist eingelöst. Kostenlos während der Beta.",
+      "confirmBody": "Diese Einladung gilt für genau eine E-Mail-Adresse. Wir haben einen Link an {{email}} geschickt. Öffne ihn und komm dann hierher zurück, um abzuschließen.",
+      "notUsable": "Diese Einladung kann mit dieser E-Mail-Adresse nicht verwendet werden. Nimm die Adresse, an die sie geschickt wurde, oder trag dich in die Warteliste ein.",
+      "useAnother": "Andere E-Mail-Adresse verwenden"
     }
   },
   "blocks": {

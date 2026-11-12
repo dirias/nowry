@@ -16,6 +16,14 @@ export const INVITE_HEADER = 'X-Invite-Code'
 
 export const BETA_INVITE_REQUIRED_CODE = 'beta_invite_required'
 export const UPGRADES_CLOSED_CODE = 'upgrades_closed'
+/** A sign-up with a personal invitation, refused until its email is confirmed (ADR-077). */
+export const INVITE_VERIFY_EMAIL_CODE = 'invite_verify_email'
+
+/** What a personal invitation's token starts with; a cohort code never does (ADR-077). */
+export const PERSONAL_INVITE_PREFIX = 'nwi_'
+
+/** The query parameter an invite link carries its token in. The address is never in the link. */
+export const INVITE_PARAM = 'invite'
 
 /** `GET /beta/config` as a plain, complete object. Anything missing reads as off. */
 export const normalizeBetaConfig = (data) => ({
@@ -32,6 +40,25 @@ const refusalCode = (error) => {
 
 /** Did the server refuse this because a new account needs an invite? */
 export const isInviteRefusal = (error) => error?.response?.status === 403 && refusalCode(error) === BETA_INVITE_REQUIRED_CODE
+
+/** Did the server refuse this sign-up until the invited email is confirmed? (ADR-077) */
+export const isVerifyEmailRefusal = (error) => error?.response?.status === 403 && refusalCode(error) === INVITE_VERIFY_EMAIL_CODE
+
+/** Is this a personal invitation's token rather than a cohort code? */
+export const isPersonalInvite = (code) =>
+  String(code ?? '')
+    .trim()
+    .startsWith(PERSONAL_INVITE_PREFIX)
+
+/**
+ * The invite a link carries, from a location's search string; '' when there is none.
+ * Bounded to what the server accepts, so a pasted novel never reaches the field.
+ */
+export const inviteFromSearch = (search) => {
+  const value = new URLSearchParams(String(search ?? '')).get(INVITE_PARAM)
+  const trimmed = String(value ?? '').trim()
+  return trimmed.length <= 64 ? trimmed : ''
+}
 
 /** Did the server refuse this because upgrades are closed for the beta? */
 export const isUpgradesClosed = (error) => error?.response?.status === 403 && refusalCode(error) === UPGRADES_CLOSED_CODE

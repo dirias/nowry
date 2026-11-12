@@ -122,6 +122,21 @@ describe('what the user is told, in their language', () => {
   })
 })
 
+describe("the beta gate's refusals belong to the sign-up screens (ADR-038, ADR-077)", () => {
+  it.each(['beta_invite_required', 'invite_verify_email'])('says nothing global for %s, on any request', async (code) => {
+    const answer = { status: 403, data: { detail: { code } } }
+    await request('/users/me', { adapter: transport(answer).adapter })
+    await request('/auth/register', { adapter: transport(answer).adapter })
+    expect(platform.notify).not.toHaveBeenCalled()
+  })
+
+  it('still speaks for any other 403', async () => {
+    await request('/decks', { adapter: transport({ status: 403, data: { detail: { code: 'upgrades_closed' } } }).adapter })
+    await request('/decks', { adapter: transport({ status: 403, data: { detail: 'Admin access required' } }).adapter })
+    expect(platform.notify).toHaveBeenCalledTimes(2)
+  })
+})
+
 describe('telemetry', () => {
   it('reports a failure with its route and status, never its body', async () => {
     await request('/decks', { adapter: transport({ status: 500, data: { secret: 'user text' } }).adapter })

@@ -4135,6 +4135,12 @@
     "phone": {
       "inviteInvalid": "Ce code n'est pas l'un des nôtres. Vérifiez-le, ou rejoignez la liste d'attente sur nowry.app.",
       "inviteRequired": "Nowry est en bêta privée. Inscrivez-vous avec un code d'invitation, ou rejoignez la liste d'attente sur nowry.app."
+    },
+    "personal": {
+      "applied": "Votre invitation est appliquée. Gratuit pendant la bêta.",
+      "confirmBody": "Cette invitation est réservée à une seule adresse e-mail. Nous avons envoyé un lien à {{email}}. Ouvrez-le, puis revenez ici pour terminer.",
+      "notUsable": "Cette invitation ne peut pas être utilisée avec cette adresse. Utilisez l'adresse à laquelle elle a été envoyée, ou inscrivez-vous sur la liste d'attente.",
+      "useAnother": "Utiliser une autre adresse"
     }
   },
   "blocks": {
