@@ -36,9 +36,12 @@ if (process.env.REACT_APP_SENTRY_DSN) {
     tracesSampleRate: IS_PRODUCTION_ENV ? 0.1 : 1.0,
     integrations: [
       Sentry.browserTracingIntegration(),
+      // A replay shows the page's shape, never what a person wrote or read:
+      // every text node and input is masked, every image and video blocked.
       Sentry.replayIntegration({
-        maskAllText: false,
-        blockAllMedia: false
+        maskAllText: true,
+        maskAllInputs: true,
+        blockAllMedia: true
       })
     ],
     // Replay envelopes are large and quota is limited. Capturing 100% of

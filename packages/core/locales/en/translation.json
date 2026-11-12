@@ -3350,7 +3350,7 @@
           "<strong>Cloudinary:</strong> stores the images you upload.",
           "<strong>Stripe:</strong> handles payments. Your email address is registered with Stripe when your account is created. Card details go to Stripe only and never reach us.",
           "<strong>Resend:</strong> delivers our emails.",
-          "<strong>Sentry:</strong> receives error reports from the website and the app. On the website, a sample of visits is recorded as a replay of the screen so that we can see what went wrong.",
+          "<strong>Sentry:</strong> receives error reports from the website and the app. On the website, a sample of visits is recorded as a replay of the screen so that we can see what went wrong; all text, everything typed and all images are hidden in it.",
           "<strong>Expo and Firebase Cloud Messaging (Google):</strong> deliver notifications to your phone, using a token that identifies the device."
         ],
         "closing": "We do not sell your data, and Nowry shows no advertising."

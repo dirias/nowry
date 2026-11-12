@@ -1800,7 +1800,7 @@
           "<strong>Cloudinary:</strong> speichert die Bilder, die Sie hochladen.",
           "<strong>Stripe:</strong> wickelt Zahlungen ab. Ihre E-Mail-Adresse wird bei Stripe hinterlegt, wenn Ihr Konto erstellt wird. Kartendaten gehen nur an Stripe und erreichen uns nie.",
           "<strong>Resend:</strong> stellt unsere E-Mails zu.",
-          "<strong>Sentry:</strong> erhält Fehlerberichte von der Website und der App. Auf der Website wird eine Stichprobe der Besuche als Wiedergabe des Bildschirms aufgezeichnet, damit wir sehen können, was schiefgegangen ist.",
+          "<strong>Sentry:</strong> erhält Fehlerberichte von der Website und der App. Auf der Website wird eine Stichprobe der Besuche als Wiedergabe des Bildschirms aufgezeichnet, damit wir sehen können, was schiefgegangen ist; darin sind sämtlicher Text, alle Eingaben und alle Bilder verborgen.",
           "<strong>Expo und Firebase Cloud Messaging (Google):</strong> stellen Benachrichtigungen auf Ihrem Telefon zu, über ein Token, das das Gerät kennzeichnet."
         ],
         "closing": "Wir verkaufen Ihre Daten nicht, und Nowry zeigt keine Werbung."

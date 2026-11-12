@@ -1811,7 +1811,7 @@
           "<strong>Cloudinary :</strong> stocke les images que vous téléversez.",
           "<strong>Stripe :</strong> gère les paiements. Votre adresse e-mail est enregistrée auprès de Stripe à la création de votre compte. Les données de carte vont uniquement à Stripe et ne nous parviennent jamais.",
           "<strong>Resend :</strong> achemine nos e-mails.",
-          "<strong>Sentry :</strong> reçoit les rapports d'erreur du site web et de l'application. Sur le site web, un échantillon des visites est enregistré sous forme de relecture de l'écran afin que nous puissions voir ce qui n'a pas fonctionné.",
+          "<strong>Sentry :</strong> reçoit les rapports d'erreur du site web et de l'application. Sur le site web, un échantillon des visites est enregistré sous forme de relecture de l'écran afin que nous puissions voir ce qui n'a pas fonctionné ; tout le texte, tout ce qui est saisi et toutes les images y sont masqués.",
           "<strong>Expo et Firebase Cloud Messaging (Google) :</strong> remettent les notifications sur votre téléphone, à l'aide d'un jeton qui identifie l'appareil."
         ],
         "closing": "Nous ne vendons pas vos données, et Nowry n'affiche aucune publicité."
