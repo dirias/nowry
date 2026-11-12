@@ -58,7 +58,7 @@ const PrivacyPolicy = () => {
             {t('legal.privacy.dataCollect.content')}
           </Typography>
           <Box component='ul' sx={{ pl: 4 }}>
-            {['identity', 'contact', 'technical', 'usage'].map((item) => (
+            {['identity', 'contact', 'waitlist', 'technical', 'usage'].map((item) => (
               <li key={item}>
                 <Typography level='body-md' component='span'>
                   <span dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(t(`legal.privacy.dataCollect.items.${item}`)) }} />
@@ -88,6 +88,20 @@ const PrivacyPolicy = () => {
 
         <Divider />
 
+        {/* What is sent to whom, and how a person leaves the waitlist (ADR-078, ADR-080). */}
+        <section>
+          <Typography level='h3' sx={{ mb: 2 }}>
+            {t('legal.privacy.emails.title')}
+          </Typography>
+          {(t('legal.privacy.emails.items', { returnObjects: true }) || []).map((paragraph, index) => (
+            <Typography key={index} level='body-md' sx={{ mb: 2 }}>
+              {paragraph}
+            </Typography>
+          ))}
+        </section>
+
+        <Divider />
+
         <section>
           <Typography level='h3' sx={{ mb: 2 }}>
             {t('legal.privacy.ai.title')}
@@ -105,6 +119,29 @@ const PrivacyPolicy = () => {
           </Typography>
           <Typography level='body-md' sx={{ mb: 2 }}>
             {t('legal.privacy.security.content')}
+          </Typography>
+        </section>
+
+        <Divider />
+
+        <section>
+          <Typography level='h3' sx={{ mb: 2 }}>
+            {t('legal.privacy.services.title')}
+          </Typography>
+          <Typography level='body-md' sx={{ mb: 2 }}>
+            {t('legal.privacy.services.content')}
+          </Typography>
+          <Box component='ul' sx={{ pl: 4, mb: 2 }}>
+            {(t('legal.privacy.services.items', { returnObjects: true }) || []).map((item, index) => (
+              <li key={index}>
+                <Typography level='body-md' component='span'>
+                  <span dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(item) }} />
+                </Typography>
+              </li>
+            ))}
+          </Box>
+          <Typography level='body-md' sx={{ mb: 2 }}>
+            {t('legal.privacy.services.closing')}
           </Typography>
         </section>
 
