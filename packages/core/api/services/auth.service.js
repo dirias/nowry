@@ -102,8 +102,10 @@ export const authService = {
   async registerNow(email, password, username, inviteCode, langCode) {
     try {
       // Create user in Firebase
-      const userCredential = await createUserWithEmailAndPassword(firebaseAuth(), email, password)
-      const user = userCredential.user
+      const user = await createUserWithEmailAndPassword(firebaseAuth(), email, password).then(
+        (credential) => credential.user,
+        (error) => this.identityLeftBehind(email, password, inviteCode, error)
+      )
 
       // Update display name
       await updateProfile(user, { displayName: username })
@@ -160,6 +162,21 @@ export const authService = {
       console.error('Registration error:', error)
       throw error
     }
+  },
+
+  /**
+   * A sign-up that the gate refused leaves a Firebase identity with no Nowry
+   * account (ADR-077). When that person comes back with an invite, Firebase
+   * says the email is in use. If the password they typed is that identity's,
+   * it is the same person: carry on with it. Otherwise the refusal stands.
+   * @returns {Promise<Object>} the Firebase user to continue the sign-up with
+   */
+  async identityLeftBehind(email, password, inviteCode, error) {
+    if (error?.code !== 'auth/email-already-in-use' || !inviteCode) throw error
+    const credential = await signInWithEmailAndPassword(firebaseAuth(), email, password).catch(() => {
+      throw error
+    })
+    return credential.user
   },
 
   /**

@@ -11,14 +11,24 @@ import React from 'react'
 import { render, act, waitFor } from '@testing-library/react'
 
 let mockAuthCallback = null
+const mockSignOut = jest.fn(async () => {})
 jest.mock('firebase/auth', () => ({
   onAuthStateChanged: (_auth, cb) => {
     mockAuthCallback = cb
     return () => {}
+  },
+  signOut: (...args) => mockSignOut(...args)
+}))
+let mockNoAccountListener = null
+jest.mock('../../api/client', () => ({
+  apiClient: { get: jest.fn() },
+  onNoAccount: (listener) => {
+    mockNoAccountListener = listener
+    return () => {}
   }
 }))
-jest.mock('../../api/client', () => ({ apiClient: { get: jest.fn() } }))
-jest.mock('../../api/services', () => ({ authService: {}, registration: { pending: null } }))
+const mockHeldSignUp = jest.fn(() => null)
+jest.mock('../../api/services', () => ({ authService: { heldSignUp: () => mockHeldSignUp() }, registration: { pending: null } }))
 jest.mock('../../api/queryClient', () => ({ queryClient: { clear: jest.fn() } }))
 jest.mock('i18next', () => ({ changeLanguage: jest.fn() }))
 
@@ -56,6 +66,9 @@ const renderWithConsumer = () => {
 
 beforeEach(() => {
   mockAuthCallback = null
+  mockNoAccountListener = null
+  mockSignOut.mockClear()
+  mockHeldSignUp.mockReset().mockReturnValue(null)
   apiClient.get.mockReset()
 })
 
@@ -194,4 +207,110 @@ test('the first profile read waits for a sign-up in flight', async () => {
   mockRegistration.pending = null
   expect(apiClient.get).toHaveBeenCalledWith('/users/me')
   await waitFor(() => expect(ctx().user?.username).toBe('brand-new'))
+})
+
+/*
+ * ADR-077 — a profile belongs to the Firebase identity it was read for.
+ *
+ * Found on dev, 12 November 2026: someone signed up with an address the invite
+ * was not for, confirmed it, was refused by the server, and was shown
+ * onboarding anyway. The app's only proof that someone is in is the profile it
+ * holds, so a profile must never be held for an identity it was not read for,
+ * and an identity the server says has no account must hold none.
+ */
+const gateRefusal = (code) => Object.assign(new Error('no'), { response: { status: 403, data: { detail: { code } } } })
+
+test('a profile kept for one identity is never restored for another', async () => {
+  const { storage } = platform
+  apiClient.get.mockResolvedValue({ data: { username: 'ana' } })
+  renderWithConsumer()
+  await act(async () => {
+    await mockAuthCallback({ uid: 'uid-ana' })
+  })
+  expect(JSON.parse(storage.get('NOWRY_LAST_PROFILE'))).toEqual({ uid: 'uid-ana', profile: { username: 'ana' } })
+
+  // Same device, a different identity, and the profile read cannot reach the server.
+  apiClient.get.mockRejectedValue(networkError())
+  const read = renderWithConsumer()
+  await act(async () => {
+    await mockAuthCallback({ uid: 'uid-other' })
+  })
+  expect(read().user).toBeNull()
+  expect(read().isAuthenticated).toBe(false)
+})
+
+test('when the identity changes under a live session, the earlier profile goes before anything is read', async () => {
+  apiClient.get.mockResolvedValue({ data: { username: 'ana' } })
+  const read = renderWithConsumer()
+  await act(async () => {
+    await mockAuthCallback({ uid: 'uid-ana' })
+  })
+  expect(read().user.username).toBe('ana')
+
+  apiClient.get.mockRejectedValue(networkError())
+  await act(async () => {
+    await mockAuthCallback({ uid: 'uid-other' })
+  })
+  expect(read().user).toBeNull()
+})
+
+test('a stored profile in the old shape, with no identity, is not restored', async () => {
+  platform.storage.set('NOWRY_LAST_PROFILE', JSON.stringify({ username: 'someone' }))
+  apiClient.get.mockRejectedValue(networkError())
+  const read = renderWithConsumer()
+  await act(async () => {
+    await mockAuthCallback({ uid: 'u1' })
+  })
+  expect(read().user).toBeNull()
+})
+
+test.each(['beta_invite_required', 'invite_verify_email'])(
+  'an identity the server says has no account (%s) holds no profile and is signed out',
+  async (code) => {
+    apiClient.get.mockRejectedValue(gateRefusal(code))
+    const read = renderWithConsumer()
+    await act(async () => {
+      await mockAuthCallback({ uid: 'uid-orphan' })
+    })
+    expect(read().user).toBeNull()
+    expect(read().loading).toBe(false)
+    expect(mockSignOut).toHaveBeenCalledTimes(1)
+    expect(platform.session.onSignedOut).not.toHaveBeenCalled()
+  }
+)
+
+test('a sign-up waiting on its email keeps its identity, and still holds no profile', async () => {
+  mockHeldSignUp.mockReturnValue({ inviteCode: 'nwi_x', username: 'yo', email: 'yo@example.com' })
+  apiClient.get.mockRejectedValue(gateRefusal('beta_invite_required'))
+  const read = renderWithConsumer()
+  await act(async () => {
+    await mockAuthCallback({ uid: 'uid-waiting' })
+  })
+  expect(read().user).toBeNull()
+  expect(mockSignOut).not.toHaveBeenCalled()
+})
+
+test('any other 403 ends the profile and leaves the Firebase session alone', async () => {
+  apiClient.get.mockRejectedValue(refused(403))
+  const read = renderWithConsumer()
+  await act(async () => {
+    await mockAuthCallback({ uid: 'u1' })
+  })
+  expect(read().user).toBeNull()
+  expect(mockSignOut).not.toHaveBeenCalled()
+})
+
+test('a gate refusal on any later request drops a profile that was being held', async () => {
+  const { storage } = platform
+  apiClient.get.mockResolvedValue({ data: { username: 'ana' } })
+  const read = renderWithConsumer()
+  await act(async () => {
+    await mockAuthCallback({ uid: 'uid-ana' })
+  })
+  expect(read().isAuthenticated).toBe(true)
+
+  act(() => mockNoAccountListener())
+  expect(read().user).toBeNull()
+  expect(read().isAuthenticated).toBe(false)
+  expect(storage.get('NOWRY_LAST_PROFILE')).toBeFalsy()
 })

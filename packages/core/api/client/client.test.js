@@ -7,7 +7,7 @@ import i18n from 'i18next'
 import { AxiosError } from 'axios'
 import { configureTestPlatform } from '../../platform/testing'
 import { resetPlatform } from '../../platform'
-import { apiClient } from './index'
+import { apiClient, onNoAccount } from './index'
 
 let platform
 
@@ -128,6 +128,20 @@ describe("the beta gate's refusals belong to the sign-up screens (ADR-038, ADR-0
     await request('/users/me', { adapter: transport(answer).adapter })
     await request('/auth/register', { adapter: transport(answer).adapter })
     expect(platform.notify).not.toHaveBeenCalled()
+  })
+
+  it('tells whoever holds a profile that this identity has no account, and only then', async () => {
+    const told = jest.fn()
+    const stop = onNoAccount(told)
+    await request('/decks', { adapter: transport({ status: 403, data: { detail: { code: 'beta_invite_required' } } }).adapter })
+    await request('/auth/register', { adapter: transport({ status: 403, data: { detail: { code: 'invite_verify_email' } } }).adapter })
+    expect(told).toHaveBeenCalledTimes(2)
+    await request('/decks', { adapter: transport({ status: 403, data: { detail: { code: 'upgrades_closed' } } }).adapter })
+    await request('/decks', { adapter: transport({ status: 401 }).adapter })
+    expect(told).toHaveBeenCalledTimes(2)
+    stop()
+    await request('/decks', { adapter: transport({ status: 403, data: { detail: { code: 'beta_invite_required' } } }).adapter })
+    expect(told).toHaveBeenCalledTimes(2)
   })
 
   it('still speaks for any other 403', async () => {

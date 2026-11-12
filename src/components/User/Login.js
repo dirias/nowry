@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate, Link as RouterLink } from 'react-router-dom'
 import { LEGAL_PATHS } from '@nowry/core/constants/site'
 import { useTranslation } from 'react-i18next'
@@ -20,6 +20,14 @@ const Login = () => {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const { login } = useAuth()
+
+  // ADR-077: someone whose sign-up is waiting on its email finishes it on
+  // Register, where the confirm step and its way out are.
+  useEffect(() => {
+    if (authService.heldSignUp()) navigate('/register', { replace: true })
+    // On arrival only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const handleLogin = async (e) => {
     e.preventDefault()
