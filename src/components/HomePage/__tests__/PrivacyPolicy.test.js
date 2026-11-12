@@ -70,4 +70,5 @@ it('names every service that handles data', () => {
   const items = screen.getAllByRole('listitem').map((item) => item.textContent)
   for (const service of SERVICES) expect(items.some((item) => item.includes(service))).toBe(true)
   expect(read('legal.privacy.services.items')).toHaveLength(12)
+  expect(items.some((item) => item.includes('all text, everything typed and all images are hidden'))).toBe(true)
 })
