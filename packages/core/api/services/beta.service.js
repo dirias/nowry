@@ -2,7 +2,7 @@ import { apiClient } from '../client'
 import { normalizeBetaConfig } from '../../domain/beta'
 
 /**
- * The beta gate's three public calls (ADR-038).
+ * The beta gate's public calls (ADR-038), and leaving the waitlist (ADR-080).
  *
  * None needs auth: the config decides what a visitor sees, an invite is
  * checked before an account exists, and the waitlist is for people who were
@@ -30,6 +30,26 @@ export const betaService = {
    */
   joinWaitlist: async (payload) => {
     const { data } = await apiClient.post('/beta/waitlist', payload)
+    return data
+  },
+
+  /**
+   * What the leave page shows for a link's token. Reading removes no one (ADR-080).
+   * @param {string} token
+   * @returns {Promise<{ email_hint: string | null, locale: string | null }>}
+   */
+  readWaitlistLeave: async (token) => {
+    const { data } = await apiClient.get(`/beta/waitlist/leave/${encodeURIComponent(String(token ?? ''))}`)
+    return data
+  },
+
+  /**
+   * Leave the waitlist. The answer is the same for any token.
+   * @param {string} token
+   * @returns {Promise<{ left: boolean }>}
+   */
+  leaveWaitlist: async (token) => {
+    const { data } = await apiClient.post(`/beta/waitlist/leave/${encodeURIComponent(String(token ?? ''))}`)
     return data
   }
 }

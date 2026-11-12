@@ -4655,7 +4655,17 @@
       "cta": "Join the waitlist",
       "sent": "You're on the list. We'll write when early access opens.",
       "failed": "That didn't go through. Try again in a moment.",
-      "purpose": "We'll use your email only to write when early access opens."
+      "purpose": "One email to confirm, one when early access opens. You can leave the list from either.",
+      "leave": {
+        "title": "Leave the waitlist?",
+        "body": "We'll remove {{email}} and won't write again.",
+        "bodyNoEmail": "We'll take this address off the list and won't write again.",
+        "confirm": "Leave the list",
+        "stay": "Stay on the list",
+        "doneTitle": "You're off the list.",
+        "doneBody": "We won't write to you again.",
+        "back": "Back to nowry.app"
+      }
     },
     "phone": {
       "inviteInvalid": "That code isn't one of ours. Check it, or join the waitlist at nowry.app.",

@@ -4662,7 +4662,17 @@
       "cta": "Apuntarme",
       "sent": "Ya estás en la lista. Te escribiremos cuando se abra el acceso anticipado.",
       "failed": "No se pudo enviar. Inténtalo de nuevo en un momento.",
-      "purpose": "Usaremos tu correo solo para escribirte cuando se abra el acceso anticipado."
+      "purpose": "Un correo para confirmar y otro cuando se abra el acceso anticipado. Puedes salir de la lista desde cualquiera de los dos.",
+      "leave": {
+        "title": "¿Salir de la lista de espera?",
+        "body": "Quitaremos {{email}} y no volveremos a escribirte.",
+        "bodyNoEmail": "Quitaremos esta dirección de la lista y no volveremos a escribirte.",
+        "confirm": "Salir de la lista",
+        "stay": "Seguir en la lista",
+        "doneTitle": "Ya no estás en la lista.",
+        "doneBody": "No volveremos a escribirte.",
+        "back": "Volver a nowry.app"
+      }
     },
     "phone": {
       "inviteInvalid": "Ese código no es nuestro. Revísalo o apúntate a la lista de espera en nowry.app.",
