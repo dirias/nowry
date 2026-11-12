@@ -1,4 +1,11 @@
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, sendPasswordResetEmail, updateProfile } from 'firebase/auth'
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  sendPasswordResetEmail,
+  sendEmailVerification,
+  updateProfile
+} from 'firebase/auth'
 import { auth as authPort, session, storage } from '../../platform'
 import { apiClient } from '../client'
 import { usernameFor } from '../../domain/username'
@@ -49,13 +56,14 @@ export const authService = {
    * @param {string} password
    * @param {string} username
    * @param {string} [inviteCode] the beta invite, sent as a header while invites are required (ADR-038)
+   * @param {string} [langCode] the app's language, for the verification email (ADR-076)
    * @returns {Promise<Object>} User data
    */
-  async register(email, password, username, inviteCode) {
-    return whileRegistering(() => this.registerNow(email, password, username, inviteCode))
+  async register(email, password, username, inviteCode, langCode) {
+    return whileRegistering(() => this.registerNow(email, password, username, inviteCode, langCode))
   },
 
-  async registerNow(email, password, username, inviteCode) {
+  async registerNow(email, password, username, inviteCode, langCode) {
     try {
       // Create user in Firebase
       const userCredential = await createUserWithEmailAndPassword(firebaseAuth(), email, password)
@@ -86,6 +94,11 @@ export const authService = {
           }
         }
       )
+
+      // ADR-076: ask the address to prove itself. After the account exists on
+      // the server, and never in its way: a failed send leaves a working
+      // account and a "send again" line in settings.
+      this.sendVerification(langCode).catch((error) => console.warn('Verification email not sent:', error?.code || error))
 
       return {
         user: {
@@ -225,6 +238,35 @@ export const authService = {
       console.error('Logout error:', error)
       throw error
     }
+  },
+
+  /**
+   * Ask Firebase to send the verification email to the signed-in user (ADR-076).
+   * @param {string} [langCode] the app's language, e.g. 'es' or 'es-MX'
+   * @returns {Promise<boolean>} true when one was sent; false when there is no one to ask or nothing to prove
+   */
+  async sendVerification(langCode) {
+    const auth = firebaseAuth()
+    const user = auth.currentUser
+    if (!user || user.emailVerified) return false
+    if (langCode) auth.languageCode = String(langCode).split('-')[0]
+    await sendEmailVerification(user)
+    return true
+  },
+
+  /**
+   * Re-read the signed-in user from Firebase; once verified, refresh the token
+   * so the server sees it too (ADR-076).
+   * @returns {Promise<boolean>} true when the email is verified
+   */
+  async confirmVerification() {
+    const user = firebaseAuth().currentUser
+    if (!user) return false
+    await user.reload()
+    if (!user.emailVerified) return false
+    const idToken = await user.getIdToken(true)
+    storage.set('firebase_token', idToken)
+    return true
   },
 
   /**

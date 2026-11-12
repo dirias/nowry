@@ -413,7 +413,17 @@
       }
     },
     "newHere": "New here?",
-    "loginRequired": "Sign in to continue."
+    "loginRequired": "Sign in to continue.",
+    "verify": {
+      "title": "Confirm your email",
+      "body": "We sent a link to {{email}}. Open it to confirm this address is yours.",
+      "resend": "Send the link again",
+      "check": "I've confirmed",
+      "sent": "Sent. Check your inbox.",
+      "failed": "That didn't go through. Try again in a moment.",
+      "notYet": "Not confirmed yet. Open the link in the email first.",
+      "done": "Your email is confirmed."
+    }
   },
   "landing": {
     "hero": {

@@ -488,7 +488,17 @@
       }
     },
     "newHere": "Nouveau ici ?",
-    "loginRequired": "Connectez-vous pour continuer."
+    "loginRequired": "Connectez-vous pour continuer.",
+    "verify": {
+      "title": "Confirmez votre e-mail",
+      "body": "Nous avons envoyé un lien à {{email}}. Ouvrez-le pour confirmer que cette adresse est la vôtre.",
+      "resend": "Renvoyer le lien",
+      "check": "C'est confirmé",
+      "sent": "Envoyé. Vérifiez votre boîte de réception.",
+      "failed": "L'envoi a échoué. Réessayez dans un instant.",
+      "notYet": "Pas encore confirmé. Ouvrez d'abord le lien dans l'e-mail.",
+      "done": "Votre e-mail est confirmé."
+    }
   },
   "landing": {
     "hero": {

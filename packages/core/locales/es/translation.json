@@ -413,7 +413,17 @@
       }
     },
     "newHere": "¿Eres nuevo aquí?",
-    "loginRequired": "Inicia sesión para continuar."
+    "loginRequired": "Inicia sesión para continuar.",
+    "verify": {
+      "title": "Confirma tu correo",
+      "body": "Enviamos un enlace a {{email}}. Ábrelo para confirmar que esta dirección es tuya.",
+      "resend": "Enviar el enlace de nuevo",
+      "check": "Ya lo confirmé",
+      "sent": "Enviado. Revisa tu bandeja de entrada.",
+      "failed": "No se pudo enviar. Inténtalo de nuevo en un momento.",
+      "notYet": "Aún no está confirmado. Abre primero el enlace del correo.",
+      "done": "Tu correo está confirmado."
+    }
   },
   "landing": {
     "hero": {

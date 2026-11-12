@@ -53,7 +53,7 @@ const Register = () => {
   const [loading, setLoading] = useState(false)
   const [registrationSuccess, setRegistrationSuccess] = useState(false)
   const navigate = useNavigate()
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { config: beta } = useBeta()
   const inviteRequired = beta.invite_required
   const { login } = useAuth()
@@ -153,7 +153,7 @@ const Register = () => {
         navigate('/register?returnUrl=%2Fonboarding', { replace: true })
 
         // 1. Create user in Firebase Auth & sync to MongoDB
-        await authService.register(formData.email, formData.password, formData.username, inviteCode)
+        await authService.register(formData.email, formData.password, formData.username, inviteCode, i18n.language)
 
         // Firebase auth service already logs the user in and stores the token
         // No need to call the old login endpoint
