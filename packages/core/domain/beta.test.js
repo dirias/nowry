@@ -5,10 +5,14 @@ import {
   BETA_INVITE_REQUIRED_CODE,
   DEFAULT_BETA_CONFIG,
   INVITE_HEADER,
+  INVITE_VERIFY_EMAIL_CODE,
   UPGRADES_CLOSED_CODE,
+  inviteFromSearch,
   inviteHeaders,
   isInviteRefusal,
+  isPersonalInvite,
   isUpgradesClosed,
+  isVerifyEmailRefusal,
   normalizeBetaConfig
 } from './beta'
 
@@ -48,5 +52,30 @@ describe('inviteHeaders', () => {
     expect(inviteHeaders(' c0-7f3a ')).toEqual({ [INVITE_HEADER]: 'c0-7f3a' })
     expect(inviteHeaders('')).toEqual({})
     expect(inviteHeaders(undefined)).toEqual({})
+  })
+})
+
+describe('personal invitations (ADR-077)', () => {
+  it('tells the wait-for-your-email refusal from the missing-code one', () => {
+    expect(isVerifyEmailRefusal(refused(INVITE_VERIFY_EMAIL_CODE))).toBe(true)
+    expect(isVerifyEmailRefusal(refused(BETA_INVITE_REQUIRED_CODE))).toBe(false)
+    expect(isVerifyEmailRefusal(refused(INVITE_VERIFY_EMAIL_CODE, 500))).toBe(false)
+    expect(isVerifyEmailRefusal(new Error('network'))).toBe(false)
+    expect(isInviteRefusal(refused(INVITE_VERIFY_EMAIL_CODE))).toBe(false)
+  })
+
+  it('tells a personal token from a cohort code', () => {
+    expect(isPersonalInvite('nwi_abc')).toBe(true)
+    expect(isPersonalInvite('  nwi_abc ')).toBe(true)
+    for (const other of ['c0-7f3a', 'NWI_abc', '', null, undefined]) expect(isPersonalInvite(other)).toBe(false)
+  })
+
+  it('reads the invite from a link and nothing else', () => {
+    expect(inviteFromSearch('?invite=nwi_abc-DEF_123')).toBe('nwi_abc-DEF_123')
+    expect(inviteFromSearch('?returnUrl=%2Fonboarding&invite=%20friends-1%20')).toBe('friends-1')
+    expect(inviteFromSearch('?email=ana@example.com')).toBe('')
+    expect(inviteFromSearch('')).toBe('')
+    expect(inviteFromSearch(undefined)).toBe('')
+    expect(inviteFromSearch(`?invite=${'x'.repeat(65)}`)).toBe('')
   })
 })

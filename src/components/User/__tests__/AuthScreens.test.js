@@ -14,7 +14,14 @@ jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key) => key, i18n: { language: 'en' } })
 }))
 
-const mockAuthService = { login: jest.fn(), loginWithGoogle: jest.fn(), logout: jest.fn(), register: jest.fn() }
+const mockAuthService = {
+  login: jest.fn(),
+  loginWithGoogle: jest.fn(),
+  logout: jest.fn(),
+  register: jest.fn(),
+  heldSignUp: jest.fn(() => null),
+  holdInviteForCurrentUser: jest.fn(() => false)
+}
 jest.mock('@nowry/core/api/services/auth.service', () => ({ authService: mockAuthService }))
 
 const mockCheckInvite = jest.fn()
@@ -22,7 +29,7 @@ jest.mock('@nowry/core/api/services/beta.service', () => ({ betaService: { check
 
 let mockBeta = { invite_required: false }
 jest.mock('@nowry/core/context/BetaContext', () => ({ useBeta: () => ({ config: mockBeta }) }))
-jest.mock('@nowry/core/context/AuthContext', () => ({ useAuth: () => ({ login: jest.fn() }) }))
+jest.mock('@nowry/core/context/AuthContext', () => ({ useAuth: () => ({ login: jest.fn(), checkUser: jest.fn() }) }))
 jest.mock('../../Public/WaitlistForm', () => () => null)
 
 const mockNavigate = jest.fn()

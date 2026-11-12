@@ -1,6 +1,7 @@
 import axios from 'axios'
 import i18n from 'i18next'
 import { auth, env, notify, session, storage, telemetry } from '../../platform'
+import { isInviteRefusal, isVerifyEmailRefusal } from '../../domain/beta'
 
 /**
  * Main API client instance with configured defaults.
@@ -153,7 +154,14 @@ apiClient.interceptors.response.use(
      * onboarding and Account Settings call it, and unchanged everywhere else.
      */
     const ownsItsErrorUi = error.config?.suppressErrorToast === true
-    const suppressGlobalToast = isAiGenerationEndpoint || ownsItsErrorUi
+    /*
+     * The beta gate's two refusals (ADR-038, ADR-077) belong to the sign-up
+     * screens, whichever request met them: the auth context's own profile read
+     * meets the gate too. "You don't have permission" over "confirm your email"
+     * or "private beta" says the wrong thing.
+     */
+    const isGateRefusal = isInviteRefusal(error) || isVerifyEmailRefusal(error)
+    const suppressGlobalToast = isAiGenerationEndpoint || ownsItsErrorUi || isGateRefusal
 
     // Handle request timeout — suppress for endpoints that surface their own error UI
     if (!suppressGlobalToast && (error.code === 'ECONNABORTED' || error.message?.includes('timeout'))) {

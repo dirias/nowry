@@ -4652,6 +4652,12 @@
     "phone": {
       "inviteInvalid": "Ese código no es nuestro. Revísalo o apúntate a la lista de espera en nowry.app.",
       "inviteRequired": "Nowry está en beta privada. Regístrate con un código de invitación o apúntate a la lista de espera en nowry.app."
+    },
+    "personal": {
+      "applied": "Tu invitación está aplicada. Gratis durante la beta.",
+      "confirmBody": "Esta invitación es para una sola dirección de correo. Enviamos un enlace a {{email}}. Ábrelo y vuelve aquí para terminar.",
+      "notUsable": "Esta invitación no se puede usar con este correo. Usa la dirección a la que se envió o apúntate a la lista de espera.",
+      "useAnother": "Usar otro correo"
     }
   },
   "blocks": {
