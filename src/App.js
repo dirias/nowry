@@ -47,6 +47,7 @@ const Register = lazy(() => import('./components/User/Register'))
 const ResetPassword = lazy(() => import('./components/User/ResetPassword'))
 const EmailAction = lazy(() => import('./components/User/EmailAction'))
 const WaitlistLeave = lazy(() => import('./components/Public/WaitlistLeave'))
+const DeleteAccountInfo = lazy(() => import('./components/HomePage/DeleteAccountInfo'))
 const OnboardingRoute = lazy(() => import('./components/User/OnboardingRoute'))
 const Home = lazy(() => import('./components/User/Home/Home'))
 const EditorHome = lazy(() => import('./components/Books/EditorHome'))
@@ -183,6 +184,8 @@ const AppContent = () => {
               <Route path='/privacy' element={<PrivacyPolicy />} />
               <Route path='/terms' element={<TermsOfService />} />
               <Route path='/copyright' element={<CopyrightNotice />} />
+              {/* Google Play's account deletion link; public, signed out or in (ADR-081). */}
+              <Route path='/delete-account' element={<DeleteAccountInfo />} />
               {Object.entries(LEGAL_PATH_ALIASES).map(([alias, path]) => (
                 <Route key={alias} path={alias} element={<Navigate to={path} replace />} />
               ))}

@@ -230,7 +230,8 @@
       "pricing": "Tarifs",
       "copyright": "Droits d'auteur",
       "privacy": "Politique de confidentialité",
-      "terms": "Conditions d'utilisation"
+      "terms": "Conditions d'utilisation",
+      "deleteAccount": "Supprimer le compte"
     },
     "support": {
       "title": "Support",
@@ -1122,14 +1123,14 @@
     },
     "deleteAccount": {
       "title": "Supprimer votre compte",
-      "message": "Cela supprimera définitivement votre compte et toutes les données associées (livres, paquets, cartes, plans, objectifs). Vos données seront conservées 30 jours avant leur suppression définitive.",
+      "message": "Cela supprime votre compte et tout son contenu : livres, paquets, cartes, historique d'étude, plans, objectifs et notes. Vous êtes déconnecté immédiatement, et tout est effacé définitivement au bout de 30 jours.",
       "emailLabel": "Confirmez votre adresse e-mail",
       "emailPlaceholder": "Saisissez votre e-mail pour confirmer",
       "emailRequired": "L'adresse e-mail est requise pour confirmer la suppression",
       "emailMismatch": "L'adresse e-mail ne correspond pas. Veuillez réessayer.",
       "confirmDisabled": "Saisissez votre e-mail pour confirmer",
       "confirmEnabled": "Supprimer définitivement",
-      "recoveryNotice": "Vos données peuvent être récupérées sous 30 jours en contactant le support. Passé ce délai, elles seront définitivement supprimées."
+      "recoveryNotice": "Effacé au bout de 30 jours. D'ici là, en cas d'erreur, écrivez à support@nowry.app."
     },
     "exportData": {
       "error": "Failed to export data. Please try again."
@@ -1809,7 +1810,7 @@
           "<strong>fal.ai :</strong> dessine le portrait du compagnon à partir de sa description.",
           "<strong>Langfuse :</strong> conserve un journal des demandes et des réponses de l'IA, avec un identifiant de compte, afin que nous puissions trouver et corriger les défauts.",
           "<strong>Cloudinary :</strong> stocke les images que vous téléversez.",
-          "<strong>Stripe :</strong> gère les paiements. Votre adresse e-mail est enregistrée auprès de Stripe à la création de votre compte. Les données de carte vont uniquement à Stripe et ne nous parviennent jamais.",
+          "<strong>Stripe :</strong> gère les paiements. Votre adresse e-mail est enregistrée auprès de Stripe à la création de votre compte, et cet enregistrement est supprimé lorsque vous supprimez votre compte. Les données de carte vont uniquement à Stripe et ne nous parviennent jamais.",
           "<strong>Resend :</strong> achemine nos e-mails.",
           "<strong>Sentry :</strong> reçoit les rapports d'erreur du site web et de l'application. Sur le site web, un échantillon des visites est enregistré sous forme de relecture de l'écran afin que nous puissions voir ce qui n'a pas fonctionné ; tout le texte, tout ce qui est saisi et toutes les images y sont masqués.",
           "<strong>Expo et Firebase Cloud Messaging (Google) :</strong> remettent les notifications sur votre téléphone, à l'aide d'un jeton qui identifie l'appareil."
@@ -1818,7 +1819,8 @@
       },
       "rights": {
         "title": "8. Vos Droits Légaux",
-        "content": "Dans certaines circonstances, vous avez des droits en vertu des lois sur la protection des données concernant vos données personnelles, y compris le droit de demander l'accès, la correction, l'effacement ou la restriction de vos données personnelles."
+        "content": "Dans certaines circonstances, vous avez des droits en vertu des lois sur la protection des données concernant vos données personnelles, y compris le droit de demander l'accès, la correction, l'effacement ou la restriction de vos données personnelles.",
+        "deletion": "Pour supprimer votre compte, et savoir ce qui est effacé et quand, consultez nowry.app/delete-account."
       },
       "contact": {
         "title": "9. Nous Contacter",
@@ -1911,6 +1913,43 @@
         "sent": "Votre notification a été reçue. Nous vous écrirons à l'adresse indiquée.",
         "failed": "L'envoi a échoué. Réessayez, ou écrivez à l'adresse de l'agent ci-dessus."
       }
+    },
+    "deleteAccount": {
+      "title": "Supprimer votre compte Nowry",
+      "intro": "Nowry est une application d'étude sur le web, à nowry.app, et sur Android. Cette page explique comment supprimer votre compte Nowry et ce qu'il advient de vos données.",
+      "webTitle": "Sur le web",
+      "web": [
+        "Connectez-vous sur nowry.app.",
+        "Ouvrez {{settings}} depuis le menu sous votre photo.",
+        "Dans {{danger}}, saisissez votre adresse e-mail pour confirmer, puis appuyez sur {{button}}."
+      ],
+      "androidTitle": "Dans l'application Android",
+      "android": [
+        "Ouvrez Nowry et touchez votre photo en haut de l'écran.",
+        "Touchez {{settings}}.",
+        "Dans {{danger}}, saisissez votre adresse e-mail pour confirmer, puis touchez {{button}}."
+      ],
+      "emailTitle": "Si vous ne pouvez pas vous connecter",
+      "email": "Écrivez à support@nowry.app depuis l'adresse e-mail de votre compte, avec l'objet « Supprimer mon compte ». Nous répondons pour confirmer, et supprimons le compte dans les 7 jours suivant votre réponse.",
+      "publicNote": "Si vous avez partagé publiquement un paquet ou un livre, dépubliez-le d'abord : un compte qui a du contenu public ne peut pas être supprimé tant que celui-ci n'est pas privé.",
+      "nowTitle": "Supprimé immédiatement",
+      "now": [
+        "Vous êtes déconnecté partout, et le compte ne peut plus être ouvert.",
+        "Votre adresse e-mail et votre nom d'utilisateur sont libérés : vous pouvez vous réinscrire avec la même adresse, et le nouveau compte démarre vide.",
+        "Les images que vous avez téléversées.",
+        "Les liens qui envoient des notifications à votre téléphone.",
+        "L'enregistrement de votre adresse e-mail chez Stripe, notre prestataire de paiement."
+      ],
+      "laterTitle": "Effacé définitivement au bout de 30 jours",
+      "later": "Tout le reste de votre compte : livres, paquets, cartes, historique d'étude, plans, objectifs, tâches, routines, calendrier, tableaux, notes, votre compagnon et la fiche du compte elle-même. Pendant ces 30 jours, tout est masqué et personne ne peut l'utiliser. Si vous avez supprimé votre compte par erreur, écrivez à support@nowry.app avant la fin des 30 jours. Rien ne revient de lui-même.",
+      "elsewhereTitle": "Ce qui est conservé ailleurs, et combien de temps",
+      "elsewhere": [
+        "La trace qu'un e-mail vous a été envoyé : son type, le jour et la langue, avec une forme brouillée de votre adresse. Conservée 90 jours.",
+        "Les rapports d'erreur du site web et de l'application, chez Sentry : ils ne portent ni numéro de compte, ni nom, ni e-mail. Conservés jusqu'à {{sentryDays}} jours.",
+        "Les journaux des demandes à nos fonctions d'IA, chez Langfuse : ils portent votre numéro de compte et ce que vous avez saisi, mais ni nom ni e-mail. Conservés jusqu'à {{langfuseDays}} jours."
+      ],
+      "waitlist": "Si vous avez aussi rejoint la liste d'attente, c'est à part : utilisez le lien de n'importe quel e-mail de la liste pour la quitter.",
+      "contact": "Questions : support@nowry.app"
     }
   },
   "home": {

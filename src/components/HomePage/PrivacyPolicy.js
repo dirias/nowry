@@ -1,10 +1,10 @@
 import React from 'react'
 import { Container, Typography, Box, Stack, Divider, Link, Button } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
+import { Link as RouterLink, useNavigate } from 'react-router-dom'
 import { ArrowBackRounded as ArrowBackIcon } from '@mui/icons-material'
 import DOMPurify from 'dompurify'
-import { LEGAL_PRIVACY_UPDATED } from '@nowry/core/constants/site'
+import { DELETE_ACCOUNT_PATH, LEGAL_PRIVACY_UPDATED } from '@nowry/core/constants/site'
 
 const PrivacyPolicy = () => {
   const { t, i18n } = useTranslation()
@@ -153,6 +153,12 @@ const PrivacyPolicy = () => {
           </Typography>
           <Typography level='body-md' sx={{ mb: 2 }}>
             {t('legal.privacy.rights.content')}
+          </Typography>
+          <Typography level='body-md' sx={{ mb: 2 }}>
+            {t('legal.privacy.rights.deletion')}{' '}
+            <Link component={RouterLink} to={DELETE_ACCOUNT_PATH}>
+              {t('footer.links.deleteAccount')}
+            </Link>
           </Typography>
         </section>
 

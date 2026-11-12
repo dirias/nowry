@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { DELETE_ACCOUNT_PATH } from '@nowry/core/constants/site'
 import { Box, Typography, Stack, Button, IconButton, Snackbar, Tooltip, Select, Option, Divider, SvgIcon } from '@mui/joy'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -55,7 +56,8 @@ const Footer = () => {
     { key: 'contact', label: t('footer.support.contact'), to: '/contact' },
     { key: 'privacy', label: t('footer.links.privacy'), to: '/privacy' },
     { key: 'terms', label: t('footer.links.terms'), to: '/terms' },
-    { key: 'copyright', label: t('footer.links.copyright'), to: '/copyright' }
+    { key: 'copyright', label: t('footer.links.copyright'), to: '/copyright' },
+    { key: 'deleteAccount', label: t('footer.links.deleteAccount'), to: DELETE_ACCOUNT_PATH }
   ]
 
   const socialLinks = [

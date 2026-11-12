@@ -154,7 +154,8 @@
       "terms": "Terms of Service",
       "library": "Library",
       "pricing": "Pricing",
-      "copyright": "Copyright"
+      "copyright": "Copyright",
+      "deleteAccount": "Delete account"
     },
     "support": {
       "title": "Support",
@@ -1093,14 +1094,14 @@
     },
     "deleteAccount": {
       "title": "Delete your account",
-      "message": "This will permanently delete your account and all associated data (books, decks, cards, plans, goals). Your data will be retained for 30 days before final removal.",
+      "message": "This deletes your account and everything in it: books, decks, cards, study history, plans, goals and notes. You are signed out at once, and everything is erased for good after 30 days.",
       "emailLabel": "Confirm your email address",
       "emailPlaceholder": "Enter your email to confirm",
       "emailRequired": "Email address is required to confirm deletion",
       "emailMismatch": "Email address does not match. Please try again.",
       "confirmDisabled": "Enter email to confirm",
       "confirmEnabled": "Delete permanently",
-      "recoveryNotice": "Your data can be recovered within 30 days by contacting support. After 30 days, it will be permanently deleted."
+      "recoveryNotice": "Deleted after 30 days. Until then, if this was a mistake, write to support@nowry.app."
     },
     "exportData": {
       "error": "Failed to export data. Please try again."
@@ -3348,7 +3349,7 @@
           "<strong>fal.ai:</strong> draws the companion's portrait from its description.",
           "<strong>Langfuse:</strong> keeps a record of AI requests and answers, with an account identifier, so that we can find and fix faults.",
           "<strong>Cloudinary:</strong> stores the images you upload.",
-          "<strong>Stripe:</strong> handles payments. Your email address is registered with Stripe when your account is created. Card details go to Stripe only and never reach us.",
+          "<strong>Stripe:</strong> handles payments. Your email address is registered with Stripe when your account is created, and that record is deleted when you delete your account. Card details go to Stripe only and never reach us.",
           "<strong>Resend:</strong> delivers our emails.",
           "<strong>Sentry:</strong> receives error reports from the website and the app. On the website, a sample of visits is recorded as a replay of the screen so that we can see what went wrong; all text, everything typed and all images are hidden in it.",
           "<strong>Expo and Firebase Cloud Messaging (Google):</strong> deliver notifications to your phone, using a token that identifies the device."
@@ -3357,7 +3358,8 @@
       },
       "rights": {
         "title": "8. Your Legal Rights",
-        "content": "Under certain circumstances, you have rights under data protection laws in relation to your personal data, including the right to request access, correction, erasure, or restriction of your personal data."
+        "content": "Under certain circumstances, you have rights under data protection laws in relation to your personal data, including the right to request access, correction, erasure, or restriction of your personal data.",
+        "deletion": "To delete your account, and to see what is erased and when, read nowry.app/delete-account."
       },
       "contact": {
         "title": "9. Contact Us",
@@ -3450,6 +3452,43 @@
         "sent": "Your notice was received. We'll write to you at the address you gave.",
         "failed": "That didn't go through. Try again, or email the agent address above."
       }
+    },
+    "deleteAccount": {
+      "title": "Delete your Nowry account",
+      "intro": "Nowry is a study app on the web at nowry.app and on Android. This page explains how to delete your Nowry account, and what happens to your data when you do.",
+      "webTitle": "On the web",
+      "web": [
+        "Sign in at nowry.app.",
+        "Open {{settings}} from the menu under your picture.",
+        "In {{danger}}, type your email address to confirm, then press {{button}}."
+      ],
+      "androidTitle": "In the Android app",
+      "android": [
+        "Open Nowry and tap your picture at the top of the screen.",
+        "Tap {{settings}}.",
+        "In {{danger}}, type your email address to confirm, then tap {{button}}."
+      ],
+      "emailTitle": "If you can't sign in",
+      "email": "Write to support@nowry.app from the email address of your account, with the subject “Delete my account”. We reply to confirm, and delete the account within 7 days of your reply.",
+      "publicNote": "If you shared a deck or a book publicly, unpublish it first: an account with public content cannot be deleted until it is private.",
+      "nowTitle": "Removed at once",
+      "now": [
+        "You are signed out everywhere, and the account can no longer be opened.",
+        "Your email address and username are released: you can sign up again with the same address, and the new account starts empty.",
+        "The images you uploaded.",
+        "The links that send notifications to your phone.",
+        "The record of your email address at Stripe, our payment provider."
+      ],
+      "laterTitle": "Erased for good after 30 days",
+      "later": "Everything else in your account: books, decks, cards, study history, plans, goals, tasks, routines, calendar, boards, notes, your companion, and the account record itself. During those 30 days it is hidden and nobody can use it. If you deleted your account by mistake, write to support@nowry.app before the 30 days are over. Nothing comes back on its own.",
+      "elsewhereTitle": "Kept elsewhere, and for how long",
+      "elsewhere": [
+        "A record that an email was sent to you: its kind, the day and the language, with a scrambled form of your address. Kept for 90 days.",
+        "Error reports from the website and the app, at Sentry: they carry no account number, name or email. Kept for up to {{sentryDays}} days.",
+        "Records of requests to our AI features, at Langfuse: they carry your account number and what you typed, but no name or email. Kept for up to {{langfuseDays}} days."
+      ],
+      "waitlist": "If you also joined the waitlist, that is separate: use the link in any waitlist email to leave it.",
+      "contact": "Questions: support@nowry.app"
     }
   },
   "home": {
