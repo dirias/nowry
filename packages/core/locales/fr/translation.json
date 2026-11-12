@@ -4145,7 +4145,17 @@
       "cta": "Rejoindre la liste",
       "sent": "Vous êtes sur la liste. Nous vous écrirons à l'ouverture de l'accès anticipé.",
       "failed": "L'envoi a échoué. Réessayez dans un instant.",
-      "purpose": "Nous utiliserons votre e-mail uniquement pour vous écrire à l'ouverture de l'accès anticipé."
+      "purpose": "Un e-mail pour confirmer, un autre à l'ouverture de l'accès anticipé. Vous pouvez quitter la liste depuis l'un ou l'autre.",
+      "leave": {
+        "title": "Quitter la liste d'attente ?",
+        "body": "Nous retirerons {{email}} et ne vous écrirons plus.",
+        "bodyNoEmail": "Nous retirerons cette adresse de la liste et ne vous écrirons plus.",
+        "confirm": "Quitter la liste",
+        "stay": "Rester sur la liste",
+        "doneTitle": "Vous n'êtes plus sur la liste.",
+        "doneBody": "Nous ne vous écrirons plus.",
+        "back": "Retour à nowry.app"
+      }
     },
     "phone": {
       "inviteInvalid": "Ce code n'est pas l'un des nôtres. Vérifiez-le, ou rejoignez la liste d'attente sur nowry.app.",

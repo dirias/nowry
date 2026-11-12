@@ -4134,7 +4134,17 @@
       "cta": "Eintragen",
       "sent": "Du stehst auf der Liste. Wir schreiben dir, sobald der Early Access startet.",
       "failed": "Das hat nicht geklappt. Versuch es gleich noch einmal.",
-      "purpose": "Wir nutzen deine E-Mail nur, um dir zu schreiben, sobald der Early Access startet."
+      "purpose": "Eine E-Mail zur Bestätigung, eine zum Start des Early Access. Aus beiden kannst du die Liste verlassen.",
+      "leave": {
+        "title": "Warteliste verlassen?",
+        "body": "Wir entfernen {{email}} und schreiben dir nicht mehr.",
+        "bodyNoEmail": "Wir entfernen diese Adresse von der Liste und schreiben dir nicht mehr.",
+        "confirm": "Liste verlassen",
+        "stay": "Auf der Liste bleiben",
+        "doneTitle": "Du stehst nicht mehr auf der Liste.",
+        "doneBody": "Wir schreiben dir nicht mehr.",
+        "back": "Zurück zu nowry.app"
+      }
     },
     "phone": {
       "inviteInvalid": "Dieser Code ist keiner von uns. Prüfe ihn oder trag dich auf nowry.app in die Warteliste ein.",
