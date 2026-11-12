@@ -41,7 +41,7 @@ export default function Register() {
 
   const submit = async () => {
     const next = {}
-    if (inviteRequired && !inviteCode.trim()) next.invite = 'beta.inviteInvalid'
+    if (inviteRequired && !inviteCode.trim()) next.invite = 'beta.phone.inviteInvalid'
     if (!username.trim()) next.username = 'auth.errors.usernameRequired'
     if (!email.trim()) next.email = 'auth.errors.emailRequired'
     if (!password) next.password = 'auth.errors.passwordRequired'
@@ -56,14 +56,16 @@ export default function Register() {
       if (inviteRequired) {
         const check = await betaService.checkInvite(code)
         if (!check?.valid) {
-          setErrors({ invite: 'beta.inviteInvalid' })
+          setErrors({ invite: 'beta.phone.inviteInvalid' })
           return
         }
       }
       await authService.register(email.trim(), password, username.trim(), code)
       // AuthGate moves us once the session resolves.
     } catch (error) {
-      setErrors(isInviteRefusal(error) ? { form: 'beta.inviteRequired', invite: 'beta.inviteInvalid' } : { form: authErrorKey(error) })
+      setErrors(
+        isInviteRefusal(error) ? { form: 'beta.phone.inviteRequired', invite: 'beta.phone.inviteInvalid' } : { form: authErrorKey(error) }
+      )
     } finally {
       setPassword('')
       setConfirm('')
@@ -82,7 +84,7 @@ export default function Register() {
         // A Google identity exists but no Nowry account was created; leave
         // Firebase signed out so AuthGate does not treat them as in.
         await authService.logout().catch(() => {})
-        setErrors({ form: 'beta.inviteRequired', invite: 'beta.inviteInvalid' })
+        setErrors({ form: 'beta.phone.inviteRequired', invite: 'beta.phone.inviteInvalid' })
       } else {
         setErrors({ form: authErrorKey(error) })
       }

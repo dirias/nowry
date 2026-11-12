@@ -4108,6 +4108,7 @@
     "inviteInvalid": "Ce code n'est pas l'un des nôtres. Vérifiez-le, ou inscrivez-vous sur la liste d'attente.",
     "inviteRequired": "Nowry est en bêta privée. Inscrivez-vous avec un code d'invitation, ou rejoignez la liste d'attente.",
     "noCode": "Pas de code ?",
+    "haveCode": "J'ai un code d'invitation",
     "earlyAccess": "Accès anticipé",
     "pricing": {
       "message": "Gratuit pendant la bêta. Il y aura toujours un forfait gratuit.",
@@ -4116,10 +4117,14 @@
     "upgradesClosed": "Les abonnements ouvriront après la bêta. Tout ce que vous pouvez faire aujourd'hui est gratuit pendant les tests.",
     "waitlist": {
       "title": "Rejoindre la liste d'attente",
-      "lead": "Laissez votre e-mail et nous vous écrirons quand une place se libère.",
       "cta": "Rejoindre la liste",
-      "sent": "Vous êtes sur la liste. Nous vous écrirons quand une place se libère.",
-      "failed": "L'envoi a échoué. Réessayez dans un instant."
+      "sent": "Vous êtes sur la liste. Nous vous écrirons à l'ouverture de l'accès anticipé.",
+      "failed": "L'envoi a échoué. Réessayez dans un instant.",
+      "purpose": "Nous utiliserons votre e-mail uniquement pour vous écrire à l'ouverture de l'accès anticipé."
+    },
+    "phone": {
+      "inviteInvalid": "Ce code n'est pas l'un des nôtres. Vérifiez-le, ou rejoignez la liste d'attente sur nowry.app.",
+      "inviteRequired": "Nowry est en bêta privée. Inscrivez-vous avec un code d'invitation, ou rejoignez la liste d'attente sur nowry.app."
     }
   },
   "blocks": {

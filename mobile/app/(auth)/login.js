@@ -45,7 +45,7 @@ export default function Login() {
       // ADR-038: a Firebase identity with no Nowry account, while invites are
       // required, is told to register with a code.
       if (isInviteRefusal(error)) await authService.logout().catch(() => {})
-      setErrors({ form: isInviteRefusal(error) ? 'beta.inviteRequired' : authErrorKey(error) })
+      setErrors({ form: isInviteRefusal(error) ? 'beta.phone.inviteRequired' : authErrorKey(error) })
     } finally {
       // The password is never logged and never stored. It leaves this scope here.
       setPassword('')
@@ -67,7 +67,7 @@ export default function Login() {
       await authService.loginWithGoogle()
     } catch (error) {
       if (isInviteRefusal(error)) await authService.logout().catch(() => {})
-      setErrors({ form: isInviteRefusal(error) ? 'beta.inviteRequired' : authErrorKey(error) })
+      setErrors({ form: isInviteRefusal(error) ? 'beta.phone.inviteRequired' : authErrorKey(error) })
     } finally {
       setGoogleBusy(false)
     }
