@@ -5,11 +5,15 @@ import { Box, Container, Typography, Stack, Button, Alert, Skeleton, Chip, Divid
 import { subscriptionService } from '@nowry/core/api/services'
 import { useSubscription } from '@nowry/core/hooks/useSubscription'
 import { useAuth } from '@nowry/core/context/AuthContext'
+import { showsBetaNote } from '@nowry/core/domain/access'
+import PlanBadge from './PlanBadge'
 
 export default function SubscriptionPage() {
   const { t } = useTranslation()
   const { user } = useAuth()
-  const { tier: contextTier, nextBillingDate } = useSubscription()
+  // ADR-079: billing is about the plan paid for; a tester's plan in effect is not a purchase.
+  const { paidTier: contextTier, nextBillingDate } = useSubscription()
+  const betaNote = showsBetaNote(user?.subscription)
   const [searchParams] = useSearchParams()
   const upgraded = searchParams.get('upgraded') === 'true'
   const [portalLoading, setPortalLoading] = useState(false)
@@ -34,8 +38,9 @@ export default function SubscriptionPage() {
         try {
           const sub = await subscriptionService.getSubscriptionStatus()
           if (cancelled) return
-          if (sub && sub.tier && sub.tier !== 'free') {
-            setFreshTier(sub.tier)
+          const paid = sub?.paid_tier ?? sub?.tier
+          if (paid && paid !== 'free') {
+            setFreshTier(paid)
             setFetchingTier(false)
             return
           }
@@ -137,11 +142,21 @@ export default function SubscriptionPage() {
               {t('subscription.currentPlan')}
             </Typography>
             <Skeleton loading={isLoading} variant='text'>
-              <Chip variant='soft' color={tierColor} size='md'>
-                {t(`subscription.tier.${tier}`)}
-              </Chip>
+              {betaNote && tier === 'free' ? (
+                <PlanBadge subscription={user?.subscription} size='md' />
+              ) : (
+                <Chip variant='soft' color={tierColor} size='md'>
+                  {t(`subscription.tier.${tier}`)}
+                </Chip>
+              )}
             </Skeleton>
           </Stack>
+
+          {betaNote && tier === 'free' && (
+            <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
+              {t('beta.fullAccess')}
+            </Typography>
+          )}
 
           {tier !== 'free' && (
             <Skeleton loading={isLoading} variant='text'>

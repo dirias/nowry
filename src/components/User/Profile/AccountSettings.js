@@ -75,6 +75,8 @@ import LearningPreferencesSection from './LearningPreferencesSection'
 import EmailVerificationNotice from './EmailVerificationNotice'
 import { getUsernameValidationError } from '@nowry/core/utils/usernameValidation'
 import useUpgradesOpen from '@nowry/core/hooks/useUpgradesOpen'
+import { showsBetaNote, subscriptionAccess } from '@nowry/core/domain/access'
+import PlanBadge from '../../Subscription/PlanBadge'
 
 // ─── Section IDs ─────────────────────────────────────────────────────────────
 const SECTION_IDS = [
@@ -197,7 +199,9 @@ export default function AccountSettings() {
   // ADR-073: no upgrade key while prices are hidden or upgrades are closed.
   const upgradesOpen = useUpgradesOpen()
   const blockReminders = useBlockReminderSetting()
-  const { user, subscriptionTier, updateUser } = useAuth()
+  const { user, updateUser } = useAuth()
+  const { paidTier } = subscriptionAccess(user?.subscription)
+  const isBetaPlan = showsBetaNote(user?.subscription)
   const { mode, setMode } = useColorScheme()
   const { themeColor: ctxThemeColor, setThemeColor } = useThemePreferences()
   const { knowledgeAccessEnabled, proactiveNudgingEnabled, updateAgentPrefs } = usePet()
@@ -995,22 +999,34 @@ export default function AccountSettings() {
             {/* ── Section: Plan & Billing ───────────────────────────────────────── */}
             <SectionBlock id='section-plan' title={t('accountSettings.plan.title')} loading={pageLoading}>
               <Stack spacing={2}>
-                <Typography level='body-md' sx={{ color: 'text.secondary' }}>
-                  {t('accountSettings.plan.current', {
-                    plan: t(`subscription.tier.${subscriptionTier ?? 'free'}`)
-                  })}
-                </Typography>
+                {/* ADR-079: a tester reads the note and is offered no billing control. */}
+                {isBetaPlan ? (
+                  <Stack direction='row' spacing={1} alignItems='center' flexWrap='wrap' useFlexGap>
+                    <PlanBadge subscription={user?.subscription} size='sm' />
+                    <Typography level='body-md' sx={{ color: 'text.secondary' }}>
+                      {t('beta.fullAccess')}
+                    </Typography>
+                  </Stack>
+                ) : (
+                  <Typography level='body-md' sx={{ color: 'text.secondary' }}>
+                    {t('accountSettings.plan.current', {
+                      plan: t(`subscription.tier.${paidTier}`)
+                    })}
+                  </Typography>
+                )}
                 <Stack direction='row' spacing={1} flexWrap='wrap'>
-                  <Button
-                    component={RouterLink}
-                    to='/subscription'
-                    variant='outlined'
-                    size='sm'
-                    aria-label={t('accountSettings.plan.manage')}
-                  >
-                    {t('accountSettings.plan.manage')}
-                  </Button>
-                  {upgradesOpen && (subscriptionTier ?? 'free') !== 'pro' && (
+                  {!isBetaPlan && (
+                    <Button
+                      component={RouterLink}
+                      to='/subscription'
+                      variant='outlined'
+                      size='sm'
+                      aria-label={t('accountSettings.plan.manage')}
+                    >
+                      {t('accountSettings.plan.manage')}
+                    </Button>
+                  )}
+                  {upgradesOpen && paidTier !== 'pro' && (
                     <Button component={RouterLink} to='/plans' variant='solid' size='sm' aria-label={t('accountSettings.plan.upgrade')}>
                       {t('accountSettings.plan.upgrade')}
                     </Button>

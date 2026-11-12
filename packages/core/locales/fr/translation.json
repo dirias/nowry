@@ -215,11 +215,7 @@
     },
     "profileMenu": {
       "open": "Ouvrir le menu du profil",
-      "viewProfile": "Voir le profil",
-      "tier": {
-        "free": "Gratuit",
-        "pro": "Pro"
-      }
+      "viewProfile": "Voir le profil"
     },
     "library": "Bibliothèque",
     "pricing": "Tarifs"
@@ -4131,6 +4127,7 @@
   },
   "beta": {
     "mark": "Bêta",
+    "fullAccess": "Bêta : toutes les fonctionnalités débloquées",
     "inviteCode": "Code d'invitation",
     "inviteCodePlaceholder": "Le code qu'on vous a donné",
     "inviteInvalid": "Ce code n'est pas l'un des nôtres. Vérifiez-le, ou inscrivez-vous sur la liste d'attente.",

@@ -24,6 +24,7 @@ import { useAuth } from '@nowry/core/context/AuthContext'
 import { useSubscriptionContext } from '../../context/SubscriptionContext'
 import { resolveColor } from '@nowry/core/utils/petColor'
 import { petPortrait } from '@nowry/core/domain/petPortrait'
+import { planLabelKey } from '@nowry/core/domain/access'
 import { MOOD_PRESENTATION, alphaHex, companionSpecies, speciesMotion as gaitFor } from '@nowry/core/domain/petMotion'
 import { CompanionArt, CompanionArtDisc } from './CompanionArt'
 import { useThemePreferences } from '../../theme/DynamicThemeProvider'
@@ -701,7 +702,7 @@ const StudyPet = () => {
   } = usePet()
 
   const { t, i18n } = useTranslation()
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, user: authUser } = useAuth()
   const { openUpgradeModal } = useSubscriptionContext()
   // ADR-073: no upgrade key while prices are hidden or upgrades are closed.
   const upgradesOpen = useUpgradesOpen()
@@ -1625,11 +1626,11 @@ const StudyPet = () => {
                           {messagesLimit === -1
                             ? t('agent.headerStatusUnlimited', {
                                 level,
-                                tier: tier.charAt(0).toUpperCase() + tier.slice(1)
+                                tier: t(planLabelKey(authUser?.subscription ?? { tier }))
                               })
                             : t('agent.headerStatus', {
                                 level,
-                                tier: tier.charAt(0).toUpperCase() + tier.slice(1),
+                                tier: t(planLabelKey(authUser?.subscription ?? { tier })),
                                 remaining: messagesRemaining
                               })}
                         </div>

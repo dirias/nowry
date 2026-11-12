@@ -210,7 +210,6 @@ const IDENTICAL_BY_DESIGN = {
     'plans.pro',
     'subscription.tier.plus',
     'subscription.tier.pro',
-    'header.profileMenu.tier.pro',
     'contact.networks.facebook',
     'contact.networks.instagram',
     'contact.networks.tiktok',

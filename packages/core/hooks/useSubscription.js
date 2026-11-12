@@ -1,9 +1,16 @@
 import { useAuth } from '../context/AuthContext'
+import { subscriptionAccess } from '../domain/access'
 
 export const useSubscription = () => {
   const { user } = useAuth()
+  // ADR-079: `tier` is the plan in effect (Pro for a tester); `paidTier` is what
+  // the account pays for, which is what a billing screen must read.
+  const { paidTier, access, isBeta } = subscriptionAccess(user?.subscription)
   return {
     tier: user?.subscription?.tier ?? 'free',
+    paidTier,
+    access,
+    isBeta,
     status: user?.subscription?.status ?? 'active',
     aiUsageCount: user?.subscription?.ai_usage_count ?? 0,
     aiUsageResetDate: user?.subscription?.ai_usage_reset_date,
