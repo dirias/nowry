@@ -9,7 +9,6 @@ import {
   Stack,
   Button,
   Avatar,
-  Chip,
   Grid,
   Input,
   Textarea,
@@ -22,6 +21,8 @@ import {
 import { Edit, Save, Cancel, CameraAlt, AccountCircle, Email, CalendarToday } from '@mui/icons-material'
 import { userService } from '@nowry/core/api/services'
 import { useAuth } from '@nowry/core/context/AuthContext'
+import { showsBetaNote } from '@nowry/core/domain/access'
+import PlanBadge from '../../Subscription/PlanBadge'
 import { getUsernameValidationError } from '@nowry/core/utils/usernameValidation'
 
 export default function UserProfile() {
@@ -171,14 +172,10 @@ export default function UserProfile() {
 
   const getTierColor = (tier) => {
     switch (tier) {
-      case 'free':
-        return 'neutral'
-      case 'student':
+      case 'plus':
         return 'primary'
       case 'pro':
         return 'success'
-      case 'enterprise':
-        return 'warning'
       default:
         return 'neutral'
     }
@@ -254,9 +251,17 @@ export default function UserProfile() {
               </Typography>
 
               {/* Subscription Badge */}
-              <Chip size='lg' variant='soft' color={getTierColor(userData.subscription.tier)} sx={{ mb: 3, textTransform: 'capitalize' }}>
-                {userData.subscription.tier} Plan
-              </Chip>
+              <PlanBadge
+                subscription={userData.subscription}
+                size='lg'
+                showFree
+                sx={{ mb: showsBetaNote(userData.subscription) ? 1 : 3 }}
+              />
+              {showsBetaNote(userData.subscription) && (
+                <Typography level='body-sm' sx={{ color: 'text.secondary', mb: 3 }}>
+                  {t('beta.fullAccess')}
+                </Typography>
+              )}
 
               {/* Usage Stats from Subscription (if available) */}
               {userData.subscription.limits && (

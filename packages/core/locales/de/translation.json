@@ -215,11 +215,7 @@
     },
     "profileMenu": {
       "open": "Profilmenü öffnen",
-      "viewProfile": "Profil anzeigen",
-      "tier": {
-        "free": "Kostenlos",
-        "pro": "Pro"
-      }
+      "viewProfile": "Profil anzeigen"
     },
     "library": "Bibliothek",
     "pricing": "Preise"
@@ -4113,6 +4109,7 @@
   },
   "beta": {
     "mark": "Beta",
+    "fullAccess": "Beta: alle Funktionen freigeschaltet",
     "inviteCode": "Einladungscode",
     "inviteCodePlaceholder": "Der Code, den du bekommen hast",
     "inviteInvalid": "Dieser Code ist keiner von uns. Prüfe ihn oder trag dich unten in die Warteliste ein.",

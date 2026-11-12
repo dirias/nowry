@@ -55,6 +55,8 @@ import { usePet } from '@nowry/core/context/AgentContext'
 import { Z_NAV } from '@nowry/core/constants/zIndex'
 import { useColorScheme } from '@mui/joy/styles'
 import { BrandLockup } from '../Common/Brand/BrandMark'
+import PlanBadge from '../Subscription/PlanBadge'
+import { planBadge } from '@nowry/core/domain/access'
 import { useTranslation } from 'react-i18next'
 import BugReportModal from '../Bugs/BugReportModal'
 import { bugsService } from '@nowry/core/api/services/bugs.service'
@@ -457,11 +459,9 @@ const Header = () => {
                         <Typography level='body-xs' noWrap sx={{ color: 'text.tertiary', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                           {user?.email}
                         </Typography>
-                        {user?.subscription?.tier && user.subscription.tier !== 'free' && (
+                        {planBadge(user?.subscription) && (
                           <Box sx={{ mt: 0.25 }}>
-                            <Chip size='sm' variant='soft' color='primary'>
-                              {t(`header.profileMenu.tier.${user.subscription.tier}`)}
-                            </Chip>
+                            <PlanBadge subscription={user.subscription} size='sm' />
                           </Box>
                         )}
                       </Stack>

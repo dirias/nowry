@@ -18,7 +18,8 @@ const PRICE_IDS = {
 
 export default function PlansPage() {
   const { t } = useTranslation()
-  const { tier: currentTier } = useSubscription()
+  // ADR-079: the card marked current is the plan paid for, not the one a tester is answered as.
+  const { paidTier: currentTier, isBeta } = useSubscription()
   // ADR-038, ADR-073: while upgrades are closed or prices hidden, no card offers a checkout.
   const upgradesOpen = useUpgradesOpen()
   const [billingInterval, setBillingInterval] = useState('monthly')
@@ -126,6 +127,12 @@ export default function PlansPage() {
           }
         >
           {error}
+        </Alert>
+      )}
+
+      {isBeta && currentTier === 'free' && (
+        <Alert color='neutral' variant='soft' sx={{ mb: 3 }}>
+          {t('beta.fullAccess')}
         </Alert>
       )}
 

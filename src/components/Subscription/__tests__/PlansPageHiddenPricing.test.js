@@ -24,7 +24,7 @@ jest.mock('@nowry/core/domain/plans', () => {
 let mockBeta = { active: true, invite_required: true, upgrades_open: false }
 jest.mock('@nowry/core/context/BetaContext', () => ({ useBeta: () => ({ config: mockBeta, loading: false }) }))
 
-jest.mock('@nowry/core/hooks/useSubscription', () => ({ useSubscription: () => ({ tier: 'free' }) }))
+jest.mock('@nowry/core/hooks/useSubscription', () => ({ useSubscription: () => ({ tier: 'free', paidTier: 'free', isBeta: false }) }))
 
 const mockCheckout = jest.fn()
 jest.mock('@nowry/core/api/services', () => ({

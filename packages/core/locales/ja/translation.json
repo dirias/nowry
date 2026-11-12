@@ -200,11 +200,7 @@
     },
     "profileMenu": {
       "open": "プロフィールメニューを開く",
-      "viewProfile": "プロフィールを見る",
-      "tier": {
-        "free": "無料",
-        "pro": "Pro"
-      }
+      "viewProfile": "プロフィールを見る"
     },
     "library": "ライブラリ",
     "pricing": "料金"
@@ -3962,6 +3958,7 @@
   },
   "beta": {
     "mark": "ベータ",
+    "fullAccess": "ベータ：すべての機能が使えます",
     "inviteCode": "招待コード",
     "inviteCodePlaceholder": "受け取ったコード",
     "inviteInvalid": "このコードは有効ではありません。確認するか、下の順番待ちリストに登録してください。",
