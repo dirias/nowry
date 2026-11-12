@@ -29,7 +29,7 @@ export const LEGAL_PATH_ALIASES = Object.freeze({
 })
 
 export const LEGAL_TERMS_UPDATED = '2026-10-03'
-export const LEGAL_PRIVACY_UPDATED = '2026-10-03'
+export const LEGAL_PRIVACY_UPDATED = '2026-11-13'
 
 /** The address copyright notices reach. The registered agent's postal address joins it once registered. */
 export const COPYRIGHT_AGENT_EMAIL = 'copyright@nowry.app'
