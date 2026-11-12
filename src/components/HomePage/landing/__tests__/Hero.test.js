@@ -13,7 +13,8 @@ jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key) => key, i1
 jest.mock('@nowry/core/api/services/beta.service', () => ({ betaService: { joinWaitlist: jest.fn() } }))
 
 let mockBeta = { active: true, invite_required: true, upgrades_open: false }
-jest.mock('@nowry/core/context/BetaContext', () => ({ useBeta: () => ({ config: mockBeta, loading: false }) }))
+let mockAnswer = { loading: false, failed: false }
+jest.mock('@nowry/core/context/BetaContext', () => ({ useBeta: () => ({ config: mockBeta, ...mockAnswer }) }))
 
 import Hero from '../Hero'
 
@@ -73,5 +74,34 @@ describe('with invites not required', () => {
   it('shows the Beta mark only while the beta is active', () => {
     renderHero()
     expect(screen.queryByText('beta.mark')).not.toBeInTheDocument()
+  })
+})
+
+// WAIT-011, FR-015: the hero offers no account until the server has said one can be made.
+describe('before the gate has answered', () => {
+  const unanswered = { active: false, invite_required: false, upgrades_open: true }
+  afterEach(() => {
+    mockAnswer = { loading: false, failed: false }
+  })
+
+  it('shows a placeholder while loading: no account key, no waitlist form, no fine print', () => {
+    mockBeta = unanswered
+    mockAnswer = { loading: true, failed: false }
+    renderHero()
+    expect(screen.getByTestId('hero-gate-pending')).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'landing.hero.cta' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('form')).not.toBeInTheDocument()
+    expect(screen.queryByText('landing.hero.fineprint')).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'landing.hero.proof' })).toHaveAttribute('href', '/browse')
+  })
+
+  it('is the gated hero when the call failed', () => {
+    mockBeta = unanswered
+    mockAnswer = { loading: false, failed: true }
+    renderHero()
+    expect(screen.getByRole('form', { name: 'beta.waitlist.title' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'beta.haveCode' })).toHaveAttribute('href', '/register')
+    expect(screen.queryByRole('link', { name: 'landing.hero.cta' })).not.toBeInTheDocument()
+    expect(screen.queryByTestId('hero-gate-pending')).not.toBeInTheDocument()
   })
 })
