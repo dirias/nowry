@@ -4733,7 +4733,7 @@
     "waitlist": {
       "title": "Apúntate a la lista de espera",
       "cta": "Apuntarme",
-      "sent": "Ya estás en la lista. Te escribiremos cuando se abra el acceso anticipado.",
+      "sent": "Listo. Si es la primera vez, te enviamos un correo de confirmación. Si ya estabas en la lista, sigues en ella; no tienes que hacer nada más.",
       "failed": "No se pudo enviar. Inténtalo de nuevo en un momento.",
       "purpose": "Un correo para confirmar y otro cuando se abra el acceso anticipado. Puedes salir de la lista desde cualquiera de los dos.",
       "leave": {

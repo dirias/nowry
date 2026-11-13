@@ -29,6 +29,20 @@ it('sends the email, the language and the page, then acknowledges and clears the
   expect(await screen.findByText('beta.waitlist.sent')).toBeInTheDocument()
   expect(mockJoin).toHaveBeenCalledWith({ email: 'ana@example.com', locale: 'es', source: '/register' })
   expect(screen.getByRole('textbox', { name: 'auth.email' })).toHaveValue('')
+  // FR-034: the one answer for every address, and the purpose line stays under the field.
+  expect(screen.getByText('beta.waitlist.purpose')).toBeInTheDocument()
+})
+
+it('says the same thing whatever the server answers about the address (FR-034)', async () => {
+  for (const message of ['first time', 'already waiting', 'has an account']) {
+    mockJoin.mockResolvedValueOnce({ message })
+    const { unmount } = render(<WaitlistForm source='/' />)
+    await userEvent.type(screen.getByRole('textbox', { name: 'auth.email' }), 'ana@example.com')
+    await userEvent.click(screen.getByRole('button', { name: 'beta.waitlist.cta' }))
+    expect(await screen.findByText('beta.waitlist.sent')).toBeInTheDocument()
+    expect(screen.queryByText(message)).not.toBeInTheDocument()
+    unmount()
+  }
 })
 
 it('keeps the email when the request fails, so it can be sent again', async () => {
