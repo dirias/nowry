@@ -51,7 +51,6 @@ import {
 import AutoAwesomeRounded from '@mui/icons-material/AutoAwesomeRounded'
 import MenuRounded from '@mui/icons-material/MenuRounded'
 import DeleteForeverRoundedIcon from '@mui/icons-material/DeleteForeverRounded'
-import WarningRoundedIcon from '@mui/icons-material/WarningRounded'
 import FileDownloadRoundedIcon from '@mui/icons-material/FileDownloadRounded'
 import BookRoundedIcon from '@mui/icons-material/BookRounded'
 import StyleRoundedIcon from '@mui/icons-material/StyleRounded'
@@ -65,6 +64,7 @@ import { keySegment, segment, segmentedGroup } from '../../Common/Form/formStyle
 const THEME_MODES = ['system', 'light', 'dark']
 import { useThemePreferences } from '../../../theme/DynamicThemeProvider'
 import DeleteConfirmationModal from '../../Common/DeleteConfirmationModal'
+import DeleteAccountDialog from './DeleteAccountDialog'
 import { useAuth } from '@nowry/core/context/AuthContext'
 import { usePet } from '@nowry/core/context/AgentContext'
 import { auth } from '../../../config/firebase.config'
@@ -265,9 +265,6 @@ export default function AccountSettings() {
 
   // ── Danger ──────────────────────────────────────────────────────────────────
   const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const [deleteLoading, setDeleteLoading] = useState(false)
-  const [deleteError, setDeleteError] = useState(null)
-  const [deleteConfirmEmail, setDeleteConfirmEmail] = useState('')
   const [exportLoading, setExportLoading] = useState(false)
   const [exportError, setExportError] = React.useState(null)
 
@@ -495,23 +492,7 @@ export default function AccountSettings() {
     }
   }
 
-  // ── Handlers — Danger ────────────────────────────────────────────────────────
-  const handleDeleteAccount = async () => {
-    if (deleteConfirmEmail !== user?.email) return
-    setDeleteError(null)
-    try {
-      setDeleteLoading(true)
-      await userService.deleteAccount()
-      localStorage.clear()
-      sessionStorage.clear()
-      setDeleteConfirmEmail('')
-      window.location.href = '/'
-    } catch (err) {
-      setDeleteError(err.response?.data?.detail || t('settings.errors.networkError'))
-      setDeleteLoading(false)
-      setShowDeleteModal(false)
-    }
-  }
+  // ── Danger: the deletion dialog (DeleteAccountDialog, ADR-089) ───────────
 
   const handleExportData = async () => {
     setExportLoading(true)
@@ -1232,13 +1213,6 @@ export default function AccountSettings() {
                   >
                     {t('settings.dangerZone.deleteButton')}
                   </Button>
-                  {/* The API's refusal (public content still published) used to be
-                      stored and never shown: the modal closed and nothing said why (QA-020). */}
-                  {deleteError && (
-                    <Typography level='body-sm' role='alert' sx={{ color: 'danger.plainColor', mt: 2 }}>
-                      {deleteError}
-                    </Typography>
-                  )}
                 </Box>
               </Stack>
             </Box>
@@ -1385,137 +1359,8 @@ export default function AccountSettings() {
         </ModalDialog>
       </Modal>
 
-      {/* ── Delete Account Confirmation Modal ─────────────────────────────────── */}
-      <Modal
-        open={showDeleteModal}
-        onClose={() => {
-          setShowDeleteModal(false)
-          setDeleteConfirmEmail('')
-        }}
-      >
-        <ModalDialog
-          role='alertdialog'
-          sx={{
-            width: { xs: '95%', sm: '85%', md: '520px' },
-            maxWidth: '520px',
-            height: { xs: '95vh', md: 'auto' },
-            maxHeight: { xs: '95vh', md: '90vh' },
-            overflowY: 'auto',
-            p: 0,
-            borderRadius: { xs: 'lg', md: 'xl' },
-            border: '1px solid',
-            borderColor: 'divider'
-          }}
-        >
-          {/* Header */}
-          <Box sx={{ px: 3, py: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
-            <Stack direction='row' spacing={1.5} alignItems='center'>
-              <Box
-                sx={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: '50%',
-                  bgcolor: 'danger.softBg',
-                  color: 'danger.solidBg',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0
-                }}
-              >
-                <WarningRoundedIcon sx={{ fontSize: 22 }} />
-              </Box>
-              <Typography level='title-lg' sx={{ m: 0, fontWeight: 700, lineHeight: 1 }}>
-                {t('settings.deleteAccount.title')}
-              </Typography>
-            </Stack>
-          </Box>
-
-          {/* Content */}
-          <Box sx={{ px: 3, py: 3 }}>
-            <Stack spacing={3}>
-              <Typography level='body-md' sx={{ color: 'text.primary', lineHeight: 1.6 }}>
-                {t('settings.deleteAccount.message')}
-              </Typography>
-
-              <FormControl required>
-                <FormLabel sx={{ fontWeight: 400 }}>{t('settings.deleteAccount.emailLabel')}</FormLabel>
-                <Input
-                  type='email'
-                  size='lg'
-                  autoFocus
-                  placeholder={t('settings.deleteAccount.emailPlaceholder')}
-                  value={deleteConfirmEmail}
-                  onChange={(e) => setDeleteConfirmEmail(e.target.value)}
-                  aria-label={t('settings.deleteAccount.emailLabel')}
-                />
-                {deleteConfirmEmail && deleteConfirmEmail !== user?.email && (
-                  <FormHelperText sx={{ color: 'danger.solidBg' }}>{t('settings.deleteAccount.emailMismatch')}</FormHelperText>
-                )}
-                {!deleteConfirmEmail && (
-                  <FormHelperText sx={{ color: 'text.tertiary' }}>{t('settings.deleteAccount.emailRequired')}</FormHelperText>
-                )}
-              </FormControl>
-
-              <Box
-                sx={{
-                  p: 2,
-                  borderRadius: 'md',
-                  bgcolor: 'background.level1',
-                  border: '1px solid',
-                  borderColor: 'divider'
-                }}
-              >
-                <Typography level='body-xs' sx={{ color: 'text.tertiary', textAlign: 'center' }}>
-                  {t('settings.deleteAccount.recoveryNotice')}
-                </Typography>
-              </Box>
-            </Stack>
-          </Box>
-
-          {/* Footer */}
-          <Box
-            sx={{
-              px: 3,
-              py: 2,
-              borderTop: '1px solid',
-              borderColor: 'divider',
-              bgcolor: 'background.surface',
-              display: 'flex',
-              flexDirection: { xs: 'column-reverse', sm: 'row' },
-              justifyContent: 'flex-end',
-              gap: 2
-            }}
-          >
-            <Button
-              variant='outlined'
-              color='neutral'
-              size='lg'
-              onClick={() => {
-                setShowDeleteModal(false)
-                setDeleteConfirmEmail('')
-              }}
-              disabled={deleteLoading}
-            >
-              {t('common.cancel')}
-            </Button>
-            <Button
-              variant='solid'
-              color='danger'
-              size='lg'
-              loading={deleteLoading}
-              disabled={deleteConfirmEmail !== user?.email || !deleteConfirmEmail}
-              onClick={handleDeleteAccount}
-              startDecorator={!deleteLoading && <DeleteForeverRoundedIcon />}
-              aria-label={t('settings.deleteAccount.title')}
-            >
-              {deleteConfirmEmail === user?.email && deleteConfirmEmail
-                ? t('settings.deleteAccount.confirmEnabled')
-                : t('settings.deleteAccount.confirmDisabled')}
-            </Button>
-          </Box>
-        </ModalDialog>
-      </Modal>
+      {/* ── Delete Account: email, then a fresh sign-in when needed (ADR-089) ── */}
+      <DeleteAccountDialog open={showDeleteModal} onClose={() => setShowDeleteModal(false)} email={user?.email} />
     </Container>
   )
 }

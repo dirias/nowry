@@ -46,6 +46,7 @@ import useProgressivePreferences, { PREFERENCE_FIELD } from '@nowry/core/hooks/u
 import { MAX_TOPICS, STUDY_GOALS, TOPICS } from '@nowry/core/constants/learningTaxonomy'
 import { queryClient } from '@nowry/core/api/queryClient'
 import { userService } from '@nowry/core/api/services'
+import { useAccountDeletion } from '@nowry/core/hooks/useAccountDeletion'
 import { requestNotificationPermission } from '../platform/alerts'
 import { useBlockReminderSetting } from '@nowry/core/hooks/useBlockReminders'
 import { useAppearance, MODES } from '../theme/AppearanceProvider'
@@ -93,10 +94,19 @@ export function Settings() {
   const appearance = useAppearance()
   const prefs = useProgressivePreferences()
 
-  const [deleting, setDeleting] = useState(false)
   const [confirmEmail, setConfirmEmail] = useState('')
   const [emailError, setEmailError] = useState(null)
-  const [deleteError, setDeleteError] = useState(null)
+  const [reauthPassword, setReauthPassword] = useState('')
+  // ADR-089: an old sign-in is asked for again before the delete call.
+  const deletion = useAccountDeletion({
+    email: user?.email,
+    language: i18n.language,
+    onDeleted: async () => {
+      await logout?.()
+      router.replace('/')
+    }
+  })
+  const deleteError = deletion.error
   const [permission, setPermission] = useState(null)
   const blockReminders = useBlockReminderSetting()
 
@@ -130,7 +140,6 @@ export function Settings() {
    * decision — one is a form and one is a reflex.
    */
   const confirmDelete = () => {
-    setDeleteError(null)
     if (!confirmEmail.trim()) {
       setEmailError('settings.deleteAccount.emailRequired')
       return
@@ -146,18 +155,7 @@ export function Settings() {
       {
         text: t('settings.deleteAccount.confirmEnabled'),
         style: 'destructive',
-        onPress: async () => {
-          setDeleting(true)
-          try {
-            await userService.deleteAccount()
-            await logout?.()
-            router.replace('/')
-          } catch {
-            setDeleteError('settings.errors.networkError')
-          } finally {
-            setDeleting(false)
-          }
-        }
+        onPress: () => deletion.confirm(confirmEmail)
       }
     ])
   }
@@ -283,15 +281,42 @@ export function Settings() {
           />
         </FormField>
 
+        {deletion.step === 'reauth' ? (
+          <Stack spacing={2}>
+            <Typography level='title-sm'>{t('settings.deleteAccount.reauth.title')}</Typography>
+            <Typography level='body-sm' color='text.secondary'>
+              {deletion.method === 'password' ? t('settings.deleteAccount.reauth.body') : t('settings.deleteAccount.reauth.googleBody')}
+            </Typography>
+            {deletion.method === 'password' ? (
+              <FormField labelKey='settings.deleteAccount.reauth.passwordLabel'>
+                <Input
+                  value={reauthPassword}
+                  onChangeText={setReauthPassword}
+                  secureTextEntry
+                  autoCapitalize='none'
+                  textContentType='password'
+                  accessibilityLabel={t('settings.deleteAccount.reauth.passwordLabel')}
+                />
+              </FormField>
+            ) : null}
+          </Stack>
+        ) : null}
+
         {deleteError ? (
           <Typography level='body-sm' color='danger.plainColor' accessibilityLiveRegion='polite'>
-            {t(deleteError)}
+            {typeof deleteError === 'string' ? t(deleteError) : deleteError.detail}
           </Typography>
         ) : null}
 
-        <Button variant='danger' onPress={confirmDelete} loading={deleting}>
-          {t('settings.dangerZone.deleteButton')}
-        </Button>
+        {deletion.step === 'reauth' ? (
+          <Button variant='danger' onPress={() => deletion.reauthenticateAndDelete(reauthPassword)} loading={deletion.busy}>
+            {deletion.method === 'google' ? t('settings.deleteAccount.reauth.googleButton') : t('settings.deleteAccount.reauth.confirm')}
+          </Button>
+        ) : (
+          <Button variant='danger' onPress={confirmDelete} loading={deletion.busy}>
+            {t('settings.dangerZone.deleteButton')}
+          </Button>
+        )}
       </Stack>
     </Screen>
   )

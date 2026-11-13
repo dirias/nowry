@@ -7,7 +7,9 @@ import {
   updateProfile,
   applyActionCode,
   verifyPasswordResetCode,
-  confirmPasswordReset
+  confirmPasswordReset,
+  EmailAuthProvider,
+  reauthenticateWithCredential
 } from 'firebase/auth'
 import { auth as authPort, session, storage } from '../../platform'
 import { apiClient } from '../client'
@@ -487,6 +489,41 @@ export const authService = {
    * from an email link asks before Firebase has finished reading its session.
    * @returns {Promise<Object|null>}
    */
+  /**
+   * When the current sign-in happened, in seconds since the epoch (the token's
+   * `auth_time`), or null when nobody is signed in (ADR-089).
+   */
+  async signInTime() {
+    const user = authPort.currentUser()
+    if (!user) return null
+    const result = await user.getIdTokenResult()
+    const value = Number(result?.claims?.auth_time)
+    return Number.isFinite(value) ? value : null
+  },
+
+  /** The ways the current user can sign in, as Firebase provider ids ('password', 'google.com'). */
+  signInProviders() {
+    const user = authPort.currentUser()
+    return (user?.providerData ?? []).map((entry) => entry.providerId)
+  },
+
+  /**
+   * Prove the sign-in again before a deletion (ADR-089, FR-038): the password
+   * for a password account, Google otherwise. The token is refreshed after, so
+   * the next API call carries the new `auth_time`.
+   * @param {{ method: 'password' | 'google', password?: string }} proof
+   */
+  async reauthenticate({ method, password }) {
+    const user = authPort.currentUser()
+    if (!user) throw Object.assign(new Error('Nobody is signed in'), { code: 'auth/no-current-user' })
+    if (method === 'password') {
+      await reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, password ?? ''))
+    } else {
+      await authPort.reauthenticateWithGoogle()
+    }
+    await authPort.getIdToken(true)
+  },
+
   async whenReady() {
     const auth = firebaseAuth()
     if (typeof auth.authStateReady === 'function') await auth.authStateReady()

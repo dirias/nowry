@@ -57,5 +57,8 @@ export const auth = initializeAuth(app, {
  */
 export const signInWithGoogle = () => googleSignIn(auth)
 
+/** The signed-in user proves it again with Google before a deletion (ADR-089). */
+export const reauthenticateWithGoogle = () => googleSignIn(auth, { reauthenticate: true })
+
 export { GoogleAuthProvider }
 export default app

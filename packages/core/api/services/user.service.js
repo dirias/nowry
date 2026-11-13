@@ -212,12 +212,19 @@ export const userService = {
   },
 
   /**
-   * Delete user account
+   * Delete the account (ADR-081). Needs a sign-in less than 5 minutes old (ADR-089);
+   * `locale` is the language of the notice email sent afterwards.
+   * @param {string} [locale]
    * @returns {Promise<Object>}
    */
-  async deleteAccount() {
-    const { data } = await apiClient.delete('/users/account')
+  async deleteAccount(locale) {
+    const { data } = await apiClient.delete('/users/account', { params: locale ? { locale } : undefined })
     return data
+  },
+
+  /** The re-registration notice was read; it is not shown again (ADR-089, FR-041). */
+  async dismissPreviousAccount() {
+    await apiClient.post('/users/me/notices/previous-account/dismiss')
   },
 
   /**

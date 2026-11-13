@@ -57,7 +57,7 @@ it('names the screens and the key as the app does', async () => {
   await show('en')
   const steps = screen.getAllByRole('listitem').map((item) => item.textContent)
   expect(steps).toContain(
-    `In ${en.settings.dangerZone.title}, type your email address to confirm, then press ${en.settings.dangerZone.deleteButton}.`
+    `In ${en.settings.dangerZone.title}, type your email address to confirm, then press ${en.settings.dangerZone.deleteButton}. If you signed in more than 5 minutes ago, sign in again when asked.`
   )
   expect(steps.some((step) => step.includes(en.settings.title))).toBe(true)
 })

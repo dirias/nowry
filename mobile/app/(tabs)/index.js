@@ -58,6 +58,7 @@ import { useToday } from '@nowry/core/hooks/useToday'
 import { useBlockLog } from '@nowry/core/hooks/useBlockLog'
 import { DAILY_REVIEW } from '../../src/screens/StudySession'
 import { ItemSheet } from '../../src/screens/ItemSheet'
+import { PreviousAccountNotice } from '../../src/screens/PreviousAccountNotice'
 import { MIN_TOUCH_TARGET } from '../../src/ui/buttonSpec'
 import { useAnnualPlan } from '@nowry/core/hooks/useAnnualPlan'
 import { tasksService } from '@nowry/core/api/services'
@@ -176,6 +177,8 @@ export default function Home() {
   return (
     <Screen>
       <Stack spacing={3}>
+        {/* A deleted account with this address, within its 30 days (ADR-089, FR-041). */}
+        <PreviousAccountNotice />
         <Greeting
           name={user?.username ?? user?.email ?? ''}
           motivation={motivation}

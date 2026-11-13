@@ -52,7 +52,7 @@ import * as Application from 'expo-application'
 import { Platform } from 'react-native'
 import * as AuthSession from 'expo-auth-session'
 import * as WebBrowser from 'expo-web-browser'
-import { GoogleAuthProvider, signInWithCredential } from 'firebase/auth'
+import { GoogleAuthProvider, reauthenticateWithCredential, signInWithCredential } from 'firebase/auth'
 
 // Required once, so the browser result is delivered back to the app.
 WebBrowser.maybeCompleteAuthSession()
@@ -129,7 +129,11 @@ let pending = null
  * @param {object} auth - the client's Firebase Auth instance
  * @returns {Promise<import('firebase/auth').UserCredential | null>} null when the user cancelled
  */
-export const signInWithGoogle = async (auth) => {
+/**
+ * `reauthenticate: true` proves the signed-in user again with the same Google
+ * sheet instead of signing in (ADR-089: a deletion needs a recent sign-in).
+ */
+export const signInWithGoogle = async (auth, { reauthenticate = false } = {}) => {
   const clientId = googleClientId()
 
   if (!clientId) {
@@ -162,7 +166,7 @@ export const signInWithGoogle = async (auth) => {
    * would then wait on a promise nobody holds.
    */
   const promise = new Promise((resolve, reject) => {
-    pending = { auth, clientId, redirectUri, request, resolve, reject }
+    pending = { auth, clientId, redirectUri, request, resolve, reject, reauthenticate }
   })
 
   const authUrl = await request.makeAuthUrlAsync(DISCOVERY)
@@ -223,7 +227,11 @@ export const completeGoogleSignIn = async (params = {}) => {
     }
 
     const credential = GoogleAuthProvider.credential(tokens.idToken)
-    inFlight.resolve(await signInWithCredential(inFlight.auth, credential))
+    inFlight.resolve(
+      inFlight.reauthenticate
+        ? await reauthenticateWithCredential(inFlight.auth.currentUser, credential)
+        : await signInWithCredential(inFlight.auth, credential)
+    )
   } catch (error) {
     inFlight.reject(error)
   }

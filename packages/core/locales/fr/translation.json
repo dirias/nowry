@@ -1129,14 +1129,24 @@
     },
     "deleteAccount": {
       "title": "Supprimer votre compte",
-      "message": "Cela supprime votre compte et tout son contenu : livres, paquets, cartes, historique d'étude, plans, objectifs et notes. Vous êtes déconnecté immédiatement, et tout est effacé définitivement au bout de 30 jours.",
+      "message": "Cela supprime votre compte et tout son contenu : livres, paquets, cartes, historique d'étude, plans, objectifs et notes. Vous êtes déconnecté immédiatement, et tout est effacé définitivement au bout de 30 jours. Si vous vous êtes connecté il y a plus de 5 minutes, nous vous demanderons d'abord de vous reconnecter. Ensuite, un e-mail à votre adresse confirme la suppression du compte.",
       "emailLabel": "Confirmez votre adresse e-mail",
       "emailPlaceholder": "Saisissez votre e-mail pour confirmer",
       "emailRequired": "L'adresse e-mail est requise pour confirmer la suppression",
       "emailMismatch": "L'adresse e-mail ne correspond pas. Veuillez réessayer.",
       "confirmDisabled": "Saisissez votre e-mail pour confirmer",
       "confirmEnabled": "Supprimer définitivement",
-      "recoveryNotice": "Effacé au bout de 30 jours. D'ici là, en cas d'erreur, écrivez à support@nowry.app."
+      "recoveryNotice": "Effacé au bout de 30 jours. D'ici là, en cas d'erreur, écrivez à support@nowry.app.",
+      "reauth": {
+        "title": "Reconnectez-vous pour supprimer",
+        "body": "Vous vous êtes connecté il y a plus de 5 minutes. Pour vérifier que c'est bien vous, reconnectez-vous.",
+        "passwordLabel": "Votre mot de passe",
+        "googleBody": "Continuez avec Google pour confirmer que c'est bien vous.",
+        "googleButton": "Continuer avec Google",
+        "confirm": "Confirmer et supprimer",
+        "wrongPassword": "Ce mot de passe n'est pas le bon. Réessayez.",
+        "failed": "Nous n'avons pas pu confirmer que c'est vous. Réessayez."
+      }
     },
     "exportData": {
       "error": "Failed to export data. Please try again."
@@ -1926,13 +1936,13 @@
       "web": [
         "Connectez-vous sur nowry.app.",
         "Ouvrez {{settings}} depuis le menu sous votre photo.",
-        "Dans {{danger}}, saisissez votre adresse e-mail pour confirmer, puis appuyez sur {{button}}."
+        "Dans {{danger}}, saisissez votre adresse e-mail pour confirmer, puis appuyez sur {{button}}. Si vous vous êtes connecté il y a plus de 5 minutes, reconnectez-vous quand on vous le demande."
       ],
       "androidTitle": "Dans l'application Android",
       "android": [
         "Ouvrez Nowry et touchez votre photo en haut de l'écran.",
         "Touchez {{settings}}.",
-        "Dans {{danger}}, saisissez votre adresse e-mail pour confirmer, puis touchez {{button}}."
+        "Dans {{danger}}, saisissez votre adresse e-mail pour confirmer, puis touchez {{button}}. Si vous vous êtes connecté il y a plus de 5 minutes, reconnectez-vous quand on vous le demande."
       ],
       "emailTitle": "Si vous ne pouvez pas vous connecter",
       "email": "Écrivez à support@nowry.app depuis l'adresse e-mail de votre compte, avec l'objet « Supprimer mon compte ». Nous répondons pour confirmer, et supprimons le compte dans les 7 jours suivant votre réponse.",
@@ -1940,6 +1950,7 @@
       "nowTitle": "Supprimé immédiatement",
       "now": [
         "Vous êtes déconnecté partout, et le compte ne peut plus être ouvert.",
+        "Un e-mail à l'adresse de votre compte confirme la suppression. Si ce n'était pas vous, écrivez à support@nowry.app dans les 30 jours.",
         "Votre adresse e-mail et votre nom d'utilisateur sont libérés : vous pouvez vous réinscrire avec la même adresse, et le nouveau compte démarre vide.",
         "Les images que vous avez téléversées.",
         "Les liens qui envoient des notifications à votre téléphone.",
@@ -4398,5 +4409,12 @@
       "save": "Enregistrer"
     },
     "studyTitle": "Révision du matin"
+  },
+  "previousAccount": {
+    "title": "Cette adresse avait un compte Nowry",
+    "body": "Cette adresse avait un compte Nowry supprimé le {{deletedOn}}. Il sera effacé définitivement le {{erasedOn}}.",
+    "mistake": "Si vous l'avez supprimé par erreur, écrivez à support@nowry.app pour le récupérer au lieu de repartir de zéro.",
+    "dismiss": "Compris",
+    "dismissAria": "Fermer cet avis"
   }
 }

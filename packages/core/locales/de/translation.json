@@ -1118,14 +1118,24 @@
     },
     "deleteAccount": {
       "title": "Konto löschen",
-      "message": "Damit löschst du dein Konto und alles darin: Bücher, Decks, Karten, Lernverlauf, Pläne, Ziele und Notizen. Du wirst sofort abgemeldet, und nach 30 Tagen ist alles endgültig gelöscht.",
+      "message": "Damit löschst du dein Konto und alles darin: Bücher, Decks, Karten, Lernverlauf, Pläne, Ziele und Notizen. Du wirst sofort abgemeldet, und nach 30 Tagen ist alles endgültig gelöscht. Wenn deine Anmeldung länger als 5 Minuten her ist, musst du dich zuerst erneut anmelden. Danach schicken wir eine E-Mail an deine Adresse, dass das Konto gelöscht wurde.",
       "emailLabel": "Bestätige deine E-Mail-Adresse",
       "emailPlaceholder": "Gib deine E-Mail zur Bestätigung ein",
       "emailRequired": "Zur Bestätigung der Löschung wird die E-Mail-Adresse benötigt",
       "emailMismatch": "Die E-Mail-Adresse stimmt nicht überein. Bitte versuche es erneut.",
       "confirmDisabled": "E-Mail zur Bestätigung eingeben",
       "confirmEnabled": "Endgültig löschen",
-      "recoveryNotice": "Nach 30 Tagen gelöscht. Bis dahin: Wenn es ein Versehen war, schreib an support@nowry.app."
+      "recoveryNotice": "Nach 30 Tagen gelöscht. Bis dahin: Wenn es ein Versehen war, schreib an support@nowry.app.",
+      "reauth": {
+        "title": "Zum Löschen erneut anmelden",
+        "body": "Deine Anmeldung ist länger als 5 Minuten her. Melde dich erneut an, damit wir sicher sind, dass du es bist.",
+        "passwordLabel": "Dein Passwort",
+        "googleBody": "Fahre mit Google fort, um zu bestätigen, dass du es bist.",
+        "googleButton": "Mit Google fortfahren",
+        "confirm": "Bestätigen und löschen",
+        "wrongPassword": "Das Passwort stimmt nicht. Versuch es noch einmal.",
+        "failed": "Wir konnten nicht bestätigen, dass du es bist. Versuch es noch einmal."
+      }
     },
     "exportData": {
       "error": "Failed to export data. Please try again."
@@ -1915,13 +1925,13 @@
       "web": [
         "Melde dich auf nowry.app an.",
         "Öffne {{settings}} über das Menü unter deinem Bild.",
-        "Gib unter {{danger}} zur Bestätigung deine E-Mail-Adresse ein und drücke {{button}}."
+        "Gib unter {{danger}} zur Bestätigung deine E-Mail-Adresse ein und drücke {{button}}. Wenn deine Anmeldung länger als 5 Minuten her ist, melde dich erneut an, wenn du dazu aufgefordert wirst."
       ],
       "androidTitle": "In der Android-App",
       "android": [
         "Öffne Nowry und tippe oben auf dein Bild.",
         "Tippe auf {{settings}}.",
-        "Gib unter {{danger}} zur Bestätigung deine E-Mail-Adresse ein und tippe auf {{button}}."
+        "Gib unter {{danger}} zur Bestätigung deine E-Mail-Adresse ein und tippe auf {{button}}. Wenn deine Anmeldung länger als 5 Minuten her ist, melde dich erneut an, wenn du dazu aufgefordert wirst."
       ],
       "emailTitle": "Wenn du dich nicht anmelden kannst",
       "email": "Schreib von der E-Mail-Adresse deines Kontos an support@nowry.app, mit dem Betreff „Mein Konto löschen“. Wir antworten zur Bestätigung und löschen das Konto innerhalb von 7 Tagen nach deiner Antwort.",
@@ -1929,6 +1939,7 @@
       "nowTitle": "Sofort entfernt",
       "now": [
         "Du wirst überall abgemeldet, und das Konto lässt sich nicht mehr öffnen.",
+        "Eine E-Mail an die Adresse deines Kontos teilt mit, dass das Konto gelöscht wurde. Wenn du das nicht warst, schreib innerhalb von 30 Tagen an support@nowry.app.",
         "Deine E-Mail-Adresse und dein Benutzername werden freigegeben: Du kannst dich mit derselben Adresse neu registrieren, und das neue Konto beginnt leer.",
         "Die Bilder, die du hochgeladen hast.",
         "Die Verknüpfungen, über die dein Telefon Benachrichtigungen erhält.",
@@ -4387,5 +4398,12 @@
       "save": "Speichern"
     },
     "studyTitle": "Morgenwiederholung"
+  },
+  "previousAccount": {
+    "title": "Zu dieser Adresse gab es ein Nowry-Konto",
+    "body": "Zu dieser Adresse gab es ein Nowry-Konto, das am {{deletedOn}} gelöscht wurde. Es wird am {{erasedOn}} endgültig gelöscht.",
+    "mistake": "Wenn du es versehentlich gelöscht hast, schreib an support@nowry.app, um es wiederherzustellen, statt neu anzufangen.",
+    "dismiss": "Verstanden",
+    "dismissAria": "Hinweis schließen"
   }
 }
