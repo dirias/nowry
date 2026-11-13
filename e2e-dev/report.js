@@ -23,7 +23,11 @@ const git = (cwd, ...args) => {
 }
 let apiDeployed = '?'
 try {
-  const list = JSON.parse(execFileSync('railway', ['deployment', 'list', '--environment', 'development', '--service', 'Nowry', '--json'], { cwd: API_ROOT }).toString())
+  const list = JSON.parse(
+    execFileSync('railway', ['deployment', 'list', '--environment', 'development', '--service', 'Nowry', '--json'], {
+      cwd: API_ROOT
+    }).toString()
+  )
   const live = list.find((d) => d.status === 'SUCCESS')
   apiDeployed = (live?.meta?.commitHash || '?').slice(0, 7)
 } catch {
@@ -53,7 +57,8 @@ for (const suite of results.suites || []) walk(suite, suite.file)
 const group = (title) => (title.startsWith('[smoke]') ? 'Smoke' : title.startsWith('[edge]') ? 'Edge cases' : 'Happy paths')
 const passed = rows.filter((r) => r.status === 'passed').length
 const failed = rows.filter((r) => r.status !== 'passed' && r.status !== 'skipped').length
-const pill = (s) => `<span class="pill ${s === 'passed' ? 'ok' : s === 'skipped' ? 'soft' : 'bad'}">${s === 'passed' ? 'Pass' : s === 'skipped' ? 'Skipped' : 'Fail'}</span>`
+const pill = (s) =>
+  `<span class="pill ${s === 'passed' ? 'ok' : s === 'skipped' ? 'soft' : 'bad'}">${s === 'passed' ? 'Pass' : s === 'skipped' ? 'Skipped' : 'Fail'}</span>`
 
 const section = (name) => {
   const list = rows.filter((r) => group(r.title) === name)

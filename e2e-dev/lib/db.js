@@ -13,7 +13,11 @@ const db = (...args) =>
       ['run', '--environment', 'development', '--service', 'Nowry', '--', '.venv/bin/python', '-m', 'scripts.e2e_dev', ...args.map(String)],
       { cwd: API_ROOT, timeout: 120000, maxBuffer: 1 << 20 },
       (error, stdout) => {
-        const line = String(stdout || '').trim().split('\n').pop() || ''
+        const line =
+          String(stdout || '')
+            .trim()
+            .split('\n')
+            .pop() || ''
         let parsed = null
         try {
           parsed = JSON.parse(line)

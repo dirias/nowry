@@ -7,24 +7,36 @@ const base = require('@playwright/test')
 const { secrets } = require('./secrets')
 const { SITE_HOSTS } = require('./env')
 
+async function withBypass(context) {
+  const { bypass } = secrets()
+  await context.route('**/*', async (route) => {
+    const request = route.request()
+    let host = ''
+    try {
+      host = new URL(request.url()).host
+    } catch {
+      // a data: or blob: URL
+    }
+    if (!SITE_HOSTS.has(host)) return route.continue()
+    return route.continue({
+      headers: { ...request.headers(), 'x-vercel-protection-bypass': bypass, 'x-vercel-set-bypass-cookie': 'true' }
+    })
+  })
+  return context
+}
+
 const test = base.test.extend({
   context: async ({ context }, use) => {
-    const { bypass } = secrets()
-    await context.route('**/*', async (route) => {
-      const request = route.request()
-      let host = ''
-      try {
-        host = new URL(request.url()).host
-      } catch {
-        // a data: or blob: URL
-      }
-      if (!SITE_HOSTS.has(host)) return route.continue()
-      return route.continue({
-        headers: { ...request.headers(), 'x-vercel-protection-bypass': bypass, 'x-vercel-set-bypass-cookie': 'true' }
-      })
-    })
-    await use(context)
+    await use(await withBypass(context))
   }
 })
 
-module.exports = { test, expect: base.expect }
+/** A page that lives across the steps of a serial scenario, with the same bypass. */
+async function sharedPage(browser) {
+  const context = await withBypass(
+    await browser.newContext({ baseURL: require('./env').SITE, locale: 'en-US', viewport: { width: 1280, height: 860 } })
+  )
+  return context.newPage()
+}
+
+module.exports = { test, expect: base.expect, withBypass, sharedPage }
