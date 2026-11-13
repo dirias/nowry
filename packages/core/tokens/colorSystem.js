@@ -225,6 +225,14 @@ export const STATUS_SPEC = Object.freeze({
 
 export const GOLD_SPEC = Object.freeze({ C: 0.15, h: 80, solidL: 0.815, darkSolidL: 0.815 })
 
+/**
+ * The Easy grade's underline (ADR-082 amendment): a fixed blue, the same for
+ * every accent, beside Again (danger), Hard (warning) and Good (success). A
+ * grade never takes the accent. Not a status colour: it marks one grade and
+ * nothing else, so it stays out of STATUS_SPEC and its distance checks.
+ */
+export const EASY_SPEC = Object.freeze({ C: 0.11, h: 245, solidL: 0.53, darkSolidL: 0.76 })
+
 /** Gold as one literal, for surfaces that append hex alpha or paint a canvas. */
 export const EARNED_GOLD = oklchToHex(GOLD_SPEC.solidL, GOLD_SPEC.C, GOLD_SPEC.h)
 

@@ -14,7 +14,7 @@
  *             within 0.08 of gold or danger moves to a paler tone of its hue
  */
 import { deltaE, hexToOklch, oklchToHex } from './oklch'
-import { GOLD_SPEC, STATUS_SPEC, buildTone } from './colorSystem'
+import { EASY_SPEC, GOLD_SPEC, STATUS_SPEC, buildTone } from './colorSystem'
 
 const PAPER_HUE = 85
 const NEUTRAL_HUE = 250
@@ -168,6 +168,7 @@ export function memberDarkScheme(accentHex) {
     warning: memberDarkTone(STATUS_SPEC.warning),
     danger: memberDarkTone(STATUS_SPEC.danger),
     gold: memberDarkTone(GOLD_SPEC),
+    easy: memberDarkTone(EASY_SPEC),
     neutral: { ...n.scale, ...n.neutral },
     background: { ...n.background },
     text: { ...n.text },

@@ -99,10 +99,33 @@ const selectedGradeSx = {
   outlineOffset: '2px'
 }
 
-// The four grades are one instrument (ADR-082 §8a): the same secondary key,
-// each with its own semantic underline from the theme's edge. None is filled,
-// because a filled grade reads as the recommended answer and biases the
-// schedule.
+// The four grades are one instrument (ADR-082 §8a, amended): the same neutral
+// filled key, each with a fixed semantic underline from the theme's edge
+// (Again danger, Hard warning, Good success, Easy a fixed blue). None takes
+// the accent and none is filled with colour, because a highlighted grade reads
+// as the recommended answer and biases the schedule. The key sits on `level2`,
+// one step above the card, as Rest and Mark sit one step above the page.
+// The underline is the tone's plain colour, not the theme edge's border colour:
+// the border colours measure 2.8–3.0:1 on this key, the plain colours are held
+// to text contrast, so every underline clears 3:1 in both modes.
+const gradeKey = (tone) => ({
+  flex: 1,
+  py: { xs: 1, md: 1.5 },
+  minHeight: 44,
+  fontSize: 'sm',
+  fontWeight: 'lg',
+  // Joy's outlined variant paints no ground at rest, so the ground is set here.
+  bgcolor: 'background.level2',
+  color: 'text.primary',
+  '--variant-outlinedHoverBg': 'var(--joy-palette-background-level2)',
+  '--variant-outlinedActiveBg': 'var(--joy-palette-background-level3)',
+  '--variant-outlinedColor': 'var(--joy-palette-text-primary)',
+  '--variant-outlinedHoverColor': 'var(--joy-palette-text-primary)',
+  boxShadow: `0 2px 0 0 var(--joy-palette-${tone}-plainColor)`,
+  '&:hover': { bgcolor: 'background.level2', boxShadow: `0 3px 0 0 var(--joy-palette-${tone}-plainColor)` },
+  '&:active': { bgcolor: 'background.level3' }
+})
+
 const GradingButtons = React.memo(function GradingButtons({ onGrade, pendingSyncCount, previousGrade, t }) {
   return (
     <Box
@@ -140,17 +163,7 @@ const GradingButtons = React.memo(function GradingButtons({ onGrade, pendingSync
           onClick={() => onGrade('again')}
           aria-pressed={previousGrade === 'again'}
           startDecorator={previousGrade === 'again' ? <CheckCircle sx={{ fontSize: 'sm' }} /> : undefined}
-          sx={{
-            flex: 1,
-            py: { xs: 1, md: 1.5 },
-            minHeight: { xs: 44, md: 36 },
-            // Static sm (14), not the xs mobile-first default: these four are the
-            // session's primary CTAs (again/hard/good/easy), not secondary or
-            // metadata text, so legibility on the main action row won out.
-            fontSize: 'sm',
-            fontWeight: 'lg',
-            ...(previousGrade === 'again' ? selectedGradeSx : {})
-          }}
+          sx={{ ...gradeKey('danger'), ...(previousGrade === 'again' ? selectedGradeSx : {}) }}
         >
           {t('cards.session.grading.again')}
         </Button>
@@ -160,14 +173,7 @@ const GradingButtons = React.memo(function GradingButtons({ onGrade, pendingSync
           onClick={() => onGrade('hard')}
           aria-pressed={previousGrade === 'hard'}
           startDecorator={previousGrade === 'hard' ? <CheckCircle sx={{ fontSize: 'sm' }} /> : undefined}
-          sx={{
-            flex: 1,
-            py: { xs: 1, md: 1.5 },
-            minHeight: { xs: 44, md: 36 },
-            fontSize: 'sm',
-            fontWeight: 'lg',
-            ...(previousGrade === 'hard' ? selectedGradeSx : {})
-          }}
+          sx={{ ...gradeKey('warning'), ...(previousGrade === 'hard' ? selectedGradeSx : {}) }}
         >
           {t('cards.session.grading.hard')}
         </Button>
@@ -177,31 +183,17 @@ const GradingButtons = React.memo(function GradingButtons({ onGrade, pendingSync
           onClick={() => onGrade('good')}
           aria-pressed={previousGrade === 'good'}
           startDecorator={previousGrade === 'good' ? <CheckCircle sx={{ fontSize: 'sm' }} /> : undefined}
-          sx={{
-            flex: 1,
-            py: { xs: 1, md: 1.5 },
-            minHeight: { xs: 44, md: 36 },
-            fontSize: 'sm',
-            fontWeight: 'lg',
-            ...(previousGrade === 'good' ? selectedGradeSx : {})
-          }}
+          sx={{ ...gradeKey('success'), ...(previousGrade === 'good' ? selectedGradeSx : {}) }}
         >
           {t('cards.session.grading.good')}
         </Button>
         <Button
           variant='outlined'
-          color='primary'
+          color='easy'
           onClick={() => onGrade('easy')}
           aria-pressed={previousGrade === 'easy'}
           startDecorator={previousGrade === 'easy' ? <CheckCircle sx={{ fontSize: 'sm' }} /> : undefined}
-          sx={{
-            flex: 1,
-            py: { xs: 1, md: 1.5 },
-            minHeight: { xs: 44, md: 36 },
-            fontSize: 'sm',
-            fontWeight: 'lg',
-            ...(previousGrade === 'easy' ? selectedGradeSx : {})
-          }}
+          sx={{ ...gradeKey('easy'), ...(previousGrade === 'easy' ? selectedGradeSx : {}) }}
         >
           {t('cards.session.grading.easy')}
         </Button>

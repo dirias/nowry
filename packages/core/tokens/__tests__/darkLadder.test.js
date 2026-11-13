@@ -103,3 +103,28 @@ describe('without the flag', () => {
     }
   })
 })
+
+describe('the grade underlines (ADR-082 §8a, amended)', () => {
+  const schemes = (accent) => [
+    ['light', generateColorScheme(accent).light],
+    ['dark', generateColorScheme(accent).dark],
+    ['member dark', generateColorScheme(accent, { memberDark: true }).dark]
+  ]
+
+  it('gives Easy the same blue for every accent', () => {
+    for (const [name] of schemes('#2a6971')) {
+      const easy = new Set(ACCENTS.map((a) => Object.fromEntries(schemes(a))[name].easy.plainColor))
+      expect(easy.size).toBe(1)
+    }
+  })
+
+  it('draws every grade underline (the tone’s plain colour) at 3:1 on the grade key, in every mode', () => {
+    for (const accent of ACCENTS) {
+      for (const [, p] of schemes(accent)) {
+        for (const tone of ['danger', 'warning', 'success', 'easy']) {
+          expect(contrastRatio(p[tone].plainColor, p.background.level2)).toBeGreaterThanOrEqual(3)
+        }
+      }
+    }
+  })
+})

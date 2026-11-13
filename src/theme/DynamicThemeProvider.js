@@ -195,16 +195,11 @@ export const DynamicThemeProvider = ({ children }) => {
             '@media (max-width: 599.95px)': {
               'input, textarea': { fontSize: '1rem !important' }
             },
+            // The page is the palette's page colour, with no accent glows in
+            // either mode (ADR-082 §7 as amended).
             body: {
-              backgroundColor: 'var(--joy-palette-background-body)',
-              backgroundImage: `radial-gradient(circle at 10% 20%, rgba(var(--joy-palette-primary-mainChannel) / 0.06), transparent 30%), 
-                                radial-gradient(circle at 90% 80%, rgba(var(--joy-palette-primary-mainChannel) / 0.06), transparent 30%)`,
-              backgroundAttachment: 'fixed',
-              backgroundRepeat: 'no-repeat',
-              backgroundSize: 'cover'
-            },
-            // ADR-082 §7: no accent glows on a member's near-black dark mode.
-            ...(memberDark ? { 'html[data-joy-color-scheme="dark"] body': { backgroundImage: 'none' } } : {})
+              backgroundColor: 'var(--joy-palette-background-body)'
+            }
           }}
         />
         {children}

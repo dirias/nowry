@@ -11,7 +11,7 @@
  * any custom hex promise the same contrast without a per-hue exception.
  */
 import { contrastRatio, hexToOklch, relativeLuminance } from './oklch'
-import { CATEGORY_SPEC, GOLD_SPEC, NEUTRALS, STATUS_SPEC, accentTone, brandTone, buildTone, categoryColors } from './colorSystem'
+import { CATEGORY_SPEC, EASY_SPEC, GOLD_SPEC, NEUTRALS, STATUS_SPEC, accentTone, brandTone, buildTone, categoryColors } from './colorSystem'
 import { memberDarkScheme } from './darkLadder'
 
 export { contrastRatio, relativeLuminance }
@@ -58,6 +58,7 @@ const buildMode = (primary, mode) => ({
   warning: buildTone(STATUS_SPEC.warning, mode),
   danger: buildTone(STATUS_SPEC.danger, mode),
   gold: buildTone(GOLD_SPEC, mode),
+  easy: buildTone(EASY_SPEC, mode),
   neutral: neutralGroup(mode),
   background: { ...NEUTRALS[mode].background },
   text: { ...NEUTRALS[mode].text },
