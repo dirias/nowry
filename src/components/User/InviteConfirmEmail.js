@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import { Alert, Button, Link, Stack, Typography } from '@mui/joy'
@@ -26,21 +26,31 @@ const STATUS_KEYS = {
   notUsable: 'beta.personal.notUsable'
 }
 
-const InviteConfirmEmail = ({ email, onDone, onLeave }) => {
+const InviteConfirmEmail = ({ email, onDone, onLeave, finishOnOpen = false }) => {
   const { t, i18n } = useTranslation()
   const [status, setStatus] = useState('idle')
   const { left: wait, start: startWait } = useCountdown()
+  const tried = useRef(false)
 
-  const check = async () => {
+  /** `quiet`: the try on arrival says nothing when the address is not confirmed yet. */
+  const check = async ({ quiet = false } = {}) => {
     setStatus('checking')
     try {
       const result = await authService.finishHeldSignUp()
       if (result.status === 'done') return onDone(result.backendUser)
-      setStatus(result.status === 'unverified' ? 'notYet' : 'failed')
+      setStatus(quiet && result.status === 'unverified' ? 'idle' : result.status === 'unverified' ? 'notYet' : 'failed')
     } catch (error) {
       setStatus(isInviteRefusal(error) ? 'notUsable' : 'failed')
     }
   }
+
+  // Arrived from the confirmed email link (E2E-006): finish without asking for the press.
+  useEffect(() => {
+    if (!finishOnOpen || tried.current) return
+    tried.current = true
+    check({ quiet: true })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [finishOnOpen])
 
   const send = async () => {
     setStatus('sending')
@@ -86,6 +96,7 @@ const InviteConfirmEmail = ({ email, onDone, onLeave }) => {
 }
 
 InviteConfirmEmail.propTypes = {
+  finishOnOpen: PropTypes.bool,
   email: PropTypes.string.isRequired,
   onDone: PropTypes.func.isRequired,
   onLeave: PropTypes.func.isRequired

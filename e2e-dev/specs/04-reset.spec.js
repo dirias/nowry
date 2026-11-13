@@ -14,9 +14,8 @@ test('[happy] password reset from the email link', async ({ page }) => {
   await page.getByRole('button', { name: 'Email me a link' }).click()
   await expect(page.getByText('Check your email')).toBeVisible({ timeout: 30000 })
   const [message] = await waitForEmails(email, 'account.reset', { since: started })
-  // Over the day's allowance the API asks Firebase to send its own reset email, whose
-  // new code cancels this one. Then this scenario cannot be judged from the outbox.
-  test.skip(message.outcome === 'over_budget', "The development email allowance was spent: Firebase's own reset email replaced the link.")
+  // The suite's aliases stay in the dev outbox (E2E-005): the link is the only one, and it works.
+  expect(message.outcome).toBe('outbox')
   await page.goto(linkIn(message, '/auth/action'))
   await expect(page.getByText('Choose a new password')).toBeVisible({ timeout: 30000 })
   const fields = page.locator('input[type="password"]')

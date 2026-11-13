@@ -43,13 +43,22 @@ test('[happy] sign-up with a personal invitation, confirmed by email', async ({ 
   expect((await db('account', email)).live, 'no account before the email is confirmed').toBeNull()
   await verifyEmail(page, email, started)
   await page.getByText('Finish signing up', { exact: true }).click()
-  // The held sign-up finishes on its own screen (INVITE-005): one more press after confirming.
-  test.info().annotations.push({
-    type: 'observation',
-    description:
-      'Opened in the same tab, "Finish signing up" returns to "Confirm your email", and the account is made only after "I\'ve confirmed": one press more than needed.'
-  })
-  await page.getByRole('button', { name: "I've confirmed" }).click()
+  await page.waitForURL((url) => url.pathname === '/onboarding', { timeout: 60000 })
+  await expect.poll(async () => (await db('account', email)).live?.beta_cohort, { timeout: 60000 }).toBe('e2e')
+})
+
+test('[edge] opened in the same tab, the invitation link finishes without going back to "Confirm your email"', async ({ page }) => {
+  const email = alias('inv-tab')
+  const { link } = await invite(email)
+  const started = new Date(Date.now() - 5000)
+  await page.goto(new URL(link).pathname + new URL(link).search)
+  await signUp(page, email, { invited: true })
+  await expect(page.getByText('Confirm your email')).toBeVisible({ timeout: 30000 })
+  await verifyEmail(page, email, started)
+  await page.getByText('Finish signing up', { exact: true }).click()
+  await page.waitForURL((url) => url.pathname !== '/auth/action', { timeout: 30000 })
+  await expect(page.getByRole('button', { name: "I've confirmed" })).toHaveCount(0)
+  await page.waitForURL((url) => url.pathname === '/onboarding', { timeout: 60000 })
   await expect.poll(async () => (await db('account', email)).live?.beta_cohort, { timeout: 60000 }).toBe('e2e')
 })
 

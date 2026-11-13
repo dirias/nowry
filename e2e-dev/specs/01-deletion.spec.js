@@ -70,7 +70,7 @@ test('[happy] the records are marked and the address released', async () => {
   expect(live).toBeNull()
   expect(deleted[0].email_released).toBe(true)
   expect(deleted[0].marked.decks).toBeGreaterThanOrEqual(1)
-  expect(['sent', 'over_budget', 'not_allowed']).toContain(deleted[0].notice)
+  expect(deleted[0].notice, 'kept in the outbox, not sent (E2E-005)').toBe('outbox')
 })
 
 let reSignUp

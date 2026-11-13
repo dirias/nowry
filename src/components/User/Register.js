@@ -46,6 +46,8 @@ const Register = () => {
   // once, on arrival, and then taken out of the address bar.
   const [linkInvite] = useState(() => inviteFromSearch(location.search))
   const [inviteFromLink, setInviteFromLink] = useState(Boolean(linkInvite))
+  // Arrived from the confirmed email link: the confirm step finishes on arrival (E2E-006).
+  const [finishOnArrival] = useState(() => new URLSearchParams(location.search).get('finish') === '1')
   // A sign-up waiting for its email to be confirmed: { email } while it waits.
   const [confirming, setConfirming] = useState(null)
   const [formData, setFormData] = useState({
@@ -319,7 +321,12 @@ const Register = () => {
   if (confirming) {
     return (
       <AuthShell title={t('auth.verify.title')}>
-        <InviteConfirmEmail email={confirming.email} onDone={finishConfirmed} onLeave={() => setConfirming(null)} />
+        <InviteConfirmEmail
+          email={confirming.email}
+          finishOnOpen={finishOnArrival}
+          onDone={finishConfirmed}
+          onLeave={() => setConfirming(null)}
+        />
       </AuthShell>
     )
   }
