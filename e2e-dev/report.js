@@ -81,7 +81,7 @@ const section = (name) => {
 
 const limits = [
   'One full run per clock hour from one network: the API sends at most 10 verification emails per caller address per hour, and a run asks for about 7.',
-  "The development email allowance is 10 a day (one Resend account with production). Past it, emails are kept in the outbox but not sent; Firebase then sends its own reset email, whose new code cancels the one the suite read, so the reset scenario is skipped."
+  'The development email allowance is 10 a day (one Resend account with production). Past it, emails are kept in the outbox but not sent; Firebase then sends its own reset email, whose new code cancels the one the suite read, so the reset scenario is skipped.'
 ]
 
 const manual = [
