@@ -57,6 +57,10 @@ export default function ResetPassword() {
             <Typography level='body-sm' color='text.secondary' accessibilityLiveRegion='polite'>
               {t('auth.resetPassword.successMsg')}
             </Typography>
+            {/* For everyone, whatever the address (FR-032): a Google sign-in has no password to reset. */}
+            <Typography level='body-sm' color='text.secondary'>
+              {t('auth.resetPassword.googleNote', { button: t('auth.signInGoogle') })}
+            </Typography>
           </Stack>
         </Box>
       ) : (
