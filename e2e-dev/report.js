@@ -46,7 +46,7 @@ const walk = (suite, file) => {
         status: last.status || 'skipped',
         ms: last.duration || 0,
         error: last.error ? (last.error.message || '').split('\n').slice(0, 4).join('\n') : '',
-        notes: [...(t.annotations || []), ...(last.annotations || [])]
+        notes: (t.annotations || [])
           .filter((a) => a.description)
           .map(
             (a) =>
