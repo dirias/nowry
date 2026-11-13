@@ -12,7 +12,7 @@ import es from '@nowry/core/locales/es/translation.json'
 import fr from '@nowry/core/locales/fr/translation.json'
 import de from '@nowry/core/locales/de/translation.json'
 import ja from '@nowry/core/locales/ja/translation.json'
-import { LANGFUSE_RETENTION_DAYS, SENTRY_RETENTION_DAYS } from '@nowry/core/constants/site'
+import { LANGFUSE_FINDABLE_DAYS, SENTRY_RETENTION_DAYS } from '@nowry/core/constants/site'
 import DeleteAccountInfo from '../DeleteAccountInfo'
 
 const BUNDLES = { en, es, fr, de, ja }
@@ -40,9 +40,19 @@ it.each(Object.keys(BUNDLES))('reads whole in %s, with nothing left to fill', as
   expect(text).not.toMatch(/\{\{|\}\}|legal\.deleteAccount/)
   expect(text).toContain('support@nowry.app')
   expect(text).toContain(String(SENTRY_RETENTION_DAYS))
-  expect(text).toContain(String(LANGFUSE_RETENTION_DAYS))
+  expect(text).toContain(String(LANGFUSE_FINDABLE_DAYS))
   expect(screen.getAllByRole('heading').length).toBeGreaterThanOrEqual(7)
   unmount()
+})
+
+it('says the AI request records go at once, and names the ones that cannot be reached (ADR-081 amendment)', async () => {
+  const { container } = await show('en')
+  const text = container.textContent
+  expect(text).toContain('Langfuse removes them, usually within 15 minutes.')
+  expect(text).toContain('made before November 13, 2026 that are more than 30 days old')
+  expect(text).toContain('stay stored there with no end date')
+  expect(text).toContain('Kept for up to 30 days')
+  expect(text).toContain('within 7 days of your reply')
 })
 
 it('names the screens and the key as the app does', async () => {

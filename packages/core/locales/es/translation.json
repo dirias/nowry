@@ -3062,7 +3062,8 @@
         "Tu dirección de correo y tu nombre de usuario quedan libres: puedes registrarte de nuevo con la misma dirección, y la cuenta nueva empieza vacía.",
         "Las imágenes que subiste.",
         "Los enlaces que envían notificaciones a tu teléfono.",
-        "El registro de tu dirección de correo en Stripe, nuestro proveedor de pagos."
+        "El registro de tu dirección de correo en Stripe, nuestro proveedor de pagos.",
+        "Los registros de tus solicitudes a nuestras funciones de IA en Langfuse, con lo que escribiste. Langfuse los elimina, normalmente en menos de 15 minutos."
       ],
       "laterTitle": "Se borra definitivamente a los 30 días",
       "later": "Todo lo demás de tu cuenta: libros, mazos, tarjetas, historial de estudio, planes, metas, tareas, rutinas, calendario, pizarras, notas, tu compañero y el propio registro de la cuenta. Durante esos 30 días queda oculto y nadie puede usarlo. Si eliminaste tu cuenta por error, escribe a support@nowry.app antes de que pasen los 30 días. Nada vuelve por sí solo.",
@@ -3070,7 +3071,7 @@
       "elsewhere": [
         "Constancia de que se te envió un correo: su tipo, el día y el idioma, con una forma cifrada de tu dirección. Se conserva 90 días.",
         "Informes de errores del sitio web y de la aplicación, en Sentry: no llevan número de cuenta, nombre ni correo. Se conservan hasta {{sentryDays}} días.",
-        "Registros de las solicitudes a nuestras funciones de IA, en Langfuse: llevan tu número de cuenta y lo que escribiste, pero no tu nombre ni tu correo. Se conservan hasta {{langfuseDays}} días."
+        "Los registros de solicitudes a nuestras funciones de IA en Langfuse hechos antes del {{since}} que tengan más de {{langfuseDays}} días cuando eliminas la cuenta: nuestro plan de Langfuse no puede alcanzarlos, así que siguen guardados allí sin fecha de fin. Llevan tu número de cuenta y lo que escribiste, pero no tu nombre ni tu correo; cuando tu cuenta se borra, ese número ya no lleva a nadie."
       ],
       "waitlist": "Si también te apuntaste a la lista de espera, eso es aparte: usa el enlace de cualquier correo de la lista para salir de ella.",
       "contact": "Preguntas: support@nowry.app"

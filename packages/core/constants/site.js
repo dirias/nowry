@@ -32,12 +32,21 @@ export const LEGAL_PATH_ALIASES = Object.freeze({
 export const DELETE_ACCOUNT_PATH = '/delete-account'
 
 /**
- * How long other services keep what they hold, as the delete-account page states it.
- * Sentry: fixed by its plan (30 days on Developer, 90 on paid), so 90 is true on either.
- * Langfuse: the project's data retention setting; change both together.
+ * What other services keep, as the delete-account page states it (ADR-081 amendment).
+ *
+ * Sentry: fixed by its plan; the Developer plan keeps events 30 days. Change this
+ * with the plan.
+ *
+ * Langfuse (Hobby): keeps traces with no end date, and its API can find only the
+ * last 30 days. Deleting an account deletes every trace the API remembered for it
+ * (the `ai_traces` ledger) and every one Langfuse still finds; what is left is
+ * traces older than 30 days made before the ledger reached production. Set
+ * LANGFUSE_LEDGER_SINCE to that release day (ACCOUNT-007), and change
+ * LANGFUSE_FINDABLE_DAYS with the plan.
  */
-export const SENTRY_RETENTION_DAYS = 90
-export const LANGFUSE_RETENTION_DAYS = 30
+export const SENTRY_RETENTION_DAYS = 30
+export const LANGFUSE_FINDABLE_DAYS = 30
+export const LANGFUSE_LEDGER_SINCE = '2026-11-13'
 
 export const LEGAL_TERMS_UPDATED = '2026-10-03'
 export const LEGAL_PRIVACY_UPDATED = '2026-11-13'

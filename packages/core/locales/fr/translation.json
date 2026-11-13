@@ -1938,7 +1938,8 @@
         "Votre adresse e-mail et votre nom d'utilisateur sont libérés : vous pouvez vous réinscrire avec la même adresse, et le nouveau compte démarre vide.",
         "Les images que vous avez téléversées.",
         "Les liens qui envoient des notifications à votre téléphone.",
-        "L'enregistrement de votre adresse e-mail chez Stripe, notre prestataire de paiement."
+        "L'enregistrement de votre adresse e-mail chez Stripe, notre prestataire de paiement.",
+        "Les journaux de vos demandes à nos fonctions d'IA chez Langfuse, avec ce que vous avez saisi. Langfuse les supprime, en général en moins de 15 minutes."
       ],
       "laterTitle": "Effacé définitivement au bout de 30 jours",
       "later": "Tout le reste de votre compte : livres, paquets, cartes, historique d'étude, plans, objectifs, tâches, routines, calendrier, tableaux, notes, votre compagnon et la fiche du compte elle-même. Pendant ces 30 jours, tout est masqué et personne ne peut l'utiliser. Si vous avez supprimé votre compte par erreur, écrivez à support@nowry.app avant la fin des 30 jours. Rien ne revient de lui-même.",
@@ -1946,7 +1947,7 @@
       "elsewhere": [
         "La trace qu'un e-mail vous a été envoyé : son type, le jour et la langue, avec une forme brouillée de votre adresse. Conservée 90 jours.",
         "Les rapports d'erreur du site web et de l'application, chez Sentry : ils ne portent ni numéro de compte, ni nom, ni e-mail. Conservés jusqu'à {{sentryDays}} jours.",
-        "Les journaux des demandes à nos fonctions d'IA, chez Langfuse : ils portent votre numéro de compte et ce que vous avez saisi, mais ni nom ni e-mail. Conservés jusqu'à {{langfuseDays}} jours."
+        "Les journaux des demandes à nos fonctions d'IA chez Langfuse faits avant le {{since}} et âgés de plus de {{langfuseDays}} jours quand vous supprimez le compte : notre formule Langfuse ne peut pas les atteindre, ils y restent donc conservés sans date de fin. Ils portent votre numéro de compte et ce que vous avez saisi, mais ni nom ni e-mail ; une fois votre compte effacé, ce numéro ne mène plus à personne."
       ],
       "waitlist": "Si vous avez aussi rejoint la liste d'attente, c'est à part : utilisez le lien de n'importe quel e-mail de la liste pour la quitter.",
       "contact": "Questions : support@nowry.app"
