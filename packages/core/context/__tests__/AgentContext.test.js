@@ -345,3 +345,34 @@ describe('history follows the subject (CHAT-008)', () => {
     ])
   })
 })
+
+describe('the companion is still by default (ROAM-001, FR-036)', () => {
+  const settle = async (state) => {
+    mockAuthValue = { user: { full_name: 'Test User' }, isAuthenticated: true }
+    agentService.getState.mockResolvedValue(state)
+    let ctx
+    render(
+      <AgentProvider>
+        <TestConsumer
+          onRender={(c) => {
+            ctx = c
+          }}
+        />
+      </AgentProvider>
+    )
+    const before = ctx.isRoamingEnabled
+    await act(async () => {})
+    return { before, after: ctx.isRoamingEnabled }
+  }
+
+  test('still before the state loads, and still when nothing is stored', async () => {
+    const { before, after } = await settle({ pet_name: 'Nubi' })
+    expect(before).toBe(false)
+    expect(after).toBe(false)
+  })
+
+  test('a person who turned roaming on keeps it', async () => {
+    const { after } = await settle({ pet_name: 'Nubi', agent_roaming_enabled: true })
+    expect(after).toBe(true)
+  })
+})

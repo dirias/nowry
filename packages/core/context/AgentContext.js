@@ -87,7 +87,7 @@ const initialState = {
   /** How the companion teaches: 'show' or 'guide' (CHAT-012) */
   teachingStyle: 'show',
   /** Whether the pet roams autonomously around the screen */
-  isRoamingEnabled: true,
+  isRoamingEnabled: false, // ROAM-001, FR-036: still unless turned on
   /**
    * A proactive nudge message from the backend, shown as a speech bubble
    * when the user first lands on the dashboard. Cleared after reading.
@@ -176,7 +176,7 @@ function agentReducer(state, action) {
         knowledgeAccessEnabled: action.payload.knowledge_access_enabled ?? false,
         proactiveNudgingEnabled: action.payload.proactive_nudging_enabled ?? false,
         teachingStyle: action.payload.teaching_style === 'guide' ? 'guide' : 'show',
-        isRoamingEnabled: action.payload.agent_roaming_enabled ?? true,
+        isRoamingEnabled: action.payload.agent_roaming_enabled ?? false,
         petName: action.payload.pet_name ?? null,
         isDefaultCompanion: action.payload.is_default_companion ?? true,
         petSpecies: action.payload.pet_species ?? null,
