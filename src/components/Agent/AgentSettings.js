@@ -60,6 +60,7 @@ import { EVOLUTION_KIND } from '@nowry/core/domain/petEvolution'
 import petService from '@nowry/core/api/services/petService'
 import { TEACHING_STYLE, agentPref } from '@nowry/core/domain/agentPrefs'
 import { suggestFromInterests } from '@nowry/core/utils/petColor'
+import { selectedCard } from '../Common/Form/formStyles'
 
 // ---------------------------------------------------------------------------
 // Static data
@@ -182,8 +183,8 @@ const INTERVENTION_TYPE_OPTIONS = (t) => [
 const StyleCard = ({ option, selected, onSelect }) => (
   <Card
     id={`agent-style-card-${option.key}`}
-    variant={selected ? 'solid' : 'outlined'}
-    color={selected ? 'primary' : 'neutral'}
+    variant='outlined'
+    color='neutral'
     onClick={() => onSelect(option.key)}
     sx={{
       cursor: 'pointer',
@@ -192,9 +193,9 @@ const StyleCard = ({ option, selected, onSelect }) => (
       p: 1.5,
       gap: 0.5,
       transition: 'all 0.18s ease',
-      borderWidth: selected ? 2 : 1,
+      ...selectedCard(selected),
       '&:hover': {
-        borderColor: selected ? 'primary.solidBg' : 'primary.outlinedBorder',
+        borderColor: 'primary.outlinedBorder',
         transform: 'translateY(-2px)',
         boxShadow: 'md'
       }
@@ -205,9 +206,9 @@ const StyleCard = ({ option, selected, onSelect }) => (
       <Typography level='title-sm' fontWeight={600}>
         {option.label}
       </Typography>
-      {selected && <CheckRounded sx={{ fontSize: 16, ml: 'auto', flexShrink: 0 }} />}
+      {selected && <CheckRounded sx={{ fontSize: 16, ml: 'auto', flexShrink: 0, color: 'primary.plainColor' }} />}
     </Stack>
-    <Typography level='body-xs' sx={{ color: selected ? 'primary.solidColor' : 'text.secondary', mt: 0.25 }}>
+    <Typography level='body-xs' sx={{ color: 'text.secondary', mt: 0.25 }}>
       {option.description}
     </Typography>
   </Card>
@@ -216,8 +217,8 @@ const StyleCard = ({ option, selected, onSelect }) => (
 /** Selectable frequency/type card — no icon variant used in the Interventions tab */
 const FrequencyCard = ({ label, description, selected, onSelect }) => (
   <Card
-    variant={selected ? 'solid' : 'outlined'}
-    color={selected ? 'primary' : 'neutral'}
+    variant='outlined'
+    color='neutral'
     onClick={onSelect}
     sx={{
       cursor: 'pointer',
@@ -226,9 +227,9 @@ const FrequencyCard = ({ label, description, selected, onSelect }) => (
       p: 1.5,
       gap: 0.5,
       transition: 'all 0.18s ease',
-      borderWidth: selected ? 2 : 1,
+      ...selectedCard(selected),
       '&:hover': {
-        borderColor: selected ? 'primary.solidBg' : 'primary.outlinedBorder',
+        borderColor: 'primary.outlinedBorder',
         transform: 'translateY(-2px)',
         boxShadow: 'md'
       }
@@ -238,9 +239,9 @@ const FrequencyCard = ({ label, description, selected, onSelect }) => (
       <Typography level='title-sm' fontWeight={600}>
         {label}
       </Typography>
-      {selected && <CheckRounded sx={{ fontSize: 16, ml: 'auto', flexShrink: 0 }} />}
+      {selected && <CheckRounded sx={{ fontSize: 16, ml: 'auto', flexShrink: 0, color: 'primary.plainColor' }} />}
     </Stack>
-    <Typography level='body-xs' sx={{ color: selected ? 'primary.solidColor' : 'text.secondary', mt: 0.25 }}>
+    <Typography level='body-xs' sx={{ color: 'text.secondary', mt: 0.25 }}>
       {description}
     </Typography>
   </Card>
@@ -651,7 +652,8 @@ export default function AgentSettings() {
         {/* XP + Level block */}
         <Box sx={{ ml: 'auto', textAlign: 'right', flexShrink: 0, minWidth: 120 }}>
           <Stack direction='row' spacing={1} alignItems='center' justifyContent='flex-end' sx={{ mb: 0.5 }}>
-            <Chip size='sm' variant='soft' color='primary' startDecorator={<AutoAwesomeRounded sx={{ fontSize: 14 }} />}>
+            {/* Earned, so gold in every accent (ADR-082 §8b). */}
+            <Chip size='sm' variant='soft' color='gold' startDecorator={<AutoAwesomeRounded sx={{ fontSize: 14 }} />}>
               {t('agent.settings.levelLabel', { level: agentLevel })}
             </Chip>
           </Stack>
@@ -670,7 +672,7 @@ export default function AgentSettings() {
               sx={{
                 height: '100%',
                 width: `${Math.min(100, Math.max(0, Math.round(levelProgress * 100)))}%`,
-                bgcolor: 'primary.solidBg',
+                bgcolor: 'gold.plainColor',
                 borderRadius: 2,
                 transition: 'width 0.6s ease'
               }}

@@ -70,6 +70,6 @@ describe('the key, theme-wide (CAL-009, BUTTONS.md)', () => {
     expect(md['--Icon-fontSize']).toBe('18px')
     expect(md.boxShadow).toBe(keyButton('neutral').boxShadow)
     expect(md[theme.breakpoints.down('sm')]).toEqual({ minWidth: 44, minHeight: 44 })
-    expect(md['&:focus-visible'].outlineColor).toBe('var(--joy-palette-primary-outlinedBorder)')
+    expect(md['&:focus-visible'].outlineColor).toBe('var(--joy-palette-focusVisible)')
   })
 })

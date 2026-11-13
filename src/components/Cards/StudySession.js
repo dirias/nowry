@@ -99,6 +99,10 @@ const selectedGradeSx = {
   outlineOffset: '2px'
 }
 
+// The four grades are one instrument (ADR-082 §8a): the same secondary key,
+// each with its own semantic underline from the theme's edge. None is filled,
+// because a filled grade reads as the recommended answer and biases the
+// schedule.
 const GradingButtons = React.memo(function GradingButtons({ onGrade, pendingSyncCount, previousGrade, t }) {
   return (
     <Box
@@ -145,14 +149,13 @@ const GradingButtons = React.memo(function GradingButtons({ onGrade, pendingSync
             // metadata text, so legibility on the main action row won out.
             fontSize: 'sm',
             fontWeight: 'lg',
-            '&:hover': { bgcolor: 'danger.softBg' },
             ...(previousGrade === 'again' ? selectedGradeSx : {})
           }}
         >
           {t('cards.session.grading.again')}
         </Button>
         <Button
-          variant='soft'
+          variant='outlined'
           color='warning'
           onClick={() => onGrade('hard')}
           aria-pressed={previousGrade === 'hard'}
@@ -169,7 +172,7 @@ const GradingButtons = React.memo(function GradingButtons({ onGrade, pendingSync
           {t('cards.session.grading.hard')}
         </Button>
         <Button
-          variant='soft'
+          variant='outlined'
           color='success'
           onClick={() => onGrade('good')}
           aria-pressed={previousGrade === 'good'}
@@ -186,7 +189,7 @@ const GradingButtons = React.memo(function GradingButtons({ onGrade, pendingSync
           {t('cards.session.grading.good')}
         </Button>
         <Button
-          variant='solid'
+          variant='outlined'
           color='primary'
           onClick={() => onGrade('easy')}
           aria-pressed={previousGrade === 'easy'}
@@ -238,7 +241,7 @@ const XpFloater = React.memo(function XpFloater({ floater, t }) {
             zIndex: 2
           }}
         >
-          <Typography level='body-xs' fontWeight='lg' sx={{ color: 'success.plainColor', whiteSpace: 'nowrap' }}>
+          <Typography level='body-xs' fontWeight='lg' sx={{ color: 'gold.plainColor', whiteSpace: 'nowrap' }}>
             {t('cards.session.xpGained', { count: floater.amount })}
           </Typography>
         </motion.div>
@@ -298,8 +301,7 @@ const SwipeHint = React.memo(function SwipeHint() {
         justifyContent: 'space-between',
         px: 2,
         pointerEvents: 'none',
-        zIndex: 15,
-        opacity: 0.5
+        zIndex: 15
       }}
     >
       <SwipeLeft sx={{ color: 'text.tertiary' }} />
@@ -1765,7 +1767,7 @@ export default function StudySession() {
             aria-label={t(`${emptyFilterPrefix}.clear`)}
             sx={{
               mt: 2,
-              '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
+              '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)', outlineOffset: '2px' }
             }}
           >
             {t(`${emptyFilterPrefix}.clear`)}
@@ -2020,7 +2022,7 @@ export default function StudySession() {
                   data-testid='session-scroll'
                   sx={{ flex: '1 1 auto', minHeight: 0, overflowY: 'auto', p: { xs: 3, md: 4 }, pt: { xs: 6, md: 8 } }}
                 >
-                  <Typography level='body-xs' sx={{ mb: 2, color: 'success.plainColor', fontWeight: 'xl', letterSpacing: '0.5px' }}>
+                  <Typography level='body-xs' sx={{ mb: 2, color: 'text.secondary', fontWeight: 'xl', letterSpacing: '0.5px' }}>
                     {t('cards.session.labels.visual')}
                   </Typography>
                   <Typography level='h3' sx={{ mb: 3, fontWeight: 'lg' }}>
@@ -2127,7 +2129,7 @@ export default function StudySession() {
                       // Critical: prevent hidden front face from blocking grade buttons
                       pointerEvents: isFlipped ? 'none' : 'auto',
                       overflow: 'hidden',
-                      '&:hover': { boxShadow: isFullscreen ? 'none' : 'md', borderColor: 'primary.outlinedBorder' }
+                      '&:hover': { boxShadow: isFullscreen ? 'none' : 'md' }
                     }}
                   >
                     {!isFullscreen && (
@@ -2168,7 +2170,7 @@ export default function StudySession() {
                         data-testid='card-front-body'
                         sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minHeight: 0 }}
                       >
-                        <Typography level='body-xs' sx={{ mb: 3, color: 'primary.plainColor', fontWeight: 'xl', letterSpacing: '0.5px' }}>
+                        <Typography level='body-xs' sx={{ mb: 3, color: 'text.secondary', fontWeight: 'xl', letterSpacing: '0.5px' }}>
                           {t('cards.session.labels.question')}
                         </Typography>
                         <Typography level='h2' sx={{ wordBreak: 'break-word', fontWeight: 'lg', whiteSpace: 'pre-wrap' }}>
@@ -2206,7 +2208,7 @@ export default function StudySession() {
                       WebkitBackfaceVisibility: 'hidden',
                       // Critical: only receive pointer events when this face is visible
                       pointerEvents: isFlipped ? 'auto' : 'none',
-                      borderColor: 'primary.outlinedBorder',
+                      borderColor: 'neutral.outlinedBorder',
                       overflow: 'hidden',
                       display: 'flex',
                       flexDirection: 'column',
@@ -2249,7 +2251,7 @@ export default function StudySession() {
                         level='body-xs'
                         sx={{
                           mb: { xs: 1.5, md: 2 },
-                          color: 'success.plainColor',
+                          color: 'text.secondary',
                           fontWeight: 'lg',
                           letterSpacing: '0.5px'
                         }}

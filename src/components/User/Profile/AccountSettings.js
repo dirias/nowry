@@ -35,8 +35,6 @@ import {
 import {
   Palette,
   Translate,
-  DarkMode,
-  LightMode,
   Timer,
   Security,
   Notifications,
@@ -62,6 +60,9 @@ import { userService } from '@nowry/core/api/services'
 import { alerts } from '@nowry/core/platform'
 import { agentService } from '@nowry/core/api/services/agent.service'
 import { useColorScheme } from '@mui/joy/styles'
+import { keySegment, segment, segmentedGroup } from '../../Common/Form/formStyles'
+
+const THEME_MODES = ['system', 'light', 'dark']
 import { useThemePreferences } from '../../../theme/DynamicThemeProvider'
 import DeleteConfirmationModal from '../../Common/DeleteConfirmationModal'
 import { useAuth } from '@nowry/core/context/AuthContext'
@@ -715,17 +716,26 @@ export default function AccountSettings() {
                   <Typography level='body-xs' sx={{ color: 'text.tertiary', mb: 1.5 }}>
                     {t('settings.appearance.modeDesc')}
                   </Typography>
-                  <Stack direction='row' spacing={1.5} alignItems='center'>
-                    <LightMode sx={{ color: mode === 'light' ? 'warning.plainColor' : 'text.tertiary', fontSize: 18 }} />
-                    <Switch
-                      checked={mode === 'dark'}
-                      onChange={(e) => setMode(e.target.checked ? 'dark' : 'light')}
-                      color={mode === 'dark' ? 'primary' : 'neutral'}
-                      variant={mode === 'dark' ? 'solid' : 'outlined'}
-                      aria-label={t('common.toggleTheme')}
-                    />
-                    <DarkMode sx={{ color: mode === 'dark' ? 'primary.plainColor' : 'text.tertiary', fontSize: 18 }} />
-                  </Stack>
+                  {/* Three ways, as on the phone (ADR-082 §8f): a two-way switch
+                      showed Light whenever the mode followed a dark system. */}
+                  <Sheet
+                    role='group'
+                    aria-label={t('settings.appearance.mode')}
+                    sx={{ ...segmentedGroup, display: 'inline-flex', border: '1px solid', borderColor: 'divider' }}
+                  >
+                    {THEME_MODES.map((value, index) => (
+                      <Button
+                        key={value}
+                        variant='plain'
+                        color='neutral'
+                        aria-pressed={(mode ?? 'system') === value}
+                        onClick={() => setMode(value)}
+                        sx={{ ...segment((mode ?? 'system') === value, index === 0), ...keySegment((mode ?? 'system') === value) }}
+                      >
+                        {t(`settings.appearance.modes.${value}`)}
+                      </Button>
+                    ))}
+                  </Sheet>
                 </Box>
 
                 <Divider />

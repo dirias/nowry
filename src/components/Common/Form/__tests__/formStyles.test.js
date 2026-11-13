@@ -5,7 +5,8 @@ describe('formStyles', () => {
   it('defines a focus ring rather than leaving the browser default Joy resets', () => {
     expect(focusRing['&:focus-visible']).toEqual({
       outline: '2px solid',
-      outlineColor: 'primary.outlinedBorder',
+      // ADR-082 §8c: one ring token, the plain colour, 3:1 or more on every ground
+      outlineColor: 'var(--joy-palette-focusVisible)',
       outlineOffset: '2px'
     })
   })

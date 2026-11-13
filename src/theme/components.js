@@ -86,7 +86,7 @@ const disabled = (variant) => ({
 // §4 — the house focus ring, from the theme rather than a per-site spread.
 const focus = {
   '--focus-outline-offset': '2px',
-  '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-primary-outlinedBorder)' }
+  '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)' }
 }
 
 const keyRoot = ({ ownerState, theme }) => {
@@ -156,10 +156,21 @@ const linkRoot = ({ theme }) => ({
   }
 })
 
-// A field is 44px tall at phone width, like every other control (§2).
+// A field is 44px tall at phone width, like every other control (§2). A
+// neutral outlined field takes the field border where the palette has one (the
+// member's near-black dark mode, ADR-082 §1: 3:1 on a card); elsewhere the
+// fallback is the neutral border it always had.
+const fieldBorder = ({ ownerState }) =>
+  (ownerState.variant ?? 'outlined') === 'outlined' && (ownerState.color ?? 'neutral') === 'neutral'
+    ? { '--variant-outlinedBorder': 'var(--joy-palette-fieldBorder, var(--joy-palette-neutral-outlinedBorder))' }
+    : {}
+
 const fieldRoot =
   (name) =>
-  ({ theme }) => ({ [theme.breakpoints.down('sm')]: { [`--${name}-minHeight`]: '44px' } })
+  ({ theme, ownerState }) => ({
+    ...fieldBorder({ ownerState }),
+    [theme.breakpoints.down('sm')]: { [`--${name}-minHeight`]: '44px' }
+  })
 
 // Controls the house button does not cover, held to the same 44px at phone width (§2).
 const touchRoot = ({ theme }) => ({ [theme.breakpoints.down('sm')]: { minHeight: 44 } })
@@ -168,6 +179,8 @@ export const components = {
   JoyMenuButton: { styleOverrides: { root: touchRoot } },
   JoyTab: { styleOverrides: { root: touchRoot } },
   JoyInput: { styleOverrides: { root: fieldRoot('Input') } },
+  JoyTextarea: { styleOverrides: { root: fieldBorder } },
+  JoySelect: { styleOverrides: { root: fieldBorder } },
   JoyLink: { styleOverrides: { root: linkRoot } },
   JoyButton: { defaultProps: { size: 'md' }, styleOverrides: { root: keyRoot } },
   JoyIconButton: { defaultProps: { size: 'md' }, styleOverrides: { root: iconRoot } }

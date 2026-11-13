@@ -14,8 +14,17 @@ import { TOUCH_TARGET, LIST_ROW_HEIGHT, FONT_WEIGHT, MOTION } from '@nowry/core/
 
 // The house focus ring. Never rely on the browser default — Joy resets it.
 export const focusRing = {
-  '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
+  '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)', outlineOffset: '2px' }
 }
+
+/**
+ * A selected option card (ADR-082 §8e): a soft tint of the accent with a 2px
+ * accent border, never a solid fill. Use with `variant='outlined'`
+ * `color='neutral'`; the text keeps its usual colours and the tick reads
+ * `primary.plainColor`.
+ */
+export const selectedCard = (selected) =>
+  selected ? { bgcolor: 'primary.softBg', borderColor: 'primary.outlinedBorder', borderWidth: 2 } : { borderWidth: 1 }
 
 // Clamp text to a single line and ellipsise. German and Spanish run roughly 30%
 // longer than the English source; without this, one-line contracts (ladder

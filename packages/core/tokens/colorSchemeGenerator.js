@@ -12,6 +12,7 @@
  */
 import { contrastRatio, hexToOklch, relativeLuminance } from './oklch'
 import { CATEGORY_SPEC, GOLD_SPEC, NEUTRALS, STATUS_SPEC, accentTone, brandTone, buildTone, categoryColors } from './colorSystem'
+import { memberDarkScheme } from './darkLadder'
 
 export { contrastRatio, relativeLuminance }
 
@@ -60,16 +61,23 @@ const buildMode = (primary, mode) => ({
   neutral: neutralGroup(mode),
   background: { ...NEUTRALS[mode].background },
   text: { ...NEUTRALS[mode].text },
-  divider: NEUTRALS[mode].divider
+  divider: NEUTRALS[mode].divider,
+  // One ring for buttons, tabs, segments and fields (ADR-082 §8c): the plain
+  // colour, held to 4.5:1 on the page, so at least 3:1 on every ground.
+  focusVisible: primary.plainColor
 })
 
 /**
  * Generate the complete palette from an accent, for light and dark.
+ *
+ * `memberDark` (ADR-082, behind the web's preview flag): a signed-in learner's
+ * dark mode on the near-black ladder tinted by their accent. Light is the same
+ * either way.
  */
-export function generateColorScheme(primaryColor) {
+export function generateColorScheme(primaryColor, { memberDark = false } = {}) {
   return {
     light: buildMode(accentTone(primaryColor, 'light'), 'light'),
-    dark: buildMode(accentTone(primaryColor, 'dark'), 'dark')
+    dark: memberDark ? memberDarkScheme(primaryColor) : buildMode(accentTone(primaryColor, 'dark'), 'dark')
   }
 }
 

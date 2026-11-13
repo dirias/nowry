@@ -63,7 +63,8 @@ import { bugsService } from '@nowry/core/api/services/bugs.service'
 import { useAuth } from '@nowry/core/context/AuthContext'
 import { useBeta } from '@nowry/core/context/BetaContext'
 import { SHOW_PRICING } from '@nowry/core/domain/plans'
-import { BRAND } from '@nowry/core/tokens/colorSystem'
+import { BRAND, BETA_MARK } from '@nowry/core/tokens/colorSystem'
+import { useThemePreferences } from '../../theme/DynamicThemeProvider'
 
 const HeaderUtils = ({ variant = 'header' }) => {
   const { mode, setMode } = useColorScheme()
@@ -133,7 +134,11 @@ const Header = () => {
   const { t } = useTranslation()
   const { config: beta } = useBeta()
   const { petName, isInStudySession } = usePet()
-  const { mode, setMode } = useColorScheme()
+  const { mode, setMode, systemMode } = useColorScheme()
+  // ADR-082 §6: a member's near-black dark mode (preview flag) raises the bar
+  // one step off the page; everywhere else it is Ink Teal (ADR-074 §2).
+  const { memberDark } = useThemePreferences()
+  const raisedBar = memberDark && (mode === 'system' ? systemMode : mode) === 'dark'
 
   // Bug report state
   const [bugReportOpen, setBugReportOpen] = React.useState(false)
@@ -254,7 +259,7 @@ const Header = () => {
           position: 'sticky',
           top: 0,
           borderBottom: '1px solid',
-          borderColor: 'divider',
+          borderColor: raisedBar ? 'neutral.outlinedBorder' : 'divider',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
@@ -267,7 +272,7 @@ const Header = () => {
           // Ink Teal and every control in it reads the dark tokens.
           // Token names, not `theme.palette` values: a name resolves on this
           // element, where the dark scheme's variables live.
-          bgcolor: 'background.surface',
+          bgcolor: raisedBar ? 'background.level1' : BRAND.inkTeal,
           color: 'text.primary'
         })}
         data-joy-color-scheme='dark'
@@ -288,7 +293,14 @@ const Header = () => {
         >
           <BrandLockup markSize={30} markSx={{ color: BRAND.coilGold }} />
           {beta.active && (
-            <Chip size='sm' variant='soft' color='primary' sx={{ ml: 1 }} aria-label={t('beta.mark')}>
+            <Chip
+              size='sm'
+              variant='soft'
+              color='neutral'
+              // The Beta mark is the brand's, whatever the accent (ADR-082 §6).
+              sx={{ ml: 1, bgcolor: BETA_MARK.bg, color: BETA_MARK.fg }}
+              aria-label={t('beta.mark')}
+            >
               {t('beta.mark')}
             </Chip>
           )}

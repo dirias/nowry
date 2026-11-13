@@ -31,6 +31,13 @@ export const BRAND = Object.freeze({
   paper: paper(0.96, 0.013)
 })
 
+/**
+ * The Beta mark: a brand-teal chip whatever the learner's accent (ADR-082 §6).
+ * One step above Ink Teal so it reads on the teal header and on a raised
+ * near-black one; Paper text at 6:1 or more.
+ */
+export const BETA_MARK = Object.freeze({ bg: teal(0.42, 0.06), fg: BRAND.paper })
+
 // ── 2 · Neutrals ───────────────────────────────────────────────────────────
 /**
  * Named roles, and the 50–900 scale Joy's own components resolve through.

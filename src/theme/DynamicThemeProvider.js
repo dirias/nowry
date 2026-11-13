@@ -10,11 +10,13 @@ import { components } from './components'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@nowry/core/context/AuthContext'
 import { clearStoredAccent, readStoredAccent, storeAccent, wearsBrand } from './accentStore'
+import { readDarkPreview } from './darkPreview'
 
 // Context to allow other components to update theme settings
 export const ThemePreferencesContext = createContext({
   themeColor: DEFAULT_ACCENT,
-  setThemeColor: () => {}
+  setThemeColor: () => {},
+  memberDark: false
 })
 
 export const useThemePreferences = () => useContext(ThemePreferencesContext)
@@ -75,10 +77,12 @@ const withLinkChannel = (palette) => ({
 
 /**
  * `brand: true` is the guest's palette (ADR-074 §3): the brand's tone as the
- * primary. Signed in, the primary is the learner's accent.
+ * primary. Signed in, the primary is the learner's accent. `memberDark` is the
+ * near-black dark ladder behind the preview flag (ADR-082); it never applies
+ * to a guest.
  */
-export const buildDynamicTheme = (themeColor, { brand = false } = {}) => {
-  const generated = brand ? generateBrandScheme() : generateColorScheme(themeColor)
+export const buildDynamicTheme = (themeColor, { brand = false, memberDark = false } = {}) => {
+  const generated = brand ? generateBrandScheme() : generateColorScheme(themeColor, { memberDark })
   const colorScheme = { light: withLinkChannel(generated.light), dark: withLinkChannel(generated.dark) }
 
   return extendTheme({
@@ -102,6 +106,7 @@ export const DynamicThemeProvider = ({ children }) => {
   // The accent this device remembers, read once and before the first render,
   // so a member's reload does not start in the guest's colours (ADR-074 §3).
   const [storedAccent] = useState(readStoredAccent)
+  const [darkPreview] = useState(readDarkPreview)
   const [themeColor, setThemeColor] = useState(storedAccent ?? DEFAULT_ACCENT)
   const { user, loading } = useAuth()
   const { i18n } = useTranslation()
@@ -134,15 +139,17 @@ export const DynamicThemeProvider = ({ children }) => {
 
   // A guest wears the brand; a member wears their accent (ADR-074 §3).
   const isGuest = wearsBrand({ user, loading, storedAccent })
-  const dynamicTheme = useMemo(() => buildDynamicTheme(themeColor, { brand: isGuest }), [themeColor, isGuest])
+  const memberDark = darkPreview && !isGuest
+  const dynamicTheme = useMemo(() => buildDynamicTheme(themeColor, { brand: isGuest, memberDark }), [themeColor, isGuest, memberDark])
 
   // Context value
   const contextValue = useMemo(
     () => ({
       themeColor,
-      setThemeColor
+      setThemeColor,
+      memberDark
     }),
-    [themeColor]
+    [themeColor, memberDark]
   )
 
   return (
@@ -195,7 +202,9 @@ export const DynamicThemeProvider = ({ children }) => {
               backgroundAttachment: 'fixed',
               backgroundRepeat: 'no-repeat',
               backgroundSize: 'cover'
-            }
+            },
+            // ADR-082 §7: no accent glows on a member's near-black dark mode.
+            ...(memberDark ? { 'html[data-joy-color-scheme="dark"] body': { backgroundImage: 'none' } } : {})
           }}
         />
         {children}

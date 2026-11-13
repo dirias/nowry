@@ -25,6 +25,7 @@ import { formatGenerationReset, generationResetAt } from '@nowry/core/domain/pet
 import useUpgradesOpen from '@nowry/core/hooks/useUpgradesOpen'
 import GenerationProgress from '../Common/GenerationProgress'
 import StageJourney from './StageJourney'
+import { selectedCard } from '../Common/Form/formStyles'
 
 // ---------------------------------------------------------------------------
 // Static catalog data
@@ -182,8 +183,8 @@ const CompanionTab = ({
                 return (
                   <Grid key={slug} xs={6} sm={4} md={3}>
                     <Card
-                      variant={selected ? 'solid' : 'outlined'}
-                      color={selected ? 'primary' : 'neutral'}
+                      variant='outlined'
+                      color='neutral'
                       onClick={() => onSpeciesSelect(slug)}
                       role='radio'
                       aria-checked={selected}
@@ -201,6 +202,7 @@ const CompanionTab = ({
                         alignItems: 'center',
                         py: 1.25,
                         userSelect: 'none',
+                        ...selectedCard(selected),
                         '&:hover': { transform: 'translateY(-2px)', boxShadow: 'md' }
                       }}
                     >
