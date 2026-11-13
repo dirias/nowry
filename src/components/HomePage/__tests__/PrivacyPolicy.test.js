@@ -22,7 +22,6 @@ const SERVICES = [
   'Groq',
   'Text-to-Speech',
   'fal.ai',
-  'Langfuse',
   'Cloudinary',
   'Stripe',
   'Resend',
@@ -69,6 +68,8 @@ it('says sign-in is Firebase and the data is in MongoDB', () => {
 it('names every service that handles data', () => {
   const items = screen.getAllByRole('listitem').map((item) => item.textContent)
   for (const service of SERVICES) expect(items.some((item) => item.includes(service))).toBe(true)
-  expect(read('legal.privacy.services.items')).toHaveLength(12)
+  expect(read('legal.privacy.services.items')).toHaveLength(11)
+  // No deployed API sends Langfuse anything; it is named again when it is turned on (ACCOUNT-008).
+  expect(document.body.textContent).not.toContain('Langfuse')
   expect(items.some((item) => item.includes('all text, everything typed and all images are hidden'))).toBe(true)
 })

@@ -37,19 +37,15 @@ export const DELETE_ACCOUNT_PATH = '/delete-account'
  * Sentry: fixed by its plan; the Developer plan keeps events 30 days. Change this
  * with the plan.
  *
- * Langfuse (Hobby): keeps traces with no end date, and its API can find only the
- * last 30 days. Deleting an account deletes every trace the API remembered for it
- * (the `ai_traces` ledger) and every one Langfuse still finds; what is left is
- * traces older than 30 days made before the ledger reached production. Set
- * LANGFUSE_LEDGER_SINCE to that release day (ACCOUNT-007), and change
- * LANGFUSE_FINDABLE_DAYS with the plan.
+ * Langfuse is not named: no deployed API sends it anything. The API still keeps
+ * the `ai_traces` ledger and deletes an account's traces with it, so turning
+ * Langfuse on is a decision plus keys, and then the privacy policy and this page
+ * name it again (ACCOUNT-008).
  */
 export const SENTRY_RETENTION_DAYS = 30
-export const LANGFUSE_FINDABLE_DAYS = 30
-export const LANGFUSE_LEDGER_SINCE = '2026-11-13'
 
 export const LEGAL_TERMS_UPDATED = '2026-10-03'
-export const LEGAL_PRIVACY_UPDATED = '2026-11-13'
+export const LEGAL_PRIVACY_UPDATED = '2026-11-14'
 
 /** The address copyright notices reach. The registered agent's postal address joins it once registered. */
 export const COPYRIGHT_AGENT_EMAIL = 'copyright@nowry.app'
