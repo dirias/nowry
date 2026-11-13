@@ -16,7 +16,7 @@
  * already guard keep their guard.
  */
 import * as Sentry from '@sentry/react'
-import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
+import { GoogleAuthProvider, reauthenticateWithPopup, signInWithPopup } from 'firebase/auth'
 import { auth as firebaseAuth } from '../config/firebase.config'
 import {
   playPomodoroNotification,
@@ -64,7 +64,10 @@ export const webPlatform = {
      * mobile equivalent; the mobile adapter will use expo-auth-session and
      * return the same credential shape.
      */
-    signInWithGoogle: () => signInWithPopup(firebaseAuth, new GoogleAuthProvider())
+    signInWithGoogle: () => signInWithPopup(firebaseAuth, new GoogleAuthProvider()),
+
+    /** The signed-in Google user proves it again before a deletion (ADR-089). */
+    reauthenticateWithGoogle: () => reauthenticateWithPopup(firebaseAuth.currentUser, new GoogleAuthProvider())
   },
 
   /**

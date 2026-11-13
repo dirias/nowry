@@ -28,6 +28,7 @@
  * @property {() => object | null} currentUser
  * @property {(forceRefresh?: boolean) => Promise<string | null>} getIdToken
  * @property {() => Promise<object>} signInWithGoogle  web uses a popup, mobile expo-auth-session
+ * @property {() => Promise<object>} [reauthenticateWithGoogle]  the signed-in user proves it again (ADR-089)
  *
  * @typedef {Object} TelemetryAdapter
  * @property {(error: Error, options?: object) => void} captureException
@@ -183,7 +184,15 @@ export const auth = {
   currentUser: () => capability('auth').currentUser(),
   getIdToken: (forceRefresh = false) => capability('auth').getIdToken(forceRefresh),
   /** The one operation that genuinely differs: popup on web, expo-auth-session on mobile. */
-  signInWithGoogle: () => capability('auth').signInWithGoogle()
+  signInWithGoogle: () => capability('auth').signInWithGoogle(),
+  /** The signed-in Google user proves it again before a deletion (ADR-089). Optional in the port. */
+  reauthenticateWithGoogle: () => {
+    const adapter = capability('auth')
+    if (!isFunction(adapter.reauthenticateWithGoogle)) {
+      throw new PlatformAdapterError('auth', 'this client cannot re-authenticate with Google')
+    }
+    return adapter.reauthenticateWithGoogle()
+  }
 }
 
 /**

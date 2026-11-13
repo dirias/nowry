@@ -5,7 +5,7 @@
  * the only two files that know the shared layer runs somewhere in particular.
  */
 import Constants from 'expo-constants'
-import { auth as firebaseAuth, signInWithGoogle } from './firebase'
+import { auth as firebaseAuth, reauthenticateWithGoogle, signInWithGoogle } from './firebase'
 import { publishNotification, publishUnauthorized, subscribeToUnauthorized } from './notifications'
 import { mobileStorage } from './storage'
 import { mobileTelemetry } from './telemetry'
@@ -25,7 +25,8 @@ export const mobilePlatform = {
       const user = firebaseAuth.currentUser
       return user ? user.getIdToken(forceRefresh) : null
     },
-    signInWithGoogle
+    signInWithGoogle,
+    reauthenticateWithGoogle
   },
 
   env: {

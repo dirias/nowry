@@ -1100,14 +1100,24 @@
     },
     "deleteAccount": {
       "title": "Delete your account",
-      "message": "This deletes your account and everything in it: books, decks, cards, study history, plans, goals and notes. You are signed out at once, and everything is erased for good after 30 days.",
+      "message": "This deletes your account and everything in it: books, decks, cards, study history, plans, goals and notes. You are signed out at once, and everything is erased for good after 30 days. If you signed in more than 5 minutes ago, you'll be asked to sign in again first. Afterwards we email your address to say the account was deleted.",
       "emailLabel": "Confirm your email address",
       "emailPlaceholder": "Enter your email to confirm",
       "emailRequired": "Email address is required to confirm deletion",
       "emailMismatch": "Email address does not match. Please try again.",
       "confirmDisabled": "Enter email to confirm",
       "confirmEnabled": "Delete permanently",
-      "recoveryNotice": "Deleted after 30 days. Until then, if this was a mistake, write to support@nowry.app."
+      "recoveryNotice": "Deleted after 30 days. Until then, if this was a mistake, write to support@nowry.app.",
+      "reauth": {
+        "title": "Sign in again to delete",
+        "body": "You signed in more than 5 minutes ago. To make sure it's you, sign in again.",
+        "passwordLabel": "Your password",
+        "googleBody": "Continue with Google to confirm it's you.",
+        "googleButton": "Continue with Google",
+        "confirm": "Confirm and delete",
+        "wrongPassword": "That password isn't right. Try again.",
+        "failed": "We couldn't confirm it's you. Try again."
+      }
     },
     "exportData": {
       "error": "Failed to export data. Please try again."
@@ -2549,7 +2559,14 @@
           "finalizePlan": "Finalize Plan"
         }
       },
-      "examples": ["Career Growth", "Health & Vitality", "Financial Freedom", "Relationships", "Creative Pursuits", "Learning & Skills"]
+      "examples": [
+        "Career Growth",
+        "Health & Vitality",
+        "Financial Freedom",
+        "Relationships",
+        "Creative Pursuits",
+        "Learning & Skills"
+      ]
     },
     "priority": {
       "title": "Yearly Priorities",
@@ -3465,13 +3482,13 @@
       "web": [
         "Sign in at nowry.app.",
         "Open {{settings}} from the menu under your picture.",
-        "In {{danger}}, type your email address to confirm, then press {{button}}."
+        "In {{danger}}, type your email address to confirm, then press {{button}}. If you signed in more than 5 minutes ago, sign in again when asked."
       ],
       "androidTitle": "In the Android app",
       "android": [
         "Open Nowry and tap your picture at the top of the screen.",
         "Tap {{settings}}.",
-        "In {{danger}}, type your email address to confirm, then tap {{button}}."
+        "In {{danger}}, type your email address to confirm, then tap {{button}}. If you signed in more than 5 minutes ago, sign in again when asked."
       ],
       "emailTitle": "If you can't sign in",
       "email": "Write to support@nowry.app from the email address of your account, with the subject “Delete my account”. We reply to confirm, and delete the account within 7 days of your reply.",
@@ -3479,6 +3496,7 @@
       "nowTitle": "Removed at once",
       "now": [
         "You are signed out everywhere, and the account can no longer be opened.",
+        "An email to your account's address says the account was deleted. If it wasn't you, write to support@nowry.app within 30 days.",
         "Your email address and username are released: you can sign up again with the same address, and the new account starts empty.",
         "The images you uploaded.",
         "The links that send notifications to your phone.",
@@ -4908,5 +4926,12 @@
       "save": "Save"
     },
     "studyTitle": "Morning review"
+  },
+  "previousAccount": {
+    "title": "This address had a Nowry account",
+    "body": "This address had a Nowry account that was deleted on {{deletedOn}}. It will be erased for good on {{erasedOn}}.",
+    "mistake": "If you deleted it by mistake, write to support@nowry.app to recover it instead of starting over.",
+    "dismiss": "Got it",
+    "dismissAria": "Dismiss this notice"
   }
 }

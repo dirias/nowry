@@ -1059,14 +1059,24 @@
     },
     "deleteAccount": {
       "title": "Eliminar tu cuenta",
-      "message": "Esto elimina tu cuenta y todo lo que contiene: libros, mazos, tarjetas, historial de estudio, planes, metas y notas. Se cierra tu sesión al instante, y todo se borra definitivamente a los 30 días.",
+      "message": "Esto elimina tu cuenta y todo lo que contiene: libros, mazos, tarjetas, historial de estudio, planes, metas y notas. Se cierra tu sesión al instante, y todo se borra definitivamente a los 30 días. Si iniciaste sesión hace más de 5 minutos, primero te pediremos que la inicies de nuevo. Después enviamos un correo a tu dirección para avisar de que la cuenta se eliminó.",
       "emailLabel": "Confirma tu dirección de correo",
       "emailPlaceholder": "Escribe tu correo para confirmar",
       "emailRequired": "Se necesita la dirección de correo para confirmar la eliminación",
       "emailMismatch": "La dirección de correo no coincide. Inténtalo de nuevo.",
       "confirmDisabled": "Escribe tu correo para confirmar",
       "confirmEnabled": "Eliminar permanentemente",
-      "recoveryNotice": "Se borra a los 30 días. Hasta entonces, si fue un error, escribe a support@nowry.app."
+      "recoveryNotice": "Se borra a los 30 días. Hasta entonces, si fue un error, escribe a support@nowry.app.",
+      "reauth": {
+        "title": "Inicia sesión de nuevo para eliminar",
+        "body": "Iniciaste sesión hace más de 5 minutos. Para asegurarnos de que eres tú, vuelve a iniciarla.",
+        "passwordLabel": "Tu contraseña",
+        "googleBody": "Continúa con Google para confirmar que eres tú.",
+        "googleButton": "Continuar con Google",
+        "confirm": "Confirmar y eliminar",
+        "wrongPassword": "La contraseña no es correcta. Inténtalo de nuevo.",
+        "failed": "No pudimos confirmar que eres tú. Inténtalo de nuevo."
+      }
     },
     "exportData": {
       "error": "No se pudieron exportar los datos. Inténtalo de nuevo."
@@ -3050,13 +3060,13 @@
       "web": [
         "Inicia sesión en nowry.app.",
         "Abre {{settings}} desde el menú bajo tu foto.",
-        "En {{danger}}, escribe tu dirección de correo para confirmar y pulsa {{button}}."
+        "En {{danger}}, escribe tu dirección de correo para confirmar y pulsa {{button}}. Si iniciaste sesión hace más de 5 minutos, vuelve a iniciarla cuando se te pida."
       ],
       "androidTitle": "En la aplicación de Android",
       "android": [
         "Abre Nowry y toca tu foto en la parte superior de la pantalla.",
         "Toca {{settings}}.",
-        "En {{danger}}, escribe tu dirección de correo para confirmar y toca {{button}}."
+        "En {{danger}}, escribe tu dirección de correo para confirmar y toca {{button}}. Si iniciaste sesión hace más de 5 minutos, vuelve a iniciarla cuando se te pida."
       ],
       "emailTitle": "Si no puedes iniciar sesión",
       "email": "Escribe a support@nowry.app desde la dirección de correo de tu cuenta, con el asunto «Eliminar mi cuenta». Te respondemos para confirmar y eliminamos la cuenta en un plazo de 7 días desde tu respuesta.",
@@ -3064,6 +3074,7 @@
       "nowTitle": "Se elimina al instante",
       "now": [
         "Se cierra tu sesión en todas partes y la cuenta ya no se puede abrir.",
+        "Un correo a la dirección de tu cuenta avisa de que se eliminó. Si no fuiste tú, escribe a support@nowry.app en un plazo de 30 días.",
         "Tu dirección de correo y tu nombre de usuario quedan libres: puedes registrarte de nuevo con la misma dirección, y la cuenta nueva empieza vacía.",
         "Las imágenes que subiste.",
         "Los enlaces que envían notificaciones a tu teléfono.",
@@ -4915,5 +4926,12 @@
       "save": "Guardar"
     },
     "studyTitle": "Repaso matutino"
+  },
+  "previousAccount": {
+    "title": "Esta dirección tenía una cuenta de Nowry",
+    "body": "Esta dirección tenía una cuenta de Nowry que se eliminó el {{deletedOn}}. Se borrará definitivamente el {{erasedOn}}.",
+    "mistake": "Si la eliminaste por error, escribe a support@nowry.app para recuperarla en lugar de empezar de cero.",
+    "dismiss": "Entendido",
+    "dismissAria": "Cerrar este aviso"
   }
 }

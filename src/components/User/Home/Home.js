@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import CalendarMonthRoundedIcon from '@mui/icons-material/CalendarMonthRounded'
 import FocusBar from './FocusBar'
 import OnboardingSurfaces from './OnboardingSurfaces'
+import PreviousAccountNotice from './PreviousAccountNotice'
 import SideMenu from './SideMenu'
 import NewsCarousel from './NewsCarousel'
 import TodayObject from '../../Study/TodayObject'
@@ -61,6 +62,9 @@ function Home() {
         onboarding by itself.
       */}
       <OnboardingSurfaces />
+
+      {/* A deleted account with this address, within its 30 days (ADR-089, FR-041). */}
+      <PreviousAccountNotice />
 
       {/* Header — the greeting. The "N due" pill that sat on the right was a
           clickable Box a keyboard could not reach and a duplicate of the Today

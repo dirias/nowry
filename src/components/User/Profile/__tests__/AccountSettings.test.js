@@ -26,6 +26,10 @@ const mockUserService = {
   updateGeneralPreferences: jest.fn()
 }
 jest.mock('@nowry/core/api/services', () => ({ userService: mockUserService }))
+// The deletion dialog's hook reads these two directly (ADR-089).
+jest.mock('@nowry/core/api/services/user.service', () => ({ userService: mockUserService }))
+const mockAuthService = { signInTime: jest.fn(), signInProviders: () => ['password'], reauthenticate: jest.fn() }
+jest.mock('@nowry/core/api/services/auth.service', () => ({ authService: mockAuthService }))
 jest.mock('@nowry/core/api/services/agent.service', () => ({ agentService: { updatePrefs: jest.fn() } }))
 jest.mock('@nowry/core/platform', () => ({ alerts: { toast: jest.fn(), confirm: jest.fn() } }))
 jest.mock('@nowry/core/context/AuthContext', () => ({
@@ -73,7 +77,8 @@ const renderPage = async () => {
 }
 
 const openDeleteModal = () => fireEvent.click(screen.getByRole('button', { name: 'settings.dangerZone.deleteButton' }))
-const confirmButton = () => screen.getByRole('button', { name: 'settings.deleteAccount.title' })
+const confirmButton = (name = 'settings.deleteAccount.confirmDisabled') => screen.getByRole('button', { name })
+const freshSignIn = () => mockAuthService.signInTime.mockResolvedValue(Math.floor(Date.now() / 1000) - 30)
 const emailField = () => screen.getByPlaceholderText('settings.deleteAccount.emailPlaceholder')
 
 beforeEach(() => {
@@ -95,25 +100,46 @@ describe('deleting the account', () => {
     expect(mockUserService.deleteAccount).not.toHaveBeenCalled()
   })
 
-  it('calls the service once, clears storage and leaves for the landing page', async () => {
+  it('calls the service once in the reader language, clears storage and leaves for the landing page', async () => {
+    freshSignIn()
     mockUserService.deleteAccount.mockResolvedValue({})
     localStorage.setItem('nowry.something', '1')
     await renderPage()
     openDeleteModal()
     fireEvent.change(emailField(), { target: { value: 'ana@example.com' } })
-    expect(confirmButton()).toBeEnabled()
-    fireEvent.click(confirmButton())
+    expect(confirmButton('settings.deleteAccount.confirmEnabled')).toBeEnabled()
+    fireEvent.click(confirmButton('settings.deleteAccount.confirmEnabled'))
     await waitFor(() => expect(mockUserService.deleteAccount).toHaveBeenCalledTimes(1))
+    expect(mockUserService.deleteAccount).toHaveBeenCalledWith('en')
     await waitFor(() => expect(window.location.href).toBe('/'))
     expect(localStorage.getItem('nowry.something')).toBeNull()
   })
 
+  it('asks for the password again when the sign-in is old, then deletes (ADR-089)', async () => {
+    mockAuthService.signInTime.mockResolvedValue(Math.floor(Date.now() / 1000) - 3600)
+    mockAuthService.reauthenticate.mockResolvedValue()
+    mockUserService.deleteAccount.mockResolvedValue({})
+    await renderPage()
+    openDeleteModal()
+    fireEvent.change(emailField(), { target: { value: 'ana@example.com' } })
+    fireEvent.click(confirmButton('settings.deleteAccount.confirmEnabled'))
+    expect(await screen.findByText('settings.deleteAccount.reauth.body')).toBeInTheDocument()
+    expect(mockUserService.deleteAccount).not.toHaveBeenCalled()
+    fireEvent.change(screen.getByLabelText('settings.deleteAccount.reauth.passwordLabel', { exact: false }), {
+      target: { value: 'Str0ng-enough!' }
+    })
+    fireEvent.click(confirmButton('settings.deleteAccount.reauth.confirm'))
+    await waitFor(() => expect(mockUserService.deleteAccount).toHaveBeenCalledTimes(1))
+    expect(mockAuthService.reauthenticate).toHaveBeenCalledWith({ method: 'password', password: 'Str0ng-enough!' })
+  })
+
   it("shows the API's refusal and keeps the account", async () => {
+    freshSignIn()
     mockUserService.deleteAccount.mockRejectedValue({ response: { data: { detail: 'You have 1 public deck(s). Unpublish first.' } } })
     await renderPage()
     openDeleteModal()
     fireEvent.change(emailField(), { target: { value: 'ana@example.com' } })
-    fireEvent.click(confirmButton())
+    fireEvent.click(confirmButton('settings.deleteAccount.confirmEnabled'))
     expect(await screen.findByText('You have 1 public deck(s). Unpublish first.')).toBeInTheDocument()
     expect(window.location.href).toBe('/settings')
   })
