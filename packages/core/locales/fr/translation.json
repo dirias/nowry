@@ -480,7 +480,8 @@
       "errors": {
         "codeRequired": "Le code de vérification est requis",
         "codeLength": "Le code doit comporter 6 chiffres"
-      }
+      },
+      "googleNote": "Si vous vous êtes inscrit avec Google, vous n'avez pas de mot de passe ; utilisez {{button}}."
     },
     "newHere": "Nouveau ici ?",
     "loginRequired": "Connectez-vous pour continuer.",

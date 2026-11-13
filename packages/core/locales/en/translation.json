@@ -405,7 +405,8 @@
       "errors": {
         "codeRequired": "Verification code is required",
         "codeLength": "Code must be 6 digits"
-      }
+      },
+      "googleNote": "If you signed up with Google, you don't have a password; use {{button}}."
     },
     "newHere": "New here?",
     "loginRequired": "Sign in to continue.",

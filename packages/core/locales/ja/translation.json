@@ -433,7 +433,8 @@
       "errors": {
         "codeRequired": "確認コードは必須です",
         "codeLength": "コードは6桁である必要があります"
-      }
+      },
+      "googleNote": "Google で登録した場合、パスワードはありません。「{{button}}」をご利用ください。"
     },
     "newHere": "はじめての方ですか？",
     "loginRequired": "続けるにはサインインしてください。",

@@ -469,7 +469,8 @@
       "errors": {
         "codeRequired": "Bestätigungscode ist erforderlich",
         "codeLength": "Code muss 6 Ziffern haben"
-      }
+      },
+      "googleNote": "Wenn du dich mit Google registriert hast, hast du kein Passwort; nutze {{button}}."
     },
     "newHere": "Neu hier?",
     "loginRequired": "Melde dich an, um fortzufahren.",

@@ -405,7 +405,8 @@
       "errors": {
         "codeRequired": "El código de verificación es obligatorio",
         "codeLength": "El código debe tener 6 dígitos"
-      }
+      },
+      "googleNote": "Si te registraste con Google, no tienes contraseña; usa {{button}}."
     },
     "newHere": "¿Eres nuevo aquí?",
     "loginRequired": "Inicia sesión para continuar.",

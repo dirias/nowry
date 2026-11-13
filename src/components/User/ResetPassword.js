@@ -48,8 +48,12 @@ const ResetPassword = () => {
           <Typography level='h3' mb={1}>
             {t('auth.resetPassword.successTitle')}
           </Typography>
-          <Typography level='body-md' sx={{ color: 'text.secondary', mb: 4 }}>
+          <Typography level='body-md' sx={{ color: 'text.secondary', mb: 1.5 }}>
             {t('auth.resetPassword.successMsg')}
+          </Typography>
+          {/* For everyone, whatever the address (FR-032): a Google sign-in has no password to reset. */}
+          <Typography level='body-sm' sx={{ color: 'text.secondary', mb: 4 }}>
+            {t('auth.resetPassword.googleNote', { button: t('auth.signInGoogle') })}
           </Typography>
           <Button size='lg' fullWidth onClick={() => navigate('/login')}>
             {t('auth.resetPassword.goToLogin')}
