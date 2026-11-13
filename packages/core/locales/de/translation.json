@@ -4205,7 +4205,7 @@
     "waitlist": {
       "title": "In die Warteliste eintragen",
       "cta": "Eintragen",
-      "sent": "Du stehst auf der Liste. Wir schreiben dir, sobald der Early Access startet.",
+      "sent": "Erledigt. Wenn es das erste Mal ist, haben wir dir eine Bestätigungs-E-Mail geschickt. Wenn du schon auf der Liste warst, bist du es weiterhin; sonst ist nichts zu tun.",
       "failed": "Das hat nicht geklappt. Versuch es gleich noch einmal.",
       "purpose": "Eine E-Mail zur Bestätigung, eine zum Start des Early Access. Aus beiden kannst du die Liste verlassen.",
       "leave": {

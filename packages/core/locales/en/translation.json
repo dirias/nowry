@@ -4733,7 +4733,7 @@
     "waitlist": {
       "title": "Join the waitlist",
       "cta": "Join the waitlist",
-      "sent": "You're on the list. We'll write when early access opens.",
+      "sent": "Done. If this is your first time, we've sent you a confirmation email. If you were already on the list, you're still on it; nothing else to do.",
       "failed": "That didn't go through. Try again in a moment.",
       "purpose": "One email to confirm, one when early access opens. You can leave the list from either.",
       "leave": {
