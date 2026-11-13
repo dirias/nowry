@@ -17,6 +17,8 @@ test('[happy] sign-up with a password and the dev-test code, then email verifica
   expect(before.beta_cohort).toBe('dev')
   expect(before.email_verified).toBe(false)
   await verifyEmail(page, email, started)
+  // The account record follows Firebase on the person's next request.
+  await page.goto('/')
   await expect.poll(async () => (await db('account', email)).live.email_verified, { timeout: 30000 }).toBe(true)
 })
 
@@ -31,6 +33,7 @@ test('[happy] onboarding with an interest: news follows without a refresh; compa
   await page.waitForURL((url) => url.pathname === '/onboarding', { timeout: 60000 })
   await page.getByRole('button', { name: 'Get Started' }).click()
   await page.getByRole('button', { name: 'Science', exact: true }).click()
+  await page.getByRole('radio', { name: 'General Knowledge' }).check({ force: true })
   await page.getByRole('button', { name: 'Choose Your First Deck' }).click()
   await page.getByRole('button', { name: 'Finish for Now' }).click()
   await page.waitForURL((url) => url.pathname === '/', { timeout: 60000 })

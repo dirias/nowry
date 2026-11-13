@@ -5,8 +5,7 @@ const { api, makeAccount } = require('../lib/api')
 const { emails, waitForEmails, linkIn } = require('../lib/outbox')
 const { db } = require('../lib/db')
 
-test.describe.configure({ mode: 'serial' })
-
+// One file, one worker: the scenarios run in order, and a failure does not stop the next.
 const join = async (email) => {
   const client = await api()
   for (let attempt = 0; attempt < 3; attempt++) {
@@ -30,6 +29,13 @@ test('[happy] a new address joins from the hero and gets one confirmation', asyn
 })
 
 test('[edge] joining again answers alike and sends nothing', async () => {
+  const [first] = await emails(email(), 'waitlist.confirm')
+  if (first.outcome !== 'sent') {
+    test.info().annotations.push({
+      type: 'finding',
+      description: `The first confirmation was not sent (${first.outcome}), and the API retries it on the repeat. FR-034 says a waiting address is sent nothing; the API sends a confirmation that never left. Decide which is meant.`
+    })
+  }
   expect((await join(email())).status()).toBe(201)
   await new Promise((resolve) => setTimeout(resolve, 6000))
   expect(await emails(email(), 'waitlist.confirm')).toHaveLength(1)
@@ -43,6 +49,13 @@ test('[edge] leaving from the email, then joining again, sends nothing new', asy
   expect((await db('waitlist', email())).row.status).toBe('left')
   expect((await join(email())).status()).toBe(201)
   await expect.poll(async () => (await db('waitlist', email())).row.status, { timeout: 30000 }).toBe('waiting')
+  const [first] = await emails(email(), 'waitlist.confirm')
+  if (first.outcome !== 'sent') {
+    test.info().annotations.push({
+      type: 'finding',
+      description: `Same cause as the repeat: the confirmation was never sent (${first.outcome}), so the rejoin sends it again.`
+    })
+  }
   await new Promise((resolve) => setTimeout(resolve, 6000))
   expect(await emails(email(), 'waitlist.confirm')).toHaveLength(1)
 })

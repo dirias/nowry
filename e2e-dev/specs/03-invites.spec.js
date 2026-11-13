@@ -9,8 +9,6 @@ const { api, bearer, makeAccount, firebaseSignUp, firebaseSignIn, applyOobCode }
 const { waitForEmails, linkIn } = require('../lib/outbox')
 const { db } = require('../lib/db')
 
-test.describe.configure({ mode: 'serial' })
-
 let adminToken
 const invite = async (email) => {
   const client = await api()
@@ -27,7 +25,10 @@ const usable = async (token) => {
 
 test.beforeAll(async () => {
   const admin = alias('admin')
-  await makeAccount(admin)
+  // A failed test restarts its worker and this runs again: the account may already exist.
+  await makeAccount(admin).catch((error) => {
+    if (!String(error.message).includes('EMAIL_EXISTS')) throw error
+  })
   await db('make-admin', admin)
   adminToken = (await firebaseSignIn(admin)).idToken
 })
@@ -41,10 +42,14 @@ test('[happy] sign-up with a personal invitation, confirmed by email', async ({ 
   await expect(page.getByText(email).first()).toBeVisible({ timeout: 30000 })
   expect((await db('account', email)).live, 'no account before the email is confirmed').toBeNull()
   await verifyEmail(page, email, started)
-  await page
-    .getByRole('button', { name: /Finish signing up|Open Nowry/ })
-    .first()
-    .click()
+  await page.getByText('Finish signing up', { exact: true }).click()
+  // The held sign-up finishes on its own screen (INVITE-005): one more press after confirming.
+  test.info().annotations.push({
+    type: 'observation',
+    description:
+      'Opened in the same tab, "Finish signing up" returns to "Confirm your email", and the account is made only after "I\'ve confirmed": one press more than needed.'
+  })
+  await page.getByRole('button', { name: "I've confirmed" }).click()
   await expect.poll(async () => (await db('account', email)).live?.beta_cohort, { timeout: 60000 }).toBe('e2e')
 })
 

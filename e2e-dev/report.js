@@ -46,6 +46,12 @@ const walk = (suite, file) => {
         status: last.status || 'skipped',
         ms: last.duration || 0,
         error: last.error ? (last.error.message || '').split('\n').slice(0, 4).join('\n') : '',
+        notes: [...(t.annotations || []), ...(last.annotations || [])]
+          .filter((a) => a.description)
+          .map(
+            (a) =>
+              `${a.type === 'skip' ? 'Skipped' : a.type === 'finding' ? 'Finding' : a.type === 'observation' ? 'Observation' : a.type}: ${a.description}`
+          ),
         shot: shot ? fs.readFileSync(shot.path).toString('base64') : null
       })
     }
@@ -68,10 +74,15 @@ const section = (name) => {
       (r) =>
         `<tr><td>${esc(r.title.replace(/^\[\w+\]\s*/, ''))}<div class="muted small">${esc(path.basename(r.file || ''))}</div>${
           r.error ? `<pre>${esc(r.error)}</pre>` : ''
-        }${r.shot ? `<img alt="Screenshot at the failure" src="data:image/png;base64,${r.shot}">` : ''}</td><td>${pill(r.status)}</td><td class="num">${(r.ms / 1000).toFixed(1)} s</td></tr>`
+        }${r.notes && r.notes.length ? r.notes.map((n) => `<p class="note">${esc(n)}</p>`).join('') : ''}${r.shot ? `<img alt="Screenshot at the failure" src="data:image/png;base64,${r.shot}">` : ''}</td><td>${pill(r.status)}</td><td class="num">${(r.ms / 1000).toFixed(1)} s</td></tr>`
     )
     .join('')}</table></div>`
 }
+
+const limits = [
+  'One full run per clock hour from one network: the API sends at most 10 verification emails per caller address per hour, and a run asks for about 7.',
+  "The development email allowance is 10 a day (one Resend account with production). Past it, emails are kept in the outbox but not sent; Firebase then sends its own reset email, whose new code cancels the one the suite read, so the reset scenario is skipped."
+]
 
 const manual = [
   'Google re-authentication before deleting (the popup on the web, the native sheet on the phone).',
@@ -98,7 +109,7 @@ th,td{text-align:left;vertical-align:top;padding:10px 14px;border-bottom:1px sol
 .pill{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px}.ok{background:var(--okbg);color:var(--ok)}.bad{background:var(--badbg);color:var(--bad)}.soft{background:var(--softbg);color:var(--soft)}
 .muted{color:var(--muted)}.small{font-size:13px}.num{font-variant-numeric:tabular-nums;white-space:nowrap}
 pre{white-space:pre-wrap;overflow-wrap:anywhere;font:12.5px/1.5 ui-monospace,Menlo,monospace;background:var(--surface);border-radius:8px;padding:8px 10px;margin:8px 0 0}
-img{max-width:100%;border:1px solid var(--line);border-radius:8px;margin-top:8px;display:block}ul{margin:0;padding-left:20px}code{font-family:ui-monospace,Menlo,monospace;font-size:.9em}
+p.note{margin:8px 0 0;font-size:13.5px;background:var(--softbg);border-radius:8px;padding:8px 10px}img{max-width:100%;border:1px solid var(--line);border-radius:8px;margin-top:8px;display:block}ul{margin:0;padding-left:20px}code{font-family:ui-monospace,Menlo,monospace;font-size:.9em}
 </style>
 <div class="page">
 <span class="muted small">Dev end-to-end suite · run ${esc(run.run)} · ${esc(new Date(run.started).toUTCString())}</span>
@@ -106,6 +117,7 @@ img{max-width:100%;border:1px solid var(--line);border-radius:8px;margin-top:8px
 <p class="verdict">${passed} passed, ${failed} failed, ${rows.length - passed - failed} skipped, against dev.nowry.app and the development API through Vercel's automation bypass. Accounts made by the run were removed at the end.</p>
 <div class="facts"><span><b>Web</b> <code>${esc(git(WEB_ROOT, 'rev-parse', '--short', 'origin/dev'))}</code> (origin/dev)</span><span><b>API</b> <code>${esc(apiDeployed)}</code> (deployed on development)</span><span><b>Site</b> https://www.dev.nowry.app</span></div>
 ${section('Smoke')}${section('Happy paths')}${section('Edge cases')}
+<h2>Limits of this run</h2><ul>${limits.map((m) => `<li>${esc(m)}</li>`).join('')}</ul>
 <h2>Needs you, by hand</h2><ul>${manual.map((m) => `<li>${esc(m)}</li>`).join('')}</ul>
 </div>`
 
