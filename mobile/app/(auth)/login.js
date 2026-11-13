@@ -17,7 +17,8 @@ import { Link } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { authService } from '@nowry/core/api/services'
 import { authErrorKey } from '@nowry/core/domain/authErrors'
-import { isInviteRefusal } from '@nowry/core/domain/beta'
+import { useAuth } from '@nowry/core/context/AuthContext'
+import { signInProblem, signInProblemKey } from '@nowry/core/domain/signInProblem'
 import { Button, FormField, Input, Stack, Typography } from '../../src/ui'
 import { AuthDivider, AuthFooter, AuthLegal, AuthShell } from '../../src/ui/patterns/AuthShell'
 
@@ -28,6 +29,22 @@ export default function Login() {
   const [errors, setErrors] = useState({})
   const [busy, setBusy] = useState(false)
   const [googleBusy, setGoogleBusy] = useState(false)
+  // Why the last sign-in had no account to open (ADR-083), kept by the auth
+  // context when the profile read met it; shown until the next attempt.
+  const { signInProblem: keptProblem, clearSignInProblem } = useAuth()
+  // The private beta names the waitlist, as Register does (ADR-083 case 3).
+  const formKey = errors.form ?? (keptProblem === 'invite' ? 'beta.phone.inviteRequired' : signInProblemKey(keptProblem))
+
+  /*
+   * ADR-038, ADR-083: an identity the API will not answer with an account (no
+   * invite, an unconfirmed address, no account, a conflict) is signed out and
+   * told which. Anything else reads through the shared Firebase table.
+   */
+  const failWith = async (error) => {
+    const reason = signInProblem(error)
+    if (reason) await authService.logout().catch(() => {})
+    setErrors({ form: reason === 'invite' ? 'beta.phone.inviteRequired' : reason ? signInProblemKey(reason) : authErrorKey(error) })
+  }
 
   const submit = async () => {
     const next = {}
@@ -36,16 +53,14 @@ export default function Login() {
     setErrors(next)
     if (Object.keys(next).length) return
 
+    clearSignInProblem()
     setBusy(true)
     try {
       await authService.login(email.trim(), password)
       // No navigation here: AuthGate moves us the moment the session resolves,
       // so success has exactly one code path whatever caused it.
     } catch (error) {
-      // ADR-038: a Firebase identity with no Nowry account, while invites are
-      // required, is told to register with a code.
-      if (isInviteRefusal(error)) await authService.logout().catch(() => {})
-      setErrors({ form: isInviteRefusal(error) ? 'beta.phone.inviteRequired' : authErrorKey(error) })
+      await failWith(error)
     } finally {
       // The password is never logged and never stored. It leaves this scope here.
       setPassword('')
@@ -61,13 +76,13 @@ export default function Login() {
    */
   const submitGoogle = async () => {
     setErrors({})
+    clearSignInProblem()
     setGoogleBusy(true)
     try {
       // null means the user dismissed the browser. Nothing to say about that.
       await authService.loginWithGoogle()
     } catch (error) {
-      if (isInviteRefusal(error)) await authService.logout().catch(() => {})
-      setErrors({ form: isInviteRefusal(error) ? 'beta.phone.inviteRequired' : authErrorKey(error) })
+      await failWith(error)
     } finally {
       setGoogleBusy(false)
     }
@@ -79,9 +94,9 @@ export default function Login() {
       subtitle={t('auth.signInSubtitle')}
       footer={<AuthFooter prompt={t('auth.newHere')} href='/register' label={t('landing.hero.cta')} />}
     >
-      {errors.form ? (
+      {formKey ? (
         <Typography level='body-sm' color='danger.plainColor' accessibilityLiveRegion='polite'>
-          {t(errors.form)}
+          {t(formKey)}
         </Typography>
       ) : null}
 

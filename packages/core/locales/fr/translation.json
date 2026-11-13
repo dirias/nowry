@@ -513,6 +513,11 @@
       "failed": "L'envoi a échoué. Réessayez dans un instant.",
       "notYet": "Pas encore confirmé. Ouvrez d'abord le lien dans l'e-mail.",
       "done": "Votre e-mail est confirmé."
+    },
+    "signInProblem": {
+      "invite": "Nowry est en bêta privée. Il vous faut une invitation pour créer un compte.",
+      "verifyEmail": "Confirmez d'abord votre adresse e-mail. Ouvrez le lien que nous vous avons envoyé, puis reconnectez-vous.",
+      "account": "Il y a un problème avec votre compte. Écrivez-nous à support@nowry.app."
     }
   },
   "landing": {

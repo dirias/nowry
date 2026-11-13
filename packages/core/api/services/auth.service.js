@@ -13,6 +13,7 @@ import { auth as authPort, session, storage } from '../../platform'
 import { apiClient } from '../client'
 import { usernameFor } from '../../domain/username'
 import { inviteHeaders, isVerifyEmailRefusal } from '../../domain/beta'
+import { isEmailUnverifiedRefusal } from '../../domain/signInProblem'
 
 /**
  * The sign-up in flight, if any (QA-024).
@@ -153,6 +154,17 @@ export const authService = {
           if (isVerifyEmailRefusal(error)) {
             holdSignUp(inviteCode, username)
             await this.sendVerification(langCode).catch(() => {})
+          } else if (isEmailUnverifiedRefusal(error)) {
+            /*
+             * ADR-083: the address already belongs to an account, and this new
+             * identity has not proved it owns it. Send the link to the address,
+             * then close the identity: once the link is opened, signing in with
+             * this password re-links the account on the server. Nothing is
+             * held; there is no sign-up left to finish.
+             */
+            await this.sendVerification(langCode).catch(() => {})
+            storage.remove('firebase_token')
+            await signOut(firebaseAuth()).catch(() => {})
           }
           throw error
         })

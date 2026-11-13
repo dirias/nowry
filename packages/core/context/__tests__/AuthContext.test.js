@@ -314,3 +314,103 @@ test('a gate refusal on any later request drops a profile that was being held', 
   expect(read().isAuthenticated).toBe(false)
   expect(storage.get('NOWRY_LAST_PROFILE')).toBeFalsy()
 })
+
+/*
+ * ADR-083 / FR-031 — a sign-in the API cannot answer with an account always
+ * says why. Found on dev, 14 November 2026: a Google account whose stored
+ * Firebase id was gone read 404 from /users/me and was sent to /login with
+ * nothing said, still signed in to Firebase.
+ */
+const refusedWith = (status, code) => Object.assign(new Error('no'), { response: { status, data: code ? { detail: { code } } : {} } })
+
+test.each([
+  ['no account found (404)', refusedWith(404), 'account'],
+  ['a sign-in conflict', refusedWith(409, 'account_conflict'), 'account'],
+  ['an unconfirmed address', refusedWith(409, 'email_unverified'), 'verifyEmail'],
+  ['the invite refusal', refusedWith(403, 'beta_invite_required'), 'invite'],
+  ['the confirm-email refusal', refusedWith(403, 'invite_verify_email'), 'verifyEmail']
+])('%s keeps its reason for the sign-in page and closes the session', async (_label, error, reason) => {
+  apiClient.get.mockRejectedValue(error)
+  const read = renderWithConsumer()
+  await act(async () => {
+    await mockAuthCallback({ uid: 'uid-orphan' })
+  })
+  expect(read().user).toBeNull()
+  expect(read().signInProblem).toBe(reason)
+  expect(mockSignOut).toHaveBeenCalledTimes(1)
+  expect(platform.storage.get('NOWRY_SIGNIN_PROBLEM')).toBe(reason)
+})
+
+test('a 404 is no longer read as being offline: the kept profile is not restored', async () => {
+  apiClient.get.mockResolvedValue({ data: { username: 'didier' } })
+  renderWithConsumer()
+  await act(async () => {
+    await mockAuthCallback({ uid: 'u1' })
+  })
+
+  apiClient.get.mockRejectedValue(refusedWith(404))
+  const read = renderWithConsumer()
+  await act(async () => {
+    await mockAuthCallback({ uid: 'u1' })
+  })
+  expect(read().user).toBeNull()
+  expect(platform.storage.get('NOWRY_LAST_PROFILE')).toBeFalsy()
+})
+
+test('a held sign-up keeps its identity and says nothing on the sign-in page', async () => {
+  mockHeldSignUp.mockReturnValue({ inviteCode: 'nwi_x', username: 'yo', email: 'yo@example.com' })
+  apiClient.get.mockRejectedValue(refusedWith(403, 'invite_verify_email'))
+  const read = renderWithConsumer()
+  await act(async () => {
+    await mockAuthCallback({ uid: 'uid-waiting' })
+  })
+  expect(read().signInProblem).toBeNull()
+  expect(mockSignOut).not.toHaveBeenCalled()
+})
+
+test('a held sign-up does not hide an account problem', async () => {
+  mockHeldSignUp.mockReturnValue({ inviteCode: 'nwi_x', username: 'yo', email: 'yo@example.com' })
+  apiClient.get.mockRejectedValue(refusedWith(404))
+  const read = renderWithConsumer()
+  await act(async () => {
+    await mockAuthCallback({ uid: 'uid-x' })
+  })
+  expect(read().signInProblem).toBe('account')
+  expect(mockSignOut).toHaveBeenCalledTimes(1)
+})
+
+test('the reason survives a reload once, and a new attempt clears it', async () => {
+  platform.storage.set('NOWRY_SIGNIN_PROBLEM', 'account')
+  const read = renderWithConsumer()
+  expect(read().signInProblem).toBe('account')
+  expect(platform.storage.get('NOWRY_SIGNIN_PROBLEM')).toBeFalsy()
+
+  act(() => read().clearSignInProblem())
+  expect(read().signInProblem).toBeNull()
+})
+
+test('something stored that is not a reason is ignored', () => {
+  platform.storage.set('NOWRY_SIGNIN_PROBLEM', 'whatever')
+  const read = renderWithConsumer()
+  expect(read().signInProblem).toBeNull()
+})
+
+test('a profile that arrives clears an earlier reason', async () => {
+  platform.storage.set('NOWRY_SIGNIN_PROBLEM', 'invite')
+  apiClient.get.mockResolvedValue({ data: { username: 'ana' } })
+  const read = renderWithConsumer()
+  await act(async () => {
+    await mockAuthCallback({ uid: 'u1' })
+  })
+  expect(read().signInProblem).toBeNull()
+})
+
+test('a server fault keeps the session and names no reason', async () => {
+  apiClient.get.mockRejectedValue(refusedWith(500))
+  const read = renderWithConsumer()
+  await act(async () => {
+    await mockAuthCallback({ uid: 'u1' })
+  })
+  expect(read().signInProblem).toBeNull()
+  expect(mockSignOut).not.toHaveBeenCalled()
+})

@@ -34,6 +34,7 @@ import { getUsernameValidationError } from '@nowry/core/utils/usernameValidation
 import { authErrorKey, FALLBACK_KEY } from '@nowry/core/domain/authErrors'
 import { passwordLongEnough } from '@nowry/core/domain/authRules'
 import { inviteFromSearch, isInviteRefusal, isVerifyEmailRefusal } from '@nowry/core/domain/beta'
+import { isEmailUnverifiedRefusal, signInProblem as classifySignInProblem, signInProblemKey } from '@nowry/core/domain/signInProblem'
 import { betaService } from '@nowry/core/api/services/beta.service'
 import { useBeta } from '@nowry/core/context/BetaContext'
 import WaitlistForm from '../Public/WaitlistForm'
@@ -229,6 +230,11 @@ const Register = () => {
           newErrors.username = t('settings.account.usernameInvalid')
         } else if (isInviteRefusal(error)) {
           newErrors.inviteCode = t('beta.inviteInvalid')
+        } else if (isEmailUnverifiedRefusal(error)) {
+          // ADR-083: the address already has an account. The link went to it
+          // and the new identity is signed out; confirming then signing in
+          // with this password opens that account.
+          newErrors.serverError = t('auth.signInProblem.verifyEmail')
         } else {
           // Through the shared table, as Login does: `error.message` is
           // Firebase's English ("Firebase: Error (auth/email-already-in-use).")
@@ -268,6 +274,15 @@ const Register = () => {
         // out so the guard does not treat them as signed in, and say why.
         await authService.logout().catch(() => {})
         setErrors({ serverError: t('beta.inviteRequired'), inviteCode: t('beta.inviteInvalid') })
+        setLoading(false)
+        return
+      }
+
+      // ADR-083: an unconfirmed address, no account or a conflict. Sign out and say which.
+      const reason = classifySignInProblem(error)
+      if (reason) {
+        await authService.logout().catch(() => {})
+        setErrors({ serverError: t(signInProblemKey(reason)) })
         setLoading(false)
         return
       }

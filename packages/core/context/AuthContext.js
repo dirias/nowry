@@ -4,7 +4,7 @@ import { apiClient, onNoAccount } from '../api/client'
 import { authService, registration } from '../api/services'
 import { queryClient } from '../api/queryClient'
 import { auth as authPort, session, storage } from '../platform'
-import { isInviteRefusal, isVerifyEmailRefusal } from '../domain/beta'
+import { isSignInProblem, signInProblem as classifySignInProblem } from '../domain/signInProblem'
 
 /*
  * The i18next singleton, not the client's `i18n.js`. Both clients initialise
@@ -53,8 +53,35 @@ const lastProfile = (uid) => {
   }
 }
 
+/**
+ * Why the last signed-in identity had no account to open (ADR-083). Kept on
+ * the device only across the reload between the failed read and the sign-in
+ * page the web reaches through `window.location.href`; read back and erased
+ * the moment the provider mounts.
+ */
+export const SIGN_IN_PROBLEM_KEY = 'NOWRY_SIGNIN_PROBLEM'
+
+const keptSignInProblem = () => {
+  try {
+    const kept = storage.get(SIGN_IN_PROBLEM_KEY)
+    return isSignInProblem(kept) ? kept : null
+  } catch {
+    return null
+  }
+}
+
+const keepSignInProblem = (problem) => {
+  try {
+    if (problem) storage.set(SIGN_IN_PROBLEM_KEY, problem)
+    else storage.remove(SIGN_IN_PROBLEM_KEY)
+  } catch {
+    // The line still shows in this session; only a reload would lose it.
+  }
+}
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
+  const [signInProblem, setSignInProblem] = useState(keptSignInProblem)
   const [loading, setLoading] = useState(true)
   const refreshingRef = useRef(false)
   // The Firebase identity the profile in `user` was read for.
@@ -69,6 +96,17 @@ export const AuthProvider = ({ children }) => {
     forgetProfile()
   }
 
+  const noteSignInProblem = (problem) => {
+    setSignInProblem(problem)
+    keepSignInProblem(problem)
+  }
+
+  /** The sign-in screens call this as a new attempt starts (ADR-083). */
+  const clearSignInProblem = () => noteSignInProblem(null)
+
+  // Read once into state above; the device copy has done its job.
+  useEffect(() => keepSignInProblem(null), [])
+
   /**
    * Fetch the backend user profile.
    * This MUST only be called after Firebase confirms a session exists
@@ -81,6 +119,7 @@ export const AuthProvider = ({ children }) => {
       profileUidRef.current = uid
       setUser(response.data)
       rememberProfile(response.data, uid)
+      noteSignInProblem(null)
       // Preferences are nested under preferences.general in the backend
       const lang = response.data?.preferences?.general?.language
       if (lang) {
@@ -102,16 +141,20 @@ export const AuthProvider = ({ children }) => {
        * Firebase session alone and keeps whatever profile was last known.
        */
       const status = error?.response?.status
-      if (status === 401 || status === 403) {
+      /*
+       * ADR-083: an identity the server answers with no account — the gate's
+       * two refusals, no account found (404), a sign-in conflict — is never
+       * left to bounce to the sign-in page in silence. The reason is kept for
+       * that page and the session that is nobody is closed, unless a sign-up
+       * is waiting on its email, which needs the identity to finish
+       * (ADR-077) and finishes on Register, which says so itself.
+       */
+      const problem = classifySignInProblem(error)
+      if (problem) {
         dropProfile()
-        /*
-         * ADR-077: the gate's refusal means this Firebase identity has no
-         * Nowry account. Left signed in, it is a session that is nobody: sign
-         * it out, quietly, unless a sign-up is waiting on its email, which
-         * needs the identity to finish.
-         */
-        const noAccount = isInviteRefusal(error) || isVerifyEmailRefusal(error)
-        if (noAccount && !authService.heldSignUp()) {
+        const held = problem !== 'account' && authService.heldSignUp()
+        if (!held) {
+          noteSignInProblem(problem)
           storage.remove('firebase_token')
           try {
             await signOut(authPort.instance())
@@ -119,6 +162,8 @@ export const AuthProvider = ({ children }) => {
             // The profile is already gone; a session that could not be closed reaches nothing.
           }
         }
+      } else if (status === 401 || status === 403) {
+        dropProfile()
       } else {
         /*
          * A COLD start with no network is the case the rule above does not
@@ -273,6 +318,8 @@ export const AuthProvider = ({ children }) => {
         logout,
         checkUser,
         updateUser,
+        signInProblem,
+        clearSignInProblem,
         loading,
         isAuthenticated: !!user,
         subscriptionTier: user?.subscription?.tier ?? 'free',

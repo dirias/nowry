@@ -25,7 +25,7 @@ import { resolveColor } from '../ui/Typography'
 const PUBLIC_GROUP = '(auth)'
 
 export function AuthGate({ children }) {
-  const { loading, isAuthenticated } = useAuth()
+  const { loading, isAuthenticated, signInProblem } = useAuth()
   const segments = useSegments()
   const router = useRouter()
 
@@ -35,7 +35,11 @@ export function AuthGate({ children }) {
     // Never redirect while the answer is still unknown; that is the flash.
     if (loading) return
 
-    if (!isAuthenticated && !inPublicGroup) {
+    if (!isAuthenticated && !inPublicGroup && signInProblem) {
+      // ADR-083: a sign-in the API could not answer with an account goes to
+      // the sign-in form, which says why, never to Welcome in silence.
+      router.replace('/login')
+    } else if (!isAuthenticated && !inPublicGroup) {
       // Welcome, not the sign-in form (docs/prd-public-site.md D-M1): a stranger
       // who installs the app meets the product before the gate; a returning
       // user taps Sign in once. A literal, so routes.test can see the target.
@@ -43,7 +47,7 @@ export function AuthGate({ children }) {
     } else if (isAuthenticated && inPublicGroup) {
       router.replace('/')
     }
-  }, [loading, isAuthenticated, inPublicGroup, router])
+  }, [loading, isAuthenticated, inPublicGroup, signInProblem, router])
 
   if (loading) return <Splash />
 

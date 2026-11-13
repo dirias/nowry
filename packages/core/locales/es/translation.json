@@ -438,6 +438,11 @@
       "failed": "No se pudo enviar. Inténtalo de nuevo en un momento.",
       "notYet": "Aún no está confirmado. Abre primero el enlace del correo.",
       "done": "Tu correo está confirmado."
+    },
+    "signInProblem": {
+      "invite": "Nowry está en beta privada. Necesitas una invitación para crear una cuenta.",
+      "verifyEmail": "Primero confirma tu correo. Abre el enlace que te enviamos y vuelve a iniciar sesión.",
+      "account": "Hay un problema con tu cuenta. Escríbenos a support@nowry.app."
     }
   },
   "landing": {
