@@ -20,6 +20,7 @@ import { betaService } from '@nowry/core/api/services'
 import { useBeta } from '@nowry/core/context/BetaContext'
 import { passwordLongEnough } from '@nowry/core/domain/authRules'
 import { legalUrl } from '@nowry/core/constants/site'
+import { getUsernameValidationError } from '@nowry/core/utils/usernameValidation'
 import { Button, Checkbox, FormField, Input, Stack, Typography } from '../../src/ui'
 import { AuthDivider, AuthFooter, AuthShell } from '../../src/ui/patterns/AuthShell'
 
@@ -44,6 +45,9 @@ export default function Register() {
     const next = {}
     if (inviteRequired && !inviteCode.trim()) next.invite = 'beta.phone.inviteInvalid'
     if (!username.trim()) next.username = 'auth.errors.usernameRequired'
+    // NAME-001, FR-035: the web's rule (3–30 characters, letters, digits, - and _), before anything is created.
+    // The rule takes a translator; the identity one hands back the key, which FormField translates.
+    else if (getUsernameValidationError(username, (key) => key)) next.username = 'settings.account.usernameInvalid'
     if (!email.trim()) next.email = 'auth.errors.emailRequired'
     if (!password) next.password = 'auth.errors.passwordRequired'
     else if (!passwordLongEnough(password)) next.password = 'auth.errors.passwordLength'
