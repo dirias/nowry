@@ -5,14 +5,18 @@ const { waitForEmails, linkIn } = require('./outbox')
 
 async function signUp(page, email, { code = CODE, invited = false } = {}) {
   if (!invited) await page.goto('/register')
-  const codeField = page.locator('input[name="inviteCode"]')
-  if (!invited && (await codeField.count()) && (await codeField.isVisible())) await codeField.fill(code)
+  if (!invited) {
+    // The code field appears once the page has asked the API whether a code is needed.
+    const codeField = page.locator('input[name="inviteCode"]')
+    await codeField.waitFor({ state: 'visible', timeout: 20000 })
+    await codeField.fill(code)
+  }
   await page.locator('input[name="username"]').fill(`e2e_${Date.now().toString(36)}`)
   await page.locator('input[name="email"]').fill(email)
   await page.locator('input[name="password"]').fill(PASSWORD)
   await page.locator('input[name="passwordConfirmation"]').fill(PASSWORD)
   await page.locator('input[type="checkbox"]').first().check()
-  await page.locator('form button[type="submit"]').click()
+  await page.getByRole('button', { name: 'Create account' }).click()
 }
 
 async function skipOnboarding(page) {

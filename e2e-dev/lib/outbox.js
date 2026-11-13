@@ -12,11 +12,14 @@ async function emails(to, kind) {
   return (await response.json()).items
 }
 
+/** The API stores UTC; a time written without a zone is read as UTC, not as this machine's local time. */
+const sentAt = (item) => new Date(/[zZ]|[+-]\d\d:\d\d$/.test(item.created_at) ? item.created_at : `${item.created_at}Z`)
+
 /** Wait for at least `count` emails of a kind to an address; newest first. */
 async function waitForEmails(to, kind, { count = 1, timeoutMs = 60000, since } = {}) {
   const started = Date.now()
   for (;;) {
-    const found = (await emails(to, kind)).filter((item) => !since || new Date(item.created_at) >= since)
+    const found = (await emails(to, kind)).filter((item) => !since || sentAt(item) >= since)
     if (found.length >= count) return found
     if (Date.now() - started > timeoutMs) throw new Error(`outbox: ${count} × ${kind} to ${to} did not arrive in ${timeoutMs / 1000}s`)
     await new Promise((resolve) => setTimeout(resolve, 2000))
