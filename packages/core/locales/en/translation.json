@@ -3347,7 +3347,6 @@
           "<strong>Google (Gemini) and Groq:</strong> produce cards, quizzes, explanations and the companion's replies from the text you send to those features.",
           "<strong>Google Cloud Text-to-Speech:</strong> turns the text you ask to hear into audio.",
           "<strong>fal.ai:</strong> draws the companion's portrait from its description.",
-          "<strong>Langfuse:</strong> keeps a record of AI requests and answers, with an account identifier, so that we can find and fix faults.",
           "<strong>Cloudinary:</strong> stores the images you upload.",
           "<strong>Stripe:</strong> handles payments. Your email address is registered with Stripe when your account is created, and that record is deleted when you delete your account. Card details go to Stripe only and never reach us.",
           "<strong>Resend:</strong> delivers our emails.",
@@ -3477,16 +3476,14 @@
         "Your email address and username are released: you can sign up again with the same address, and the new account starts empty.",
         "The images you uploaded.",
         "The links that send notifications to your phone.",
-        "The record of your email address at Stripe, our payment provider.",
-        "Records of your requests to our AI features at Langfuse, with what you typed. Langfuse removes them, usually within 15 minutes."
+        "The record of your email address at Stripe, our payment provider."
       ],
       "laterTitle": "Erased for good after 30 days",
       "later": "Everything else in your account: books, decks, cards, study history, plans, goals, tasks, routines, calendar, boards, notes, your companion, and the account record itself. During those 30 days it is hidden and nobody can use it. If you deleted your account by mistake, write to support@nowry.app before the 30 days are over. Nothing comes back on its own.",
       "elsewhereTitle": "Kept elsewhere, and for how long",
       "elsewhere": [
         "A record that an email was sent to you: its kind, the day and the language, with a scrambled form of your address. Kept for 90 days.",
-        "Error reports from the website and the app, at Sentry: they carry no account number, name or email. Kept for up to {{sentryDays}} days.",
-        "Records of requests to our AI features at Langfuse made before {{since}} that are more than {{langfuseDays}} days old when you delete the account: our Langfuse plan cannot reach them, so they stay stored there with no end date. They carry your account number and what you typed, but no name or email; once your account is erased, that number leads to no one."
+        "Error reports from the website and the app, at Sentry: they carry no account number, name or email. Kept for up to {{sentryDays}} days."
       ],
       "waitlist": "If you also joined the waitlist, that is separate: use the link in any waitlist email to leave it.",
       "contact": "Questions: support@nowry.app"
