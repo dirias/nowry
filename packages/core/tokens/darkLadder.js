@@ -2,9 +2,9 @@
  * A signed-in learner's dark mode (ADR-082): a near-black ladder tinted by
  * their own accent, with the accent on top.
  *
- * ADR-074's dark grounds (the brand's teal at chroma ~0.05) stay for guests and
- * stay the default; this ladder is worn only when the web's preview flag is on,
- * until the user makes it the default. Light mode never reads this file.
+ * ADR-074's dark grounds (the brand's teal at chroma ~0.05) stay for guests
+ * (`generateBrandScheme`); a signed-in learner's dark mode is this ladder, on
+ * both clients. Light mode never reads this file.
  *
  *   Grounds   one lightness ladder; chroma 0.025 in the accent's hue, 0.012 for
  *             warm hues (40–110), neutral when the accent has almost no chroma
@@ -14,7 +14,7 @@
  *             within 0.08 of gold or danger moves to a paler tone of its hue
  */
 import { deltaE, hexToOklch, oklchToHex } from './oklch'
-import { EASY_SPEC, GOLD_SPEC, STATUS_SPEC, buildTone } from './colorSystem'
+import { BETA_MARK, EASY_SPEC, GOLD_SPEC, STATUS_SPEC, buildTone } from './colorSystem'
 
 const PAPER_HUE = 85
 const NEUTRAL_HUE = 250
@@ -174,6 +174,9 @@ export function memberDarkScheme(accentHex) {
     text: { ...n.text },
     divider: n.divider,
     fieldBorder: n.fieldBorder,
-    focusVisible: primary.plainColor
+    focusVisible: primary.plainColor,
+    // The app bar one step off the page with the card border under it (ADR-082 §6).
+    bar: { bg: n.background.level1, fg: n.text.primary, line: n.neutral.outlinedBorder },
+    beta: { ...BETA_MARK }
   }
 }

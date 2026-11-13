@@ -12,6 +12,9 @@
  * fails if the two clients ever disagree. Before ADR-034 these were a snapshot
  * of Joy's defaults; a snapshot rots, a shared source does not.
  *
+ * Dark here is ADR-074's teal, which guests wear. A signed-in learner's dark grounds depend
+ * on their accent (ADR-082) and come, with the accent groups, from `generateColorScheme`.
+ *
  * The accent groups are per user and come from `generateColorScheme(themeColor)`,
  * which each client merges over this base. The status and gold groups are here
  * too, because they do not depend on the accent and a screen may read them

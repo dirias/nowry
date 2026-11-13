@@ -1,6 +1,6 @@
 import { contrastRatio, deltaE, hexToOklch, oklchToHex } from '../oklch'
 import { generateBrandScheme, generateColorScheme, getColorPresets } from '../colorSchemeGenerator'
-import { GOLD_SPEC, STATUS_SPEC } from '../colorSystem'
+import { BETA_MARK, BRAND, GOLD_SPEC, STATUS_SPEC } from '../colorSystem'
 import { FILL_MAX_CHROMA, MEANING_DISTANCE, groundTint, memberDarkScheme, memberDarkSolid } from '../darkLadder'
 
 // The eight presets plus colours only the free picker can store: a yellow that
@@ -85,13 +85,35 @@ describe('the guard', () => {
   })
 })
 
-describe('without the flag', () => {
-  it('leaves every dark palette on ADR-074’s teal grounds', () => {
-    for (const accent of ACCENTS) expect(generateColorScheme(accent).dark.background.body).toBe('#023135')
+describe('the default (ADR-082, amended: no flag)', () => {
+  it('gives every signed-in learner the near-black ladder in dark', () => {
+    for (const accent of ACCENTS) expect(generateColorScheme(accent).dark).toEqual(memberDarkScheme(accent))
   })
 
-  it('leaves light mode identical with and without it', () => {
-    for (const accent of ACCENTS) expect(generateColorScheme(accent, { memberDark: true }).light).toEqual(generateColorScheme(accent).light)
+  it('keeps guests on ADR-074’s teal dark with the brand’s gold', () => {
+    const guest = generateBrandScheme().dark
+    expect(guest.background.body).toBe('#023135')
+    expect(guest.bar.bg).toBe(BRAND.inkTeal)
+  })
+
+  it('raises a member’s app bar one step off the page in dark, with the card border', () => {
+    const p = generateColorScheme('#2a6971').dark
+    expect(p.bar).toEqual({ bg: p.background.level1, fg: p.text.primary, line: p.neutral.outlinedBorder })
+    expect(contrastRatio(p.bar.fg, p.bar.bg)).toBeGreaterThanOrEqual(4.5)
+  })
+
+  it('keeps the Beta mark brand teal for every accent, readable', () => {
+    for (const accent of ACCENTS) {
+      for (const p of [
+        generateColorScheme(accent).light,
+        generateColorScheme(accent).dark,
+        generateBrandScheme().light,
+        generateBrandScheme().dark
+      ]) {
+        expect(p.beta).toEqual({ ...BETA_MARK })
+      }
+    }
+    expect(contrastRatio(BETA_MARK.fg, BETA_MARK.bg)).toBeGreaterThanOrEqual(4.5)
   })
 
   it('draws the focus ring at 3:1 on every ground in both modes, guests included (ADR-082 §8c)', () => {
@@ -108,7 +130,8 @@ describe('the grade underlines (ADR-082 §8a, amended)', () => {
   const schemes = (accent) => [
     ['light', generateColorScheme(accent).light],
     ['dark', generateColorScheme(accent).dark],
-    ['member dark', generateColorScheme(accent, { memberDark: true }).dark]
+    ['guest dark', generateBrandScheme().dark],
+    ['guest light', generateBrandScheme().light]
   ]
 
   it('gives Easy the same blue for every accent', () => {
@@ -118,11 +141,11 @@ describe('the grade underlines (ADR-082 §8a, amended)', () => {
     }
   })
 
-  it('draws every grade underline (the tone’s plain colour) at 3:1 on the grade key, in every mode', () => {
+  it('draws every grade underline (the tone’s plain colour) at 3:1 on the grade key (level1 on the phone, level2 on the web), in every mode', () => {
     for (const accent of ACCENTS) {
       for (const [, p] of schemes(accent)) {
         for (const tone of ['danger', 'warning', 'success', 'easy']) {
-          expect(contrastRatio(p[tone].plainColor, p.background.level2)).toBeGreaterThanOrEqual(3)
+          for (const key of ['level1', 'level2']) expect(contrastRatio(p[tone].plainColor, p.background[key])).toBeGreaterThanOrEqual(3)
         }
       }
     }

@@ -14,8 +14,16 @@
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b3e43" />
   <style>
     html { color-scheme: light dark; background-color: #fcfbf8; }
-    @media (prefers-color-scheme: dark) { html { background-color: #023135; } }
+    @media (prefers-color-scheme: dark) { html { background-color: var(--first-dark, #023135); } }
   </style>
+  <script>
+    /* A signed-in learner's own dark ground on first paint (ADR-082): written
+       with their accent, removed on sign-out. Without it, Ink Teal's. */
+    try {
+      var ground = window.localStorage.getItem('nowry-ground-dark')
+      if (/^#[0-9a-f]{6}$/i.test(ground || '')) document.documentElement.style.setProperty('--first-dark', ground)
+    } catch (e) {}
+  </script>
   <meta name="description" content="Write or import your notes, turn them into flashcards, and review them on a spaced schedule, next to your plan for the year. Web and Android." />
   <!--
       Link previews (Slack, WhatsApp, X, LinkedIn). This is a single-page app,

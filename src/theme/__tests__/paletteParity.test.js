@@ -13,6 +13,7 @@
  */
 import { extendTheme } from '@mui/joy/styles'
 import { BASE_PALETTE } from '@nowry/core/tokens/palette'
+import { generateColorScheme } from '@nowry/core/tokens/colorSchemeGenerator'
 import { buildDynamicTheme } from '../DynamicThemeProvider'
 
 /** `var(--joy-palette-neutral-50)` → `#FBFCFE`, following the chain. */
@@ -26,16 +27,33 @@ const resolve = (palette, value, depth = 0) => {
   return resolve(palette, next, depth + 1)
 }
 
+const ACCENT = '#3a9dac'
+
 const webPalette = (scheme) => {
-  const theme = buildDynamicTheme('#3a9dac')
+  const theme = buildDynamicTheme(ACCENT)
   const joy = extendTheme(theme)
   return joy.colorSchemes[scheme].palette
 }
 
 const norm = (value) => String(value).toLowerCase().replace(/\s+/g, '')
 
+/**
+ * What the phone paints for a signed-in learner: the shared base with the
+ * generated groups merged over it, as `mobile/src/theme/buildTheme.js` does.
+ * Since ADR-082 a member's dark grounds depend on the accent, so they come
+ * from the generator rather than the base.
+ */
+const phonePalette = (scheme) => {
+  const base = BASE_PALETTE[scheme]
+  const generated = generateColorScheme(ACCENT)[scheme]
+  const out = { ...base }
+  for (const [group, values] of Object.entries(generated))
+    out[group] = typeof values === 'string' ? values : { ...(base[group] || {}), ...values }
+  return out
+}
+
 describe.each(['light', 'dark'])('%s — the shared palette matches what the web resolves', (scheme) => {
-  const shared = BASE_PALETTE[scheme]
+  const shared = phonePalette(scheme)
 
   it.each(['level1', 'level2', 'level3', 'body', 'surface', 'popup'])('background.%s', (key) => {
     expect(norm(resolve(webPalette(scheme), webPalette(scheme).background[key]))).toBe(norm(shared.background[key]))

@@ -11,7 +11,19 @@
  * any custom hex promise the same contrast without a per-hue exception.
  */
 import { contrastRatio, hexToOklch, relativeLuminance } from './oklch'
-import { CATEGORY_SPEC, EASY_SPEC, GOLD_SPEC, NEUTRALS, STATUS_SPEC, accentTone, brandTone, buildTone, categoryColors } from './colorSystem'
+import {
+  BETA_MARK,
+  BRAND,
+  CATEGORY_SPEC,
+  EASY_SPEC,
+  GOLD_SPEC,
+  NEUTRALS,
+  STATUS_SPEC,
+  accentTone,
+  brandTone,
+  buildTone,
+  categoryColors
+} from './colorSystem'
 import { memberDarkScheme } from './darkLadder'
 
 export { contrastRatio, relativeLuminance }
@@ -65,20 +77,26 @@ const buildMode = (primary, mode) => ({
   divider: NEUTRALS[mode].divider,
   // One ring for buttons, tabs, segments and fields (ADR-082 §8c): the plain
   // colour, held to 4.5:1 on the page, so at least 3:1 on every ground.
-  focusVisible: primary.plainColor
+  focusVisible: primary.plainColor,
+  // The phone's app bar (ADR-082 amendment): the accent's solid in light (Ink
+  // Teal for a guest, whose primary is the brand's), Ink Teal in a guest's dark.
+  bar:
+    mode === 'light'
+      ? { bg: primary.solidBg, fg: primary.solidColor, line: primary.solidBg }
+      : { bg: BRAND.inkTeal, fg: BRAND.paper, line: BRAND.inkTeal },
+  beta: { ...BETA_MARK }
 })
 
 /**
- * Generate the complete palette from an accent, for light and dark.
+ * A signed-in learner's palette, for light and dark.
  *
- * `memberDark` (ADR-082, behind the web's preview flag): a signed-in learner's
- * dark mode on the near-black ladder tinted by their accent. Light is the same
- * either way.
+ * Dark is the near-black ladder tinted by their accent (ADR-082). ADR-074's
+ * teal dark survives only in `generateBrandScheme`, which guests wear.
  */
-export function generateColorScheme(primaryColor, { memberDark = false } = {}) {
+export function generateColorScheme(primaryColor) {
   return {
     light: buildMode(accentTone(primaryColor, 'light'), 'light'),
-    dark: memberDark ? memberDarkScheme(primaryColor) : buildMode(accentTone(primaryColor, 'dark'), 'dark')
+    dark: memberDarkScheme(primaryColor)
   }
 }
 

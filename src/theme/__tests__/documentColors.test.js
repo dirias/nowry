@@ -23,5 +23,12 @@ it('paints the browser bar in the header ground, per scheme', () => {
 
 it('paints each page ground first', () => {
   expect(html).toContain(`html { color-scheme: light dark; background-color: ${NEUTRALS.light.background.body}; }`)
-  expect(html).toContain(`@media (prefers-color-scheme: dark) { html { background-color: ${NEUTRALS.dark.background.body}; } }`)
+  expect(html).toContain(
+    `@media (prefers-color-scheme: dark) { html { background-color: var(--first-dark, ${NEUTRALS.dark.background.body}); } }`
+  )
+})
+
+it('paints a remembered member’s own dark ground first (ADR-082)', () => {
+  expect(html).toContain("window.localStorage.getItem('nowry-ground-dark')")
+  expect(html).toContain("document.documentElement.style.setProperty('--first-dark', ground)")
 })
