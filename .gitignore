@@ -204,3 +204,6 @@ DEBUG_*.md
 # Playwright (QA-010)
 /test-results/
 /playwright-report/
+
+# The dev end-to-end suite's Vercel bypass secret (never committed)
+.env.e2e.local
