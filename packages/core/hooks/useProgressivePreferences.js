@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { userService } from '../api/services/user.service'
+import { useOptionalAuth } from '../context/AuthContext'
 import { derivePrimaryTopic } from '../constants/learningTaxonomy'
 import { ACTION_PHASE, classifyError } from '../domain/onboarding'
 
@@ -268,6 +269,29 @@ const useProgressivePreferences = ({ autoLoad = true } = {}) => {
    *
    * @param {string} field Wire field name
    */
+  /*
+   * PREF-001: the signed-in profile is what Home reads (the news follows
+   * `user.preferences.general.interests`). It was loaded once at sign-in, so a
+   * save made here — the onboarding wizard, Settings, web or phone — was
+   * invisible to it until a reload. Each confirmed save copies the keys it
+   * owns into the profile; every one of them lives in `preferences.general`.
+   */
+  const auth = useOptionalAuth()
+  const updateUserRef = useRef(null)
+  updateUserRef.current = auth?.updateUser ?? null
+  const syncProfile = useCallback((payload, ownedKeys = []) => {
+    const updateUser = updateUserRef.current
+    if (!updateUser || !payload || typeof payload !== 'object') return
+    const saved = {}
+    ownedKeys.forEach((key) => {
+      if (key in payload) saved[key] = payload[key]
+    })
+    if (!Object.keys(saved).length) return
+    updateUser((prev) => ({
+      preferences: { ...prev?.preferences, general: { ...prev?.preferences?.general, ...saved } }
+    }))
+  }, [])
+
   const drainField = useCallback(
     async (field) => {
       inFlightRef.current[field] = true
@@ -280,6 +304,7 @@ const useProgressivePreferences = ({ autoLoad = true } = {}) => {
           try {
             const payload = await userService.updateGeneralPreferences({ [field]: value })
             applyPayload(payload, { issueSeq, ownedKeys: OWNED_KEYS[field] })
+            syncProfile(payload, OWNED_KEYS[field])
 
             // The draft is only retired when it is still the value that was just
             // confirmed. A newer intent queued mid-flight keeps the field unsaved
@@ -303,7 +328,7 @@ const useProgressivePreferences = ({ autoLoad = true } = {}) => {
         inFlightRef.current[field] = false
       }
     },
-    [applyPayload, clearDraft, nextSeq, setFieldStatus]
+    [applyPayload, clearDraft, nextSeq, setFieldStatus, syncProfile]
   )
 
   /**

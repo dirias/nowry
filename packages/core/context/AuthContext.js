@@ -289,7 +289,8 @@ export const AuthProvider = ({ children }) => {
    * transient failure, which is the wrong price for a username edit.
    */
   const updateUser = (patch) => {
-    setUser((prev) => (prev ? { ...prev, ...patch } : prev))
+    // A function patch reads the current user, for nested merges (PREF-001).
+    setUser((prev) => (prev ? { ...prev, ...(typeof patch === 'function' ? patch(prev) : patch) } : prev))
   }
 
   const logout = async () => {
@@ -329,6 +330,9 @@ export const AuthProvider = ({ children }) => {
     children
   )
 }
+
+/** The auth context, or null outside its provider: for shared hooks that also run without it (PREF-001). */
+export const useOptionalAuth = () => useContext(AuthContext)
 
 export const useAuth = () => {
   const context = useContext(AuthContext)

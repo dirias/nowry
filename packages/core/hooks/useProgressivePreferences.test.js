@@ -24,6 +24,10 @@ jest.mock('../api/services/cards.service', () => ({
   cardsService: { generateOnboardingFallback: jest.fn() }
 }))
 
+// PREF-001: the signed-in profile each confirmed save is copied into.
+const mockUpdateUser = jest.fn()
+jest.mock('../context/AuthContext', () => ({ useOptionalAuth: () => ({ updateUser: mockUpdateUser }) }))
+
 const { userService } = require('../api/services/user.service')
 
 const useProgressivePreferences = require('./useProgressivePreferences').default
@@ -150,6 +154,28 @@ describe('independent partial updates', () => {
 
     expect(userService.updateGeneralPreferences).toHaveBeenCalledWith({ interests: ['mathematics', 'science'] })
     expect(result.current.confirmedPrimaryTopic).toBe('mathematics')
+  })
+
+  it('copies the saved interests into the signed-in profile, so Home reads them at once (PREF-001)', async () => {
+    mockUpdateUser.mockClear()
+    userService.updateGeneralPreferences.mockResolvedValue(
+      preferences({ interests: ['science'], primary_topic: 'science', language: 'de' })
+    )
+
+    const { result } = await setup()
+
+    await act(async () => {
+      result.current.setInterests(['science'])
+    })
+    await waitFor(() => expect(result.current.fields.interests.isConfirmed).toBe(true))
+
+    expect(mockUpdateUser).toHaveBeenCalledTimes(1)
+    const patch = mockUpdateUser.mock.calls[0][0]
+    const before = { username: 'ana', preferences: { general: { language: 'en', interests: [] }, agent: { tone: 'warm' } } }
+    // Only the keys this save owns; the language echoed alongside is not this save's to set.
+    expect(patch(before)).toEqual({
+      preferences: { general: { language: 'en', interests: ['science'], primary_topic: 'science' }, agent: { tone: 'warm' } }
+    })
   })
 
   it('does not re-send a value the server already holds', async () => {
