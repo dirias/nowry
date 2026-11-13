@@ -502,6 +502,11 @@
       "failed": "Das hat nicht geklappt. Versuche es gleich noch einmal.",
       "notYet": "Noch nicht bestätigt. Öffne zuerst den Link in der E-Mail.",
       "done": "Deine E-Mail-Adresse ist bestätigt."
+    },
+    "signInProblem": {
+      "invite": "Nowry ist in einer privaten Beta. Du brauchst eine Einladung, um ein Konto zu erstellen.",
+      "verifyEmail": "Bestätige zuerst deine E-Mail-Adresse. Öffne den Link, den wir dir geschickt haben, und melde dich dann erneut an.",
+      "account": "Mit deinem Konto stimmt etwas nicht. Schreib uns an support@nowry.app."
     }
   },
   "landing": {

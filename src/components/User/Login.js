@@ -9,6 +9,7 @@ import AuthShell from './AuthShell'
 import { useAuth } from '@nowry/core/context/AuthContext'
 import { authService } from '@nowry/core/api/services/auth.service'
 import { isInviteRefusal } from '@nowry/core/domain/beta'
+import { signInProblem as classifySignInProblem, signInProblemKey } from '@nowry/core/domain/signInProblem'
 import { authErrorKey, FALLBACK_KEY } from '@nowry/core/domain/authErrors'
 
 const Login = () => {
@@ -17,9 +18,28 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  // Why the last sign-in had no account to open (ADR-083): met by this screen's
+  // own request, or kept by the auth context from the read that sent us here.
+  const [problem, setProblem] = useState(null)
   const navigate = useNavigate()
   const { t } = useTranslation()
-  const { login } = useAuth()
+  const { signInProblem, clearSignInProblem } = useAuth()
+  const shownProblem = problem ?? signInProblem ?? null
+
+  // Each attempt starts with nothing said; the line stays until then.
+  const startAttempt = () => {
+    setError('')
+    setProblem(null)
+    clearSignInProblem?.()
+    setLoading(true)
+  }
+
+  // The identity has no account to open: close it and say which of three it was.
+  const showProblem = async (reason) => {
+    await authService.logout().catch(() => {})
+    setProblem(reason)
+    setLoading(false)
+  }
 
   // ADR-077: someone whose sign-up is waiting on its email finishes it on
   // Register, where the confirm step and its way out are.
@@ -31,8 +51,7 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault()
-    setError('')
-    setLoading(true)
+    startAttempt()
 
     try {
       // Use Firebase Authentication
@@ -48,6 +67,12 @@ const Login = () => {
       // finishes on Register, where the confirm step is.
       if (isInviteRefusal(error) && authService.heldSignUp()) {
         window.location.href = '/register'
+        return
+      }
+
+      const reason = classifySignInProblem(error)
+      if (reason) {
+        await showProblem(reason)
         return
       }
 
@@ -67,8 +92,7 @@ const Login = () => {
   }
 
   const handleGoogleLogin = async () => {
-    setError('')
-    setLoading(true)
+    startAttempt()
 
     try {
       // Use Firebase Google OAuth
@@ -88,12 +112,14 @@ const Login = () => {
     } catch (error) {
       console.error('Google login error:', error)
 
-      if (isInviteRefusal(error)) {
-        // ADR-038: a Google identity with no Nowry account, while invites are
-        // required. Sign out of Firebase and send them to register with a code.
-        await authService.logout().catch(() => {})
-        setError(t('beta.inviteRequired'))
-        setLoading(false)
+      /*
+       * ADR-038, ADR-083: a Google identity the API will not answer with an
+       * account — no invite, an unconfirmed address, no account or a conflict.
+       * Sign out of Firebase and say which, never the transport's message.
+       */
+      const reason = classifySignInProblem(error)
+      if (reason) {
+        await showProblem(reason)
         return
       }
 
@@ -129,6 +155,34 @@ const Login = () => {
   return (
     <>
       <AuthShell title={t('auth.welcomeBack')} subtitle={t('auth.signInSubtitle')}>
+        {/* Why the last sign-in had no account (ADR-083); the private beta is not a fault. */}
+        {shownProblem && !error && (
+          <Alert color={shownProblem === 'invite' ? 'neutral' : 'danger'} variant='soft' sx={{ mb: 3 }} role='alert'>
+            <Box>
+              {shownProblem !== 'invite' && (
+                <Typography level='body-sm' sx={{ fontWeight: 'lg', mb: 0.5 }}>
+                  {t('auth.errors.unableToSignIn')}
+                </Typography>
+              )}
+              <Typography level='body-sm' sx={{ opacity: 0.9 }}>
+                {/* The private beta names the waitlist, the same line Register shows (ADR-083 case 3). */}
+                {shownProblem === 'invite' ? t('beta.inviteRequired') : t(signInProblemKey(shownProblem))}
+              </Typography>
+              {/* One email field on this page: the waitlist is the landing page's early-access section, as the header links it. */}
+              {shownProblem === 'invite' && (
+                <Link
+                  component={RouterLink}
+                  to={{ pathname: '/', hash: '#pricing' }}
+                  level='body-sm'
+                  sx={{ display: 'inline-block', mt: 1, fontWeight: 'lg' }}
+                >
+                  {t('beta.waitlist.cta')}
+                </Link>
+              )}
+            </Box>
+          </Alert>
+        )}
+
         {/* Error Alert */}
         {error && (
           <Alert color='danger' variant='soft' sx={{ mb: 3 }}>

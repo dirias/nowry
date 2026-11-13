@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next'
 import { authService } from '@nowry/core/api/services'
 import { authErrorKey } from '@nowry/core/domain/authErrors'
 import { isInviteRefusal } from '@nowry/core/domain/beta'
+import { signInProblem, signInProblemKey } from '@nowry/core/domain/signInProblem'
 import { betaService } from '@nowry/core/api/services'
 import { useBeta } from '@nowry/core/context/BetaContext'
 import { passwordLongEnough } from '@nowry/core/domain/authRules'
@@ -63,9 +64,11 @@ export default function Register() {
       await authService.register(email.trim(), password, username.trim(), code, i18n.language)
       // AuthGate moves us once the session resolves.
     } catch (error) {
-      setErrors(
-        isInviteRefusal(error) ? { form: 'beta.phone.inviteRequired', invite: 'beta.phone.inviteInvalid' } : { form: authErrorKey(error) }
-      )
+      // ADR-083: an address that already has an account reads as "confirm your
+      // email first"; the shared service sent the link and signed the identity out.
+      const reason = signInProblem(error)
+      if (isInviteRefusal(error)) setErrors({ form: 'beta.phone.inviteRequired', invite: 'beta.phone.inviteInvalid' })
+      else setErrors({ form: reason ? signInProblemKey(reason) : authErrorKey(error) })
     } finally {
       setPassword('')
       setConfirm('')
@@ -85,6 +88,10 @@ export default function Register() {
         // Firebase signed out so AuthGate does not treat them as in.
         await authService.logout().catch(() => {})
         setErrors({ form: 'beta.phone.inviteRequired', invite: 'beta.phone.inviteInvalid' })
+      } else if (signInProblem(error)) {
+        // ADR-083: an unconfirmed address, no account or a conflict. Sign out and say which.
+        await authService.logout().catch(() => {})
+        setErrors({ form: signInProblemKey(signInProblem(error)) })
       } else {
         setErrors({ form: authErrorKey(error) })
       }

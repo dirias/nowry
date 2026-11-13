@@ -189,3 +189,26 @@ it('does not try the password when there is no invite to use', async () => {
   await expect(authService.register('ana@x.io', 'secret-pass', 'ana', '')).rejects.toMatchObject({ code: 'auth/email-already-in-use' })
   expect(mockSignIn).not.toHaveBeenCalled()
 })
+
+/*
+ * ADR-083: a password sign-up for an address an account already has. The new
+ * identity has not proved the address, so the server answers 409
+ * email_unverified before the gate. The link goes to the address, nothing is
+ * held, and the identity is closed only after the send.
+ */
+it('sends the link and signs the identity out, holding nothing, when the address already has an account', async () => {
+  const unverified = { response: { status: 409, data: { detail: { code: 'email_unverified' } } } }
+  const order = []
+  mockSendEmailVerification.mockImplementation(async () => order.push('send'))
+  mockSignOut.mockImplementation(async () => order.push('signOut'))
+  mockStore.set('firebase_token', 'stale')
+  mockPost.mockRejectedValueOnce(unverified)
+
+  await expect(authService.register('ana@x.io', 'secret-pass', 'ana', '', 'fr')).rejects.toEqual(unverified)
+
+  expect(order).toEqual(['send', 'signOut'])
+  expect(mockSendEmailVerification).toHaveBeenCalledWith(mockUser)
+  expect(mockStore.has(HELD_KEY)).toBe(false)
+  expect(mockStore.has('firebase_token')).toBe(false)
+  expect(authService.heldSignUp()).toBeNull()
+})

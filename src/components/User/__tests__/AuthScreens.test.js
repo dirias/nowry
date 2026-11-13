@@ -29,8 +29,12 @@ jest.mock('@nowry/core/api/services/beta.service', () => ({ betaService: { check
 
 let mockBeta = { invite_required: false }
 jest.mock('@nowry/core/context/BetaContext', () => ({ useBeta: () => ({ config: mockBeta }) }))
-jest.mock('@nowry/core/context/AuthContext', () => ({ useAuth: () => ({ login: jest.fn(), checkUser: jest.fn() }) }))
-jest.mock('../../Public/WaitlistForm', () => () => null)
+let mockSignInProblem = null
+const mockClearSignInProblem = jest.fn()
+jest.mock('@nowry/core/context/AuthContext', () => ({
+  useAuth: () => ({ login: jest.fn(), checkUser: jest.fn(), signInProblem: mockSignInProblem, clearSignInProblem: mockClearSignInProblem })
+}))
+jest.mock('../../Public/WaitlistForm', () => ({ source }) => <div>waitlist:{source}</div>)
 
 const mockNavigate = jest.fn()
 jest.mock('react-router-dom', () => ({ ...jest.requireActual('react-router-dom'), useNavigate: () => mockNavigate }))
@@ -43,6 +47,8 @@ const firebaseError = (code) => Object.assign(new Error(`Firebase: Error (${code
 let location
 beforeEach(() => {
   mockBeta = { invite_required: false }
+  mockSignInProblem = null
+  mockClearSignInProblem.mockClear()
   location = { href: '' }
   delete window.location
   window.location = location
@@ -95,8 +101,53 @@ describe('Login', () => {
     renderIn(<Login />)
     fireEvent.click(screen.getByText('auth.signInGoogle'))
     expect(await screen.findByText('beta.inviteRequired')).toBeInTheDocument()
+    // ADR-083 case 3: the private beta links to the waitlist; one email field on the page.
+    expect(screen.getByText('beta.waitlist.cta').closest('a')).toHaveAttribute('href', '/#pricing')
     expect(mockAuthService.logout).toHaveBeenCalled()
     expect(location.href).toBe('')
+  })
+
+  // ADR-083 / FR-031: never a silent bounce.
+  it.each([
+    ['account', 'auth.signInProblem.account'],
+    ['verifyEmail', 'auth.signInProblem.verifyEmail'],
+    ['invite', 'beta.inviteRequired']
+  ])('says why the last sign-in had no account (%s)', (reason, key) => {
+    mockSignInProblem = reason
+    renderIn(<Login />)
+    expect(screen.getByText(key)).toBeInTheDocument()
+  })
+
+  it('clears the kept reason when a new attempt starts', async () => {
+    mockSignInProblem = 'account'
+    mockAuthService.loginWithGoogle.mockResolvedValueOnce({ backendUser: { wizard_completed: true } })
+    renderIn(<Login />)
+    fireEvent.click(screen.getByText('auth.signInGoogle'))
+    await waitFor(() => expect(location.href).toBe('/'))
+    expect(mockClearSignInProblem).toHaveBeenCalled()
+  })
+
+  it.each([
+    [{ response: { status: 404, data: { detail: 'User not found' } } }, 'auth.signInProblem.account'],
+    [{ response: { status: 409, data: { detail: { code: 'account_conflict' } } } }, 'auth.signInProblem.account'],
+    [{ response: { status: 409, data: { detail: { code: 'email_unverified' } } } }, 'auth.signInProblem.verifyEmail']
+  ])('a Google sign-in the API answers with no account is signed out and told why, not shown the raw message', async (error, key) => {
+    mockAuthService.loginWithGoogle.mockRejectedValue(Object.assign(new Error('Request failed with status code'), error))
+    mockAuthService.logout.mockResolvedValue()
+    renderIn(<Login />)
+    fireEvent.click(screen.getByText('auth.signInGoogle'))
+    expect(await screen.findByText(key)).toBeInTheDocument()
+    expect(screen.queryByText(/Request failed/)).toBeNull()
+    expect(mockAuthService.logout).toHaveBeenCalled()
+    expect(location.href).toBe('')
+  })
+
+  it('an email sign-in the API answers with 404 says so too', async () => {
+    mockAuthService.login.mockRejectedValue(Object.assign(new Error('Request failed'), { response: { status: 404, data: {} } }))
+    mockAuthService.logout.mockResolvedValue()
+    signIn()
+    expect(await screen.findByText('auth.signInProblem.account')).toBeInTheDocument()
+    expect(mockAuthService.logout).toHaveBeenCalled()
   })
 })
 
@@ -140,6 +191,12 @@ describe('Register', () => {
     register()
     expect(await screen.findByText('auth.errors.accountExistsDifferent')).toBeInTheDocument()
     expect(screen.queryByText(/Firebase: Error/)).toBeNull()
+  })
+
+  it('an address that already has an account is told to confirm its email first (ADR-083)', async () => {
+    mockAuthService.register.mockRejectedValue({ response: { status: 409, data: { detail: { code: 'email_unverified' } } } })
+    register()
+    expect(await screen.findByText('auth.signInProblem.verifyEmail')).toBeInTheDocument()
   })
 
   it('falls back to its own sentence for an error with no code', async () => {
