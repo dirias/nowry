@@ -22,7 +22,9 @@ test('[happy] password reset from the email link', async ({ page }) => {
   await fields.nth(0).fill(NEW_PASSWORD)
   await fields.nth(1).fill(NEW_PASSWORD)
   await page.getByRole('button', { name: 'Save password' }).click()
-  await expect(page.getByText('Your password is changed')).toBeVisible({ timeout: 30000 })
+  // Saving signs in with the new password and opens Nowry; "Your password is changed" is only the fallback.
+  await page.waitForURL((url) => url.pathname === '/', { timeout: 30000 })
+  await expect(page.getByText('Welcome back', { exact: false }).first()).toBeVisible({ timeout: 30000 })
   expect((await firebaseSignIn(email, NEW_PASSWORD)).idToken).toBeTruthy()
 })
 
