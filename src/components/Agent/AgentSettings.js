@@ -369,7 +369,7 @@ export default function AgentSettings() {
         setTeachingStyle(agentPref(prefs, 'teachingStyle'))
         setKnowledgeAccess(prefs.agent_knowledge_access ?? false)
         setProactiveNudging(prefs.agent_proactive_nudging ?? false)
-        setRoamingEnabled(state.agent_roaming_enabled ?? true)
+        setRoamingEnabled(state.agent_roaming_enabled ?? false)
         setQuizQuestionCount(prefs.agent_ai_quiz_question_count ?? 10)
         setInterventionFrequency(prefs.agent_intervention_frequency || 'balanced')
         setFocusModeEnabled(prefs.agent_focus_mode ?? false)
