@@ -1262,7 +1262,7 @@ export function StudySession() {
               front={
                 <CardFace
                   label={t('cards.session.labels.question')}
-                  labelColor='primary.plainColor'
+                  labelColor='text.secondary'
                   level='h4'
                   text={frontOf(current)}
                   source={source}
@@ -1271,7 +1271,7 @@ export function StudySession() {
               back={
                 <CardFace
                   label={t('cards.session.labels.answer')}
-                  labelColor='success.plainColor'
+                  labelColor='text.secondary'
                   // The web's own switch: a long answer is prose and reads at
                   // body size; a short one is a term and holds the card.
                   level={backOf(current).length > LONG_ANSWER ? 'body-lg' : 'h4'}
@@ -1382,12 +1382,10 @@ export function StudySession() {
             </Stack>
           ) : revealed ? (
             /*
-             * Four tones, not four neutral keys, and they are the web's own:
-             * outlined danger, soft warning, soft success, solid primary. An
-             * earlier version made all four secondary on the reasoning that an
-             * accented key biases self-assessment. That reasoning lost to a
-             * design that has shipped for a year and to the fact that these four
-             * ARE the surface — the exception is recorded in `buttonSpec.js`.
+             * Four neutral keys with fixed semantic underlines (ADR-082 §8a,
+             * amended 2026-11-13), the web's own: no grade takes the accent or a
+             * colour fill, so none reads as the recommended answer. The variants
+             * live in `buttonSpec.js`.
              */
             <Stack direction='row' spacing={1} flexWrap={wrapGrades ? 'wrap' : 'nowrap'}>
               {GRADES.map((value) => (

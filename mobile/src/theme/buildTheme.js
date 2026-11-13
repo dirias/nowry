@@ -6,7 +6,7 @@
  * plain Node environment. This one can, and it is where all the merging lives.
  */
 import { BASE_PALETTE } from '@nowry/core/tokens/palette'
-import { DEFAULT_ACCENT, generateColorScheme } from '@nowry/core/tokens/colorSchemeGenerator'
+import { DEFAULT_ACCENT, generateBrandScheme, generateColorScheme } from '@nowry/core/tokens/colorSchemeGenerator'
 import {
   FONT_FAMILY,
   FONT_SIZE,
@@ -42,9 +42,14 @@ const mergeGroups = (base, generated) => {
   return out
 }
 
-export const buildTheme = (scheme, themeColor) => {
+/**
+ * `brand: true` is a guest's palette, as on the web (ADR-074 §3, ADR-082): the
+ * brand's tone on ADR-074's teal dark. Signed in, the learner's accent, and in
+ * dark the near-black ladder tinted by it.
+ */
+export const buildTheme = (scheme, themeColor, { brand = false } = {}) => {
   const base = BASE_PALETTE[scheme] || BASE_PALETTE.light
-  const generated = generateColorScheme(themeColor)[scheme] || {}
+  const generated = (brand ? generateBrandScheme() : generateColorScheme(themeColor))[scheme] || {}
   return {
     scheme,
     palette: mergeGroups(base, generated),

@@ -116,7 +116,11 @@ export function AppBar() {
         flexDirection: 'row',
         alignItems: 'center',
         gap: theme.spacing[1.5],
-        backgroundColor: resolveColor(theme, 'primary.solidBg')
+        // `bar` (ADR-082): the accent's solid in light, Ink Teal for a guest,
+        // and in a member's dark the raised step with the card border under it.
+        backgroundColor: resolveColor(theme, 'bar.bg'),
+        borderBottomWidth: 1,
+        borderBottomColor: resolveColor(theme, 'bar.line')
       }}
     >
       {/*
@@ -137,7 +141,7 @@ export function AppBar() {
           hitSlop={8}
           style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1, marginLeft: -theme.spacing[1] })}
         >
-          <Icon name='ArrowLeft' size='md' color='primary.solidColor' />
+          <Icon name='ArrowLeft' size='md' color='bar.fg' />
         </Pressable>
       ) : null}
 
@@ -155,19 +159,23 @@ export function AppBar() {
        * on the accent they were 2.9:1 (audit, ADR-034). Mounted with the bar,
        * so a screen without it gets the OS default back.
        */}
-      <StatusBar style={readableTextOn(resolveColor(theme, 'primary.solidBg')) === '#ffffff' ? 'light' : 'dark'} />
-      <View accessibilityRole='header' accessibilityLabel='Nowry'>
-        <BrandLockup markSize={MARK_SIZE} color='primary.solidColor' />
+      <StatusBar style={readableTextOn(resolveColor(theme, 'bar.bg')) === '#ffffff' ? 'light' : 'dark'} />
+      <View accessibilityRole='header' accessibilityLabel='Nowry' style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <BrandLockup markSize={MARK_SIZE} color='bar.fg' />
         {beta.active ? (
-          <Typography
-            level='body-xs'
-            color='primary.solidColor'
-            weight='lg'
-            style={{ marginLeft: theme.spacing[1] }}
-            accessibilityLabel={t('beta.mark')}
+          // The Beta mark is the brand's, whatever the accent (ADR-082 §6).
+          <View
+            style={{
+              marginLeft: theme.spacing[1],
+              paddingHorizontal: theme.spacing[1],
+              borderRadius: theme.radius.full,
+              backgroundColor: resolveColor(theme, 'beta.bg')
+            }}
           >
-            {t('beta.mark')}
-          </Typography>
+            <Typography level='body-xs' color='beta.fg' weight='lg' accessibilityLabel={t('beta.mark')}>
+              {t('beta.mark')}
+            </Typography>
+          </View>
         ) : null}
       </View>
 

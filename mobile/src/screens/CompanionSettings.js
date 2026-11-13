@@ -124,13 +124,15 @@ export function CompanionSettings() {
             <Typography level='title-md' numberOfLines={1}>
               {name}
             </Typography>
-            <Readout>{t('agent.settings.levelLabel', { level: pet.level })}</Readout>
+            {/* Earned, so gold in every accent (ADR-082 §8b). */}
+            <Readout color='gold.plainColor'>{t('agent.settings.levelLabel', { level: pet.level })}</Readout>
 
             {/* The bar is the level's progress, which the server computes — the
                 phone does not do its own XP arithmetic and cannot disagree. */}
             {pet.levelProgress !== null ? (
               <View>
                 <Progress
+                  color='gold.plainColor'
                   value={Math.round(pet.levelProgress * 100)}
                   accessibilityLabel={t('agent.settings.levelLabel', { level: pet.level })}
                 />

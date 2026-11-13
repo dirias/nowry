@@ -75,19 +75,21 @@ describe('variants (BUTTONS.md §3)', () => {
     ])
   })
 
-  it('gives every grade its own tone, so the row is not four identical keys', () => {
+  it('gives every grade its own fixed underline on one neutral key (ADR-082 §8a)', () => {
     const grades = Object.values(GRADE_VARIANTS).map((name) => BUTTON_VARIANTS[name])
     expect(grades).toHaveLength(4)
     grades.forEach((tone) => expect(tone).toBeDefined())
-    // Four distinct labels: that is the whole point of the exception.
-    expect(new Set(grades.map((tone) => tone.label)).size).toBe(4)
+    // Four distinct underlines, one ground, one label colour.
+    expect(grades.map((tone) => tone.edge)).toEqual(['danger.plainColor', 'warning.plainColor', 'success.plainColor', 'easy.plainColor'])
+    expect(new Set(grades.map((tone) => tone.ground))).toEqual(new Set(['background.level1']))
+    expect(new Set(grades.map((tone) => tone.label))).toEqual(new Set(['text.primary']))
   })
 
-  it('keeps exactly one solid on the grade row, and it is Easy', () => {
-    // Matching the web, where Easy is the solid. Two solids would be two
-    // primaries on one surface, which is what the standard actually forbids.
-    const solid = Object.entries(GRADE_VARIANTS).filter(([, name]) => BUTTON_VARIANTS[name].ground === 'primary.solidBg')
-    expect(solid.map(([grade]) => grade)).toEqual(['easy'])
+  it('fills no grade with colour and lets none take the accent', () => {
+    // A highlighted grade reads as the recommended answer and biases the schedule.
+    Object.values(GRADE_VARIANTS).forEach((name) => {
+      Object.values(BUTTON_VARIANTS[name]).forEach((token) => expect(token).not.toMatch(/^primary\./))
+    })
   })
 
   it('names every colour semantically, so no preset is assumed', () => {

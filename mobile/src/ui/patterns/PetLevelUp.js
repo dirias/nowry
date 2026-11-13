@@ -90,7 +90,8 @@ export function PetLevelUp({ level, stage, accent = null }) {
             right: -8,
             bottom: -8,
             borderRadius: 999,
-            backgroundColor: resolveColor(theme, 'primary.solidBg'),
+            // A level is earned, so the glow is gold in every accent (ADR-082 §8b).
+            backgroundColor: resolveColor(theme, 'gold.solidBg'),
             opacity: glow
           }}
         />

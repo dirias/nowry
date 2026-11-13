@@ -35,10 +35,10 @@ export const LANGUAGES = [
 const current = (language) => LANGUAGES.find(({ code }) => code === String(language ?? '').slice(0, 2))?.code ?? 'en'
 
 /**
- * @param {string} [color='primary.solidColor'] - the glyph's token, which is
- *   the bar's own foreground: the switch is drawn on the accent.
+ * @param {string} [color='bar.fg'] - the glyph's token, which is the bar's own
+ *   foreground (ADR-082: the bar is not always the accent).
  */
-export function LanguageSwitch({ color = 'primary.solidColor' }) {
+export function LanguageSwitch({ color = 'bar.fg' }) {
   const { t, i18n } = useTranslation()
   const [open, setOpen] = useState(false)
 

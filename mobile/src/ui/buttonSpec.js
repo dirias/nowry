@@ -63,51 +63,40 @@ export const BUTTON_VARIANTS = {
   },
 
   /*
-   * The four grades, and the one place the house table is set aside.
+   * The four grades (ADR-082 §8a, as amended): one neutral filled key each, the
+   * phone's secondary ground with the label in primary text, and a fixed
+   * semantic underline: Again danger, Hard warning, Good success, Easy a fixed
+   * blue that is the same for every accent. No grade is filled with colour and
+   * none takes the accent, because a highlighted grade reads as the
+   * recommended answer and biases the schedule. The underline is each tone's
+   * plain colour, held to text contrast, so it clears 3:1 on the key.
    *
-   * BUTTONS.md gives a surface one solid and three neutral shapes. The study
-   * session breaks that on purpose and has since it shipped on the web: these
-   * four ARE the surface, they are answered in tenths of a second, and four
-   * identical neutral keys make the reader parse the words every time. The
-   * tones are the web's own — outlined danger, soft warning, soft success,
-   * solid primary — so a learner who studies on both sees one control.
-   *
-   * Recorded here rather than inlined at the call site, so the exception is a
-   * decision somebody can find and argue with rather than a colour somebody
-   * typed.
-   */
-  /*
-   * A soft ground, not a transparent one. The web draws Again as an OUTLINED
-   * danger button, and the first attempt copied that literally — transparent
-   * ground, danger edge. This Button paints the edge as the layer BEHIND the
-   * face, so a transparent face let the edge fill the whole key, and the label
-   * is that same red: a solid red block with invisible text, shipped and seen
-   * on a device. There is no border in this button's anatomy, so soft is the
-   * honest translation of outlined.
+   * (Before 2026-11-13 these were the web's tones, with Easy a solid accent;
+   * the web changed, so this follows it.)
    */
   gradeAgain: {
-    ground: 'danger.softBg',
+    ground: 'background.level1',
     groundPressed: 'background.level2',
-    label: 'danger.plainColor',
+    label: 'text.primary',
     edge: 'danger.plainColor'
   },
   gradeHard: {
-    ground: 'warning.softBg',
+    ground: 'background.level1',
     groundPressed: 'background.level2',
-    label: 'warning.plainColor',
+    label: 'text.primary',
     edge: 'warning.plainColor'
   },
   gradeGood: {
-    ground: 'success.softBg',
+    ground: 'background.level1',
     groundPressed: 'background.level2',
-    label: 'success.plainColor',
+    label: 'text.primary',
     edge: 'success.plainColor'
   },
   gradeEasy: {
-    ground: 'primary.solidBg',
-    groundPressed: 'primary.solidActiveBg',
-    label: 'primary.solidColor',
-    edge: 'primary.solidActiveBg'
+    ground: 'background.level1',
+    groundPressed: 'background.level2',
+    label: 'text.primary',
+    edge: 'easy.plainColor'
   }
 }
 

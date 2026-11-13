@@ -71,7 +71,8 @@ export function AppearanceProvider({ children }) {
   return (
     <AppearanceContext.Provider value={{ mode, setMode, accent: accent ?? DEFAULT_THEME_COLOR, setAccent }}>
       {/* `scheme: undefined` hands the decision back to the OS. */}
-      <ThemeProvider themeColor={accent ?? DEFAULT_THEME_COLOR} scheme={mode === 'system' ? undefined : mode}>
+      {/* A guest wears the brand, a member their accent (ADR-082, as the web). */}
+      <ThemeProvider themeColor={accent ?? DEFAULT_THEME_COLOR} scheme={mode === 'system' ? undefined : mode} brand={!isAuthenticated}>
         {children}
       </ThemeProvider>
     </AppearanceContext.Provider>

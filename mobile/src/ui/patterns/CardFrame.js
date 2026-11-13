@@ -5,7 +5,7 @@
  * The phone's Welcome has room for one frame above the fold, so it carries the
  * one claim no competitor makes: a card made from a book that remembers where
  * it came from. Built element by element beside `screens/StudySession.js` as
- * the screen stands before the reveal: `CardFace` — the label in the accent,
+ * the screen stands before the reveal: `CardFace` — the label in secondary text,
  * the text centred, the source line under it — and the one Show answer key
  * below it, in the house button's lg size with its 2 pt edge.
  *
@@ -52,7 +52,7 @@ export function CardFrame({ style }) {
       {/* The front, as CardFace draws it: label, text, the source line. */}
       <Card padding={3} elevation='sm'>
         <Stack spacing={2} style={{ alignItems: 'center' }}>
-          <Typography level='body-xs' color='primary.plainColor'>
+          <Typography level='body-xs' color='text.secondary'>
             {t('cards.session.labels.question')}
           </Typography>
           <Typography level='title-lg' style={{ textAlign: 'center' }}>

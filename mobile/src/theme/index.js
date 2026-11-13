@@ -18,13 +18,13 @@ import { buildTheme, DEFAULT_THEME_COLOR } from './buildTheme'
 
 const ThemeContext = createContext(null)
 
-export function ThemeProvider({ children, themeColor = DEFAULT_THEME_COLOR, scheme: forced }) {
+export function ThemeProvider({ children, themeColor = DEFAULT_THEME_COLOR, scheme: forced, brand = false }) {
   // `forced` overrides the OS. The harness passes it to show both schemes at
   // once; `AppearanceProvider` passes it for a user who has chosen light or
   // dark explicitly. `undefined` means "follow the OS", and keeps following it.
   const os = useColorScheme() === 'dark' ? 'dark' : 'light'
   const scheme = forced ?? os
-  const theme = useMemo(() => buildTheme(scheme, themeColor), [scheme, themeColor])
+  const theme = useMemo(() => buildTheme(scheme, themeColor, { brand }), [scheme, themeColor, brand])
   return <ThemeContext.Provider value={theme}>{children}</ThemeContext.Provider>
 }
 
