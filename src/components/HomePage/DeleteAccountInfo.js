@@ -1,7 +1,7 @@
 import React from 'react'
 import { Box, Container, Divider, Link, Stack, Typography } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
-import { LANGFUSE_RETENTION_DAYS, SENTRY_RETENTION_DAYS } from '@nowry/core/constants/site'
+import { LANGFUSE_FINDABLE_DAYS, LANGFUSE_LEDGER_SINCE, SENTRY_RETENTION_DAYS } from '@nowry/core/constants/site'
 
 /**
  * How to delete a Nowry account, public and signed out (ADR-081, FR-029).
@@ -40,11 +40,17 @@ const Section = ({ title, children }) => (
 )
 
 const DeleteAccountInfo = () => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const list = (key, options) => t(key, { returnObjects: true, ...options }) || []
   // The names the screens themselves use, so the steps match what is on them.
   const screen = { settings: t('settings.title'), danger: t('settings.dangerZone.title'), button: t('settings.dangerZone.deleteButton') }
-  const days = { sentryDays: SENTRY_RETENTION_DAYS, langfuseDays: LANGFUSE_RETENTION_DAYS }
+  // The day the trace ledger reached production, in the reader's language (ADR-081 amendment).
+  const since = new Date(`${LANGFUSE_LEDGER_SINCE}T12:00:00Z`).toLocaleDateString(i18n.language, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+  const days = { sentryDays: SENTRY_RETENTION_DAYS, langfuseDays: LANGFUSE_FINDABLE_DAYS, since }
 
   return (
     <Container component='main' sx={{ py: { xs: 4, md: 8 }, maxWidth: '760px' }}>

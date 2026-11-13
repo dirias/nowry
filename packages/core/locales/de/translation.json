@@ -1927,7 +1927,8 @@
         "Deine E-Mail-Adresse und dein Benutzername werden freigegeben: Du kannst dich mit derselben Adresse neu registrieren, und das neue Konto beginnt leer.",
         "Die Bilder, die du hochgeladen hast.",
         "Die Verknüpfungen, über die dein Telefon Benachrichtigungen erhält.",
-        "Der Eintrag deiner E-Mail-Adresse bei Stripe, unserem Zahlungsdienstleister."
+        "Der Eintrag deiner E-Mail-Adresse bei Stripe, unserem Zahlungsdienstleister.",
+        "Die Protokolle deiner Anfragen an unsere KI-Funktionen bei Langfuse, mit dem, was du eingegeben hast. Langfuse löscht sie, meist innerhalb von 15 Minuten."
       ],
       "laterTitle": "Nach 30 Tagen endgültig gelöscht",
       "later": "Alles andere in deinem Konto: Bücher, Decks, Karten, Lernverlauf, Pläne, Ziele, Aufgaben, Routinen, Kalender, Boards, Notizen, dein Begleiter und der Kontoeintrag selbst. In diesen 30 Tagen ist alles verborgen und niemand kann es nutzen. Wenn du dein Konto versehentlich gelöscht hast, schreib an support@nowry.app, bevor die 30 Tage um sind. Nichts kommt von selbst zurück.",
@@ -1935,7 +1936,7 @@
       "elsewhere": [
         "Ein Vermerk, dass dir eine E-Mail gesendet wurde: ihre Art, der Tag und die Sprache, mit einer verschlüsselten Form deiner Adresse. 90 Tage aufbewahrt.",
         "Fehlerberichte von der Website und der App, bei Sentry: Sie enthalten keine Kontonummer, keinen Namen und keine E-Mail-Adresse. Bis zu {{sentryDays}} Tage aufbewahrt.",
-        "Protokolle der Anfragen an unsere KI-Funktionen, bei Langfuse: Sie enthalten deine Kontonummer und was du eingegeben hast, aber keinen Namen und keine E-Mail-Adresse. Bis zu {{langfuseDays}} Tage aufbewahrt."
+        "Protokolle von Anfragen an unsere KI-Funktionen bei Langfuse, die vor dem {{since}} entstanden und beim Löschen des Kontos älter als {{langfuseDays}} Tage sind: Unser Langfuse-Tarif kann sie nicht erreichen, deshalb bleiben sie dort ohne Enddatum gespeichert. Sie enthalten deine Kontonummer und was du eingegeben hast, aber keinen Namen und keine E-Mail-Adresse; sobald dein Konto gelöscht ist, führt diese Nummer zu niemandem mehr."
       ],
       "waitlist": "Wenn du dich auch in die Warteliste eingetragen hast, ist das getrennt: Nutze den Link in einer beliebigen E-Mail der Warteliste, um sie zu verlassen.",
       "contact": "Fragen: support@nowry.app"
