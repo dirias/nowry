@@ -38,6 +38,9 @@ async function signIn(page, email, password = PASSWORD) {
   await page.locator('input[type="password"]').first().fill(password)
   await page.locator('form button[type="submit"]').first().click()
   await page.waitForURL((url) => !url.pathname.startsWith('/login'), { timeout: 60000 })
+  // The sign-in page lands by reloading the app; let that reload finish before the next navigation.
+  await page.waitForLoadState('load')
+  await page.waitForLoadState('networkidle').catch(() => {})
 }
 
 /** The token the page itself holds (not a secret of the suite), for calls from the test process. */
