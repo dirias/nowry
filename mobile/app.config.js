@@ -20,7 +20,17 @@ const path = require('path')
  * have nothing to do with push.
  */
 const googleServices = path.join(__dirname, 'google-services.json')
-const androidPush = fs.existsSync(googleServices) ? { googleServicesFile: './google-services.json' } : {}
+/*
+ * A production build takes its own file from the EAS file variable
+ * GOOGLE_SERVICES_JSON (production environment only): the local file is the
+ * DEVELOPMENT project's, and builds 27-29 carried it to the store (PLAY-001).
+ */
+const productionGoogleServices = process.env.GOOGLE_SERVICES_JSON
+const androidPush = productionGoogleServices
+  ? { googleServicesFile: productionGoogleServices }
+  : fs.existsSync(googleServices)
+    ? { googleServicesFile: './google-services.json' }
+    : {}
 
 module.exports = () => ({
   expo: {

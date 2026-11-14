@@ -118,3 +118,23 @@ rather than failing at Google with an opaque redirect error.
 `GoogleAuthProvider` credential for the same Google identity in the same
 Firebase project, so Firebase resolves them to one user. Nothing in the mobile
 flow creates an account.
+
+## Production: Google sign-in and the native Firebase file (PLAY-001, 2026-11-14)
+
+Production builds (`production`, `production-apk`) use the **EAS `production` environment**, and until
+2026-11-14 it had **no Google client IDs at all**: every store build (27–29) failed Google sign-in in the
+app before reaching Google ("Google sign-in is not configured for this build"). Set now, production only:
+
+| Variable | Type | Source |
+|---|---|---|
+| `EXPO_PUBLIC_GOOGLE_CLIENT_ID_ANDROID` | plaintext | the Android OAuth client (type 1) in Firebase `nowry-prod`'s `google-services.json` |
+| `EXPO_PUBLIC_GOOGLE_CLIENT_ID_WEB` | plaintext | the web OAuth client (type 3) in the same file |
+| `GOOGLE_SERVICES_JSON` | file, secret | that `google-services.json`; `app.config.js` uses it when set |
+
+Dev keeps its own: `mobile/.env` (client IDs from `nowry-88f05`) and the git-ignored local
+`mobile/google-services.json`, which is the **development** project's. Without `GOOGLE_SERVICES_JSON`
+a build takes that local file — which is how builds 27–29 carried dev's file to the store.
+
+The production Android client has **custom URI schemes off by default** (see above): it must be
+switched on in Google Cloud console → project Nowry-Prod → Credentials → the Android client for
+`com.nowry.app` → Advanced settings. The local copy of the file is `~/.secrets/nowry/google-services.prod.json`.
