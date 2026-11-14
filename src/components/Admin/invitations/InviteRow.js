@@ -10,7 +10,7 @@ const STATE_COLOR = Object.freeze({ open: 'primary', used: 'success', expired: '
 /** The columns: address · cohort · state · sent · actions; a phone keeps address, state and actions. */
 export const ROW_GRID = {
   display: 'grid',
-  gridTemplateColumns: { xs: 'minmax(0, 1fr) auto', md: 'minmax(0, 1.6fr) 120px 96px 140px minmax(160px, auto)' },
+  gridTemplateColumns: { xs: 'minmax(0, 1fr) auto', md: 'minmax(0, 1.6fr) 120px 96px 190px minmax(160px, auto)' },
   alignItems: 'center',
   columnGap: 1.5,
   rowGap: 0.5,
