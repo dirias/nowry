@@ -63,6 +63,8 @@ const UserProfile = lazy(() => import('./components/User/Profile/UserProfile'))
 const AccountSettings = lazy(() => import('./components/User/Profile/AccountSettings'))
 const AgentSettings = lazy(() => import('./components/Agent/AgentSettings'))
 const AdminPage = lazy(() => import('./components/Admin/AdminPage'))
+const OverviewTab = lazy(() => import('./components/Admin/overview/OverviewTab'))
+const AdminLogPage = lazy(() => import('./components/Admin/log/AdminLogPage'))
 const ModerationTab = lazy(() => import('./components/Admin/moderation/ModerationTab'))
 const BugsTab = lazy(() => import('./components/Admin/bugs/BugsTab'))
 const InvitationsTab = lazy(() => import('./components/Admin/invitations/InvitationsTab'))
@@ -351,6 +353,8 @@ const AppContent = () => {
                 }
               >
                 <Route index element={<Navigate to={ADMIN_HOME} replace />} />
+                <Route path='overview' element={<OverviewTab />} />
+                <Route path='log' element={<AdminLogPage />} />
                 <Route path='moderation' element={<ModerationTab />} />
                 <Route path='bugs' element={<BugsTab />} />
                 <Route path='invitations' element={<InvitationsTab />} />

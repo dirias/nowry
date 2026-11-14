@@ -4816,7 +4816,7 @@
         "things_one": "{{count}} Punkt",
         "things_other": "{{count}} Punkte",
         "none": "Nichts offen",
-        "rowLabel": "{{title}}: {{count}} offen",
+        "rowLabel": "{{title}}: {{number}} offen",
         "reports": {
           "title": "Zu prüfende Meldungen",
           "oldest": "Älteste {{when}}",

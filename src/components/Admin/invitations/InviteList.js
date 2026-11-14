@@ -120,9 +120,9 @@ const Rows = ({ invites, rowAction, label }) => (
  * Revoke, each confirmed in place. Loading is skeleton rows; empty and error
  * say so, the error with Try again.
  */
-export default function InviteList({ run }) {
+export default function InviteList({ run, initialState = null }) {
   const { t, i18n } = useTranslation()
-  const [filter, setFilter] = useState(null)
+  const [filter, setFilter] = useState(initialState)
   const list = useInviteList(filter)
   const rowAction = useRowAction({ run, reload: list.reload, language: i18n?.language })
   const filtered = filter !== null

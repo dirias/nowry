@@ -8,6 +8,7 @@
 import React from 'react'
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { MemoryRouter } from 'react-router-dom'
 import InvitationsTab from '../invitations/InvitationsTab'
 
 /* The key, then its interpolation values: 'admin.inv.bar.send|count=2'. */
@@ -78,11 +79,13 @@ const SENT = {
   invitations_left_today: 62
 }
 
-const renderTab = () => {
+const renderTab = (path = '/admin/invitations') => {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
     <QueryClientProvider client={client}>
-      <InvitationsTab />
+      <MemoryRouter initialEntries={[path]}>
+        <InvitationsTab />
+      </MemoryRouter>
     </QueryClientProvider>
   )
 }
@@ -331,5 +334,18 @@ describe('row actions', () => {
     })
     expect(service.revoke).toHaveBeenCalledTimes(2)
     expect(await screen.findByText('admin.inv.notice.revoked|email=ana.r@example.com')).toBeInTheDocument()
+  })
+})
+
+describe('opened from the Overview (ADMIN-007c, board A)', () => {
+  it('starts filtered to the state the address names', async () => {
+    renderTab('/admin/invitations?state=open')
+    await waitFor(() => expect(service.listInvites).toHaveBeenCalledWith({ state: 'open', limit: 200 }))
+    expect(await screen.findByRole('button', { name: 'admin.inv.states.open · 2' })).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('ignores a state it does not know', async () => {
+    renderTab('/admin/invitations?state=bogus')
+    await waitFor(() => expect(service.listInvites).toHaveBeenCalledWith({ state: undefined, limit: 200 }))
   })
 })

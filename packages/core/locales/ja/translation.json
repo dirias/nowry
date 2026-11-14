@@ -4644,7 +4644,7 @@
         "title": "対応が必要",
         "things_other": "{{count}} 件",
         "none": "待機中のものはありません",
-        "rowLabel": "{{title}}：{{count}} 件",
+        "rowLabel": "{{title}}：{{number}} 件",
         "reports": {
           "title": "確認待ちの報告",
           "oldest": "最も古いもの {{when}}",

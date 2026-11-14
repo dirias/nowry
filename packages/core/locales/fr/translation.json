@@ -4827,7 +4827,7 @@
         "things_one": "{{count}} point",
         "things_other": "{{count}} points",
         "none": "Rien en attente",
-        "rowLabel": "{{title}} : {{count}}",
+        "rowLabel": "{{title}} : {{number}}",
         "reports": {
           "title": "Signalements à examiner",
           "oldest": "Le plus ancien {{when}}",

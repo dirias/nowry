@@ -93,7 +93,10 @@ describe('describeAction', () => {
   it('says a removal with its type and its public copies', () => {
     const removal = row('content.remove', { target_type: 'deck', target_title: 'JLPT N5', reason: 'copyright', details: { copies: 1 } })
     expect(describeAction(removal)).toEqual({ id: 'removeDeckCopies', values: { title: 'JLPT N5', count: 1 } })
-    expect(describeAction({ ...removal, details: { copies: 2 } })).toEqual({ id: 'removeDeckCopies', values: { title: 'JLPT N5', count: 2 } })
+    expect(describeAction({ ...removal, details: { copies: 2 } })).toEqual({
+      id: 'removeDeckCopies',
+      values: { title: 'JLPT N5', count: 2 }
+    })
     expect(describeAction({ ...removal, details: {} })).toEqual({ id: 'removeDeck', values: { title: 'JLPT N5' } })
     expect(describeAction({ ...removal, target_type: 'book', details: { copies: 0 } }).id).toBe('removeBook')
     expect(describeAction({ ...removal, target_type: 'book', details: { copies: 3 } }).id).toBe('removeBookCopies')
@@ -125,7 +128,10 @@ describe('describeAction', () => {
   })
 
   it('names an action it does not know rather than hiding it', () => {
-    expect(describeAction(row('something.new', { target_title: 'X' }))).toEqual({ id: 'other', values: { action: 'something.new', title: 'X' } })
+    expect(describeAction(row('something.new', { target_title: 'X' }))).toEqual({
+      id: 'other',
+      values: { action: 'something.new', title: 'X' }
+    })
     expect(describeAction(row('something.new', { target_title: null, target_id: 'id9' })).values.title).toBe('id9')
   })
 })
@@ -140,7 +146,8 @@ describe('reasonOf', () => {
 })
 
 describe('groupRecent', () => {
-  const send = (id, at, extra = {}) => row('invite.send', { id, at, details: { cohort: 'c1-waitlist' }, target_title: `${id}@x.org`, ...extra })
+  const send = (id, at, extra = {}) =>
+    row('invite.send', { id, at, details: { cohort: 'c1-waitlist' }, target_title: `${id}@x.org`, ...extra })
 
   it('joins consecutive sends by one admin to one cohort within one minute', () => {
     const rows = [
@@ -159,7 +166,9 @@ describe('groupRecent', () => {
 
   it('keeps sends apart across minutes, cohorts, admins, or another action between', () => {
     expect(groupRecent([send('a', '2026-11-13T18:16:00'), send('b', '2026-11-13T18:15:59')])).toHaveLength(2)
-    expect(groupRecent([send('a', '2026-11-13T18:15:30'), send('b', '2026-11-13T18:15:20', { details: { cohort: 'friends' } })])).toHaveLength(2)
+    expect(
+      groupRecent([send('a', '2026-11-13T18:15:30'), send('b', '2026-11-13T18:15:20', { details: { cohort: 'friends' } })])
+    ).toHaveLength(2)
     expect(groupRecent([send('a', '2026-11-13T18:15:30'), send('b', '2026-11-13T18:15:20', { actor: ANA })])).toHaveLength(2)
     expect(
       groupRecent([send('a', '2026-11-13T18:15:30'), row('invite.revoke', { at: '2026-11-13T18:15:25' }), send('b', '2026-11-13T18:15:20')])

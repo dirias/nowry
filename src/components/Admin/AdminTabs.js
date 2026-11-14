@@ -26,7 +26,7 @@ export default function AdminTabs({ tabs = ADMIN_TABS }) {
       sx={{ ...segmentedGroup, width: 'fit-content', maxWidth: '100%', overflowX: 'auto', scrollbarWidth: 'none' }}
     >
       {tabs.map((tab, index) => {
-        const active = pathname === tab.path || pathname.startsWith(`${tab.path}/`)
+        const active = [tab.path, ...(tab.also ?? [])].some((path) => pathname === path || pathname.startsWith(`${path}/`))
         const label = t(tab.labelKey)
         const count = tab.count ? counts[tab.count] : null
         return (

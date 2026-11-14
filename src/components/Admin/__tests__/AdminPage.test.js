@@ -6,6 +6,8 @@
  * to-review count, then Invitations, then Waitlist — and /admin still opens on
  * Invitations until the Overview exists (D9).
  * ADMIN-007b (board C): Bug reports follows Moderation with its new count.
+ * ADMIN-007c (boards A, K): Overview is the first tab and /admin opens on it;
+ * the admin log is reached from the Overview, so Overview stays marked there.
  */
 import React from 'react'
 import { render as rtlRender, screen } from '@testing-library/react'
@@ -51,17 +53,26 @@ const renderAt = (path) =>
       <Routes>
         <Route path='/admin' element={<AdminPage />}>
           <Route index element={<Navigate to={ADMIN_HOME} replace />} />
+          <Route path='overview' element={<Where />} />
           <Route path='invitations' element={<Where />} />
+          <Route path='log' element={<Where />} />
         </Route>
       </Routes>
     </MemoryRouter>
   )
 
-it('opens /admin on Invitations until Overview exists, though Moderation and Bug reports come first', () => {
-  expect(ADMIN_TABS.map((tab) => tab.key)).toEqual(['moderation', 'bugs', 'invitations', 'waitlist'])
-  expect(ADMIN_HOME).toBe('/admin/invitations')
+it('opens /admin on the Overview, the first tab (FR-011, D9)', () => {
+  expect(ADMIN_TABS.map((tab) => tab.key)).toEqual(['overview', 'moderation', 'bugs', 'invitations', 'waitlist'])
+  expect(ADMIN_HOME).toBe('/admin/overview')
   renderAt('/admin')
-  expect(screen.getByTestId('where')).toHaveTextContent('/admin/invitations')
+  expect(screen.getByTestId('where')).toHaveTextContent('/admin/overview')
+  expect(screen.getByRole('link', { name: 'admin.tabs.overview' })).toHaveAttribute('aria-current', 'page')
+})
+
+it('keeps Overview marked on the admin log, which the Overview opens', () => {
+  renderAt('/admin/log')
+  expect(screen.getByRole('link', { name: 'admin.tabs.overview' })).toHaveAttribute('aria-current', 'page')
+  expect(screen.getByRole('link', { name: 'admin.tabs.invitations' })).not.toHaveAttribute('aria-current')
 })
 
 it('names the page, says only its admin sees it, and marks the open tab', () => {
@@ -73,10 +84,11 @@ it('names the page, says only its admin sees it, and marks the open tab', () => 
   expect(screen.getByRole('link', { name: 'admin.tabs.invitations' })).toHaveAttribute('aria-current', 'page')
 })
 
-it('lists Moderation with how many wait for review, then Invitations, then Waitlist', async () => {
+it('lists Overview, Moderation with how many wait for review, then Invitations, then Waitlist', async () => {
   renderAt('/admin/invitations')
   const links = screen.getAllByRole('link')
   expect(links.map((link) => link.getAttribute('href'))).toEqual([
+    '/admin/overview',
     '/admin/moderation',
     '/admin/bugs',
     '/admin/invitations',

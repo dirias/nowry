@@ -5317,7 +5317,7 @@
         "things_one": "{{count}} asunto",
         "things_other": "{{count}} asuntos",
         "none": "Nada pendiente",
-        "rowLabel": "{{title}}: {{count}} pendientes",
+        "rowLabel": "{{title}}: {{number}} pendientes",
         "reports": {
           "title": "Denuncias por revisar",
           "oldest": "La más antigua {{when}}",

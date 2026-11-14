@@ -5317,7 +5317,7 @@
         "things_one": "{{count}} thing",
         "things_other": "{{count}} things",
         "none": "Nothing waiting",
-        "rowLabel": "{{title}}: {{count}}",
+        "rowLabel": "{{title}}: {{number}}",
         "reports": {
           "title": "Reports to review",
           "oldest": "Oldest {{when}}",
