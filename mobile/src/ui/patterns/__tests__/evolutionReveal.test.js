@@ -20,6 +20,10 @@ describe('the phone reveal swaps the form under the gold', () => {
     for (const layer of ['from', 'flash', 'to']) expect(source).toContain(`'${layer}')`)
   })
 
+  it('runs every beat on one schedule from the reveal\'s start, so late renders do not add up', () => {
+    expect(source).toMatch(/beatRemaining\(VARIANT, beat, Date\.now\(\) - startedAt\.current\)/)
+  })
+
   it('lets the gold go in the shared fade, not across the whole reveal', () => {
     expect(source).toMatch(/flashFadeShare\(VARIANT\)/)
   })

@@ -14,6 +14,7 @@ import {
   showsNewForm,
   evolutionLayer,
   flashFadeShare,
+  beatRemaining,
   motePath,
   spiralLength,
   spiralPath,
@@ -86,6 +87,26 @@ describe('the timeline', () => {
     expect(showsNewForm('sweep')).toBe(false)
     expect(showsNewForm('reveal')).toBe(true)
     expect(showsNewForm(EVOLUTION_DONE)).toBe(true)
+  })
+})
+
+describe('one schedule from the moment the reveal opens (EVO-017, measured on a release bundle)', () => {
+  it('gives a beat that starts on time its whole length', () => {
+    expect(beatRemaining('full', 'anticipation', 0)).toBe(720)
+    expect(beatRemaining('full', 'transformation', 720)).toBe(960)
+    expect(beatRemaining('full', 'flash', 1680)).toBe(160)
+    expect(beatRemaining('full', 'reveal', 1840)).toBe(720)
+  })
+
+  it('shortens a beat that starts late, so the sequence still ends at its designed length', () => {
+    expect(beatRemaining('full', 'flash', 1760)).toBe(80)
+    expect(beatRemaining('full', 'reveal', 1900)).toBe(evolutionDuration('full') - 1900)
+  })
+
+  it('never asks for a negative length, and has none for done', () => {
+    expect(beatRemaining('full', 'flash', 5000)).toBe(0)
+    expect(beatRemaining('full', EVOLUTION_DONE, 0)).toBe(0)
+    expect(beatRemaining('short', 'reveal', 480)).toBe(480)
   })
 })
 

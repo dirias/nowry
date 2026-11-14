@@ -68,6 +68,21 @@ export const firstBeat = (variant) => evolutionBeats(variant)[0]?.beat ?? EVOLUT
 /** How long a beat holds before the next, in milliseconds; 0 for `done` or a stranger. */
 export const beatDuration = (variant, beat) => evolutionBeats(variant).find((step) => step.beat === beat)?.ms ?? 0
 
+/**
+ * How long a beat still has, given how long ago the reveal opened: the beats
+ * keep one schedule from the start, so a beat that began late (the screen took
+ * a frame or two to re-render) ends on time and the sequence keeps its designed
+ * length. Measured on a release bundle, chaining each beat after the last ran
+ * 3.2 s against 2.56 s (EVO-017). Never negative; 0 for `done` or a stranger.
+ */
+export const beatRemaining = (variant, beat, elapsedMs) => {
+  const beats = evolutionBeats(variant)
+  const index = beats.findIndex((step) => step.beat === beat)
+  if (index === -1) return 0
+  const endsAt = beats.slice(0, index + 1).reduce((total, step) => total + step.ms, 0)
+  return Math.max(0, endsAt - elapsedMs)
+}
+
 /** The beat after this one; `done` after the last, and for anything unknown. */
 export const nextBeat = (variant, beat) => {
   const beats = evolutionBeats(variant)

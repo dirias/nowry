@@ -32,9 +32,9 @@ import { useTranslation } from 'react-i18next'
 import {
   EVOLUTION_DONE,
   MOTE_COUNT,
+  beatRemaining,
   evolutionLayer,
   flashFadeShare,
-  beatDuration,
   firstBeat,
   motePath,
   nextBeat,
@@ -66,6 +66,8 @@ export function EvolutionReveal({ fromStage, toStage, level, accent = null, onCl
   const theme = useTheme()
   const reduceMotion = useReduceMotion()
   const [beat, setBeat] = useState(firstBeat(VARIANT))
+  // When the reveal opened: every beat ends on this one schedule (EVO-017).
+  const startedAt = useRef(Date.now())
   const done = beat === EVOLUTION_DONE
 
   // One value per beat: each is the 0–1 progress of the thing that beat moves.
@@ -91,7 +93,7 @@ export function EvolutionReveal({ fromStage, toStage, level, accent = null, onCl
   useEffect(() => {
     if (done) return undefined
     const easing = Easing.bezier(...theme.motion.easing.standard)
-    const duration = beatDuration(VARIANT, beat)
+    const duration = beatRemaining(VARIANT, beat, Date.now() - startedAt.current)
     const value = { anticipation: draw, transformation: tighten, flash, reveal: open }[beat]
     // The dash offset is an SVG prop, which the native driver cannot reach; the transforms can.
     const moving = play(value, duration, easing, beat !== 'anticipation')
