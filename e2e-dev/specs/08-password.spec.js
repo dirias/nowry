@@ -37,6 +37,9 @@ test('[edge] a wrong current password is refused plainly and changes nothing', a
 test('[happy] the right current password changes it, tells once, and signs other sessions out', async ({ page }) => {
   const email = alias('pw-change')
   await makeAccount(email)
+  // A sign-in in the same second as makeAccount's returns the very token makeAccount already used,
+  // which an API worker has cached; the other device must be a session of its own.
+  await new Promise((resolve) => setTimeout(resolve, 1100))
   const otherDevice = (await firebaseSignIn(email, PASSWORD)).idToken
   await signIn(page, email)
   await openChange(page)
