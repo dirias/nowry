@@ -82,6 +82,13 @@ export const evolutionDuration = (variant) => evolutionBeats(variant).reduce((to
 export const showsNewForm = (beat) => beat === 'reveal' || beat === EVOLUTION_DONE
 
 /**
+ * The share of the reveal beat over which the gold goes: one base step, as the
+ * web's flash exits, so the gold is a flash and not a glow that lingers while
+ * the new form arrives. The short variant has no gold.
+ */
+export const flashFadeShare = (variant) => (variant === 'full' ? MOTION.duration.base / beatDuration(variant, 'reveal') : 0)
+
+/**
  * What each layer in the reveal's frame is doing at a beat (EVO-016): the old
  * form (`from`), the gold (`flash`) and the new form (`to`), each one of
  * `held`, `fading`, `arriving`, `shown` or `gone`.

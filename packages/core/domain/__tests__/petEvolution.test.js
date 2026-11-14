@@ -13,6 +13,7 @@ import {
   showsGenerationsLeft,
   showsNewForm,
   evolutionLayer,
+  flashFadeShare,
   motePath,
   spiralLength,
   spiralPath,
@@ -121,6 +122,12 @@ describe('the layers in the frame: the swap happens under the gold (ADR-075, EVO
     expect(evolutionLayer('short', 'reveal', 'from')).toBe('gone')
     expect(evolutionLayer('short', 'reveal', 'to')).toBe('arriving')
     for (const beat of ['sweep', 'reveal', EVOLUTION_DONE]) expect(evolutionLayer('short', beat, 'flash')).toBe('gone')
+  })
+
+  it('lets the gold go in one base step as the reveal starts, as the web does, not across the whole reveal', () => {
+    expect(flashFadeShare('full')).toBeCloseTo(MOTION.duration.base / beatDuration('full', 'reveal'))
+    expect(flashFadeShare('full')).toBeLessThan(0.25)
+    expect(flashFadeShare('short')).toBe(0)
   })
 
   it('agrees with showsNewForm', () => {

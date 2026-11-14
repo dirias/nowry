@@ -33,6 +33,7 @@ import {
   EVOLUTION_DONE,
   MOTE_COUNT,
   evolutionLayer,
+  flashFadeShare,
   beatDuration,
   firstBeat,
   motePath,
@@ -194,7 +195,10 @@ export function EvolutionReveal({ fromStage, toStage, level, accent = null, onCl
               pointerEvents='none'
               style={{
                 position: 'absolute',
-                opacity: flashLayer === 'arriving' ? flash : open.interpolate({ inputRange: [0, 1], outputRange: [1, 0] }),
+                opacity:
+                  flashLayer === 'arriving'
+                    ? flash
+                    : open.interpolate({ inputRange: [0, flashFadeShare(VARIANT), 1], outputRange: [1, 0, 0] }),
                 transform: [{ scale: flashLayer === 'arriving' ? flash.interpolate({ inputRange: [0, 1], outputRange: [0.6, 1] }) : 1 }]
               }}
             >
