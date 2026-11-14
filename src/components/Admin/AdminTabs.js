@@ -18,7 +18,7 @@ export default function AdminTabs({ tabs = ADMIN_TABS }) {
       component='nav'
       variant='outlined'
       aria-label={t('admin.tabsLabel')}
-      sx={{ ...segmentedGroup, width: '100%', overflowX: 'auto', scrollbarWidth: 'none' }}
+      sx={{ ...segmentedGroup, width: 'fit-content', maxWidth: '100%', overflowX: 'auto', scrollbarWidth: 'none' }}
     >
       {tabs.map((tab, index) => {
         const active = pathname === tab.path || pathname.startsWith(`${tab.path}/`)
