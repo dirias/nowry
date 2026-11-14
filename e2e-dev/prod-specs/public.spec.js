@@ -16,14 +16,15 @@ test('[prod] nowry.app and the API answer', async ({ page, request }) => {
 
 publicChecks(test, expect)
 
+/**
+ * The Play reviewer account (Didier, 2026-11-14): it exists in production and its mail reaches the
+ * support mailbox. The API writes it "You already have a Nowry account" at most once a day (ADR-084).
+ */
+const ACCOUNT_ADDRESS = 'demo@nowry.app'
+
 test('[prod] the waitlist answer for an address that already has an account', async ({ page }) => {
-  const address = process.env.PROD_CHECK_WAITLIST_EMAIL
-  test.skip(
-    !address,
-    'Waiting for your choice: this sends that address one "You already have a Nowry account" email (at most once a day, ADR-084).'
-  )
   await page.goto('/')
-  await page.locator('input[type="email"]').first().fill(address)
+  await page.locator('input[type="email"]').first().fill(ACCOUNT_ADDRESS)
   await page.getByRole('button', { name: 'Join the waitlist' }).first().click()
   await expect(page.getByText('Done. If this is your first time', { exact: false })).toBeVisible({ timeout: 30000 })
 })

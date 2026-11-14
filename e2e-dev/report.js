@@ -82,7 +82,7 @@ const prodT = tally(prodRows)
 const prodSection = prodResults
   ? `<section><span class="muted small">Production check after the release · ${esc(new Date(prodRun?.started || Date.now()).toUTCString())}</span>
 <h2>nowry.app: ${headline(prodT, prodRows.length)}</h2>
-<p class="muted">As a visitor sees it: no account made, no email sent, nothing written.</p>
+<p class="muted">As a visitor sees it: no account made and nothing written. The waitlist step uses demo@nowry.app, the Play reviewer account, which the API writes at most once a day; that letter lands in the support mailbox.</p>
 ${facts(prodRun?.commits, 'https://www.nowry.app')}
 ${table('Checks', prodRows)}</section>`
   : ''
