@@ -18,9 +18,7 @@ const refusal = (reason) => ({ response: { status: 409, data: { detail: { code: 
 
 it('says the removal sentence in all five languages', () => {
   const sentences = LOCALES.map((locale) => publishFailureText(tFor(locale), refusal('removed_by_moderation')))
-  expect(sentences[0]).toBe(
-    "This was removed from public Browse by Nowry and can't be published again. The email we sent explains why."
-  )
+  expect(sentences[0]).toBe("This was removed from public Browse by Nowry and can't be published again. The email we sent explains why.")
   sentences.forEach((sentence) => expect(sentence).not.toMatch(/^public\./))
   expect(new Set(sentences).size).toBe(5)
 })

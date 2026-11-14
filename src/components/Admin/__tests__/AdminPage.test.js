@@ -2,6 +2,9 @@
  * ADMIN-007a (FR-011, board A): /admin opens on its first built tab; the page
  * says only its admin sees it; the tab bar lists only the tabs that exist.
  * WAIT-002 (board E): the Waitlist tab follows Invitations with its waiting count.
+ * ADMIN-003 (board B): the tabs follow the boards' order — Moderation, with its
+ * to-review count, then Invitations, then Waitlist — and /admin still opens on
+ * Invitations until the Overview exists (D9).
  */
 import React from 'react'
 import { render as rtlRender, screen } from '@testing-library/react'
@@ -16,10 +19,16 @@ jest.mock('@nowry/core/api/services/adminWaitlist.service', () => ({
   WAITLIST_LIST_LIMIT: 200,
   adminWaitlistService: { listWaitlist: jest.fn() }
 }))
+jest.mock('@nowry/core/api/services/adminModeration.service', () => ({
+  MODERATION_QUEUE_LIMIT: 100,
+  adminModerationService: { listQueue: jest.fn() }
+}))
 const { adminWaitlistService } = require('@nowry/core/api/services/adminWaitlist.service')
+const { adminModerationService } = require('@nowry/core/api/services/adminModeration.service')
 
 beforeEach(() => {
   adminWaitlistService.listWaitlist.mockResolvedValue({ rows: [], totals: { waiting: 37, invited: 12, joined: 9, left: 2 } })
+  adminModerationService.listQueue.mockResolvedValue({ items: [], totals: { to_review: 2, kept: 5, removed: 1 } })
 })
 
 const render = (ui) => {
@@ -41,8 +50,9 @@ const renderAt = (path) =>
     </MemoryRouter>
   )
 
-it('opens /admin on Invitations, the first tab, until Overview exists', () => {
-  expect(ADMIN_TABS.map((tab) => tab.key)).toEqual(['invitations', 'waitlist'])
+it('opens /admin on Invitations until Overview exists, though Moderation comes first', () => {
+  expect(ADMIN_TABS.map((tab) => tab.key)).toEqual(['moderation', 'invitations', 'waitlist'])
+  expect(ADMIN_HOME).toBe('/admin/invitations')
   renderAt('/admin')
   expect(screen.getByTestId('where')).toHaveTextContent('/admin/invitations')
 })
@@ -56,10 +66,17 @@ it('names the page, says only its admin sees it, and marks the open tab', () => 
   expect(screen.getByRole('link', { name: 'admin.tabs.invitations' })).toHaveAttribute('aria-current', 'page')
 })
 
-it('lists Waitlist after Invitations, with how many are waiting', async () => {
+it('lists Moderation with how many wait for review, then Invitations, then Waitlist', async () => {
   renderAt('/admin/invitations')
   const links = screen.getAllByRole('link')
-  expect(links.map((link) => link.getAttribute('href'))).toEqual(['/admin/invitations', '/admin/waitlist'])
+  expect(links.map((link) => link.getAttribute('href'))).toEqual(['/admin/moderation', '/admin/invitations', '/admin/waitlist'])
+  const moderation = await screen.findByRole('link', { name: 'admin.tabs.moderation 2' })
+  expect(moderation).not.toHaveAttribute('aria-current')
+  expect(adminModerationService.listQueue).toHaveBeenCalledWith({ state: 'to_review', limit: 1 })
+})
+
+it('lists Waitlist after Invitations, with how many are waiting', async () => {
+  renderAt('/admin/invitations')
   const waitlist = await screen.findByRole('link', { name: 'admin.tabs.waitlist 37' })
   expect(waitlist).toHaveTextContent('admin.tabs.waitlist37')
   expect(waitlist).not.toHaveAttribute('aria-current')
@@ -68,18 +85,20 @@ it('lists Waitlist after Invitations, with how many are waiting', async () => {
 
 it('draws the tab without a count until it is known', () => {
   adminWaitlistService.listWaitlist.mockReturnValue(new Promise(() => {}))
+  adminModerationService.listQueue.mockReturnValue(new Promise(() => {}))
   renderAt('/admin/invitations')
   expect(screen.getByRole('link', { name: 'admin.tabs.waitlist' })).toBeInTheDocument()
+  expect(screen.getByRole('link', { name: 'admin.tabs.moderation' })).toBeInTheDocument()
 })
 
 it('grows by one entry per tab', () => {
-  const tabs = [ADMIN_TABS[0], { key: 'moderation', path: '/admin/moderation', labelKey: 'admin.tabs.moderation' }]
+  const tabs = [ADMIN_TABS.find((tab) => tab.key === 'invitations'), { key: 'bugs', path: '/admin/bugs', labelKey: 'admin.tabs.bugs' }]
   render(
-    <MemoryRouter initialEntries={['/admin/moderation']}>
+    <MemoryRouter initialEntries={['/admin/bugs']}>
       <AdminTabs tabs={tabs} />
     </MemoryRouter>
   )
   expect(screen.getAllByRole('link')).toHaveLength(2)
-  expect(screen.getByRole('link', { name: 'admin.tabs.moderation' })).toHaveAttribute('aria-current', 'page')
+  expect(screen.getByRole('link', { name: 'admin.tabs.bugs' })).toHaveAttribute('aria-current', 'page')
   expect(screen.getByRole('link', { name: 'admin.tabs.invitations' })).not.toHaveAttribute('aria-current')
 })

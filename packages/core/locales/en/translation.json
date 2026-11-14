@@ -4988,6 +4988,14 @@
       "revoke": {
         "title": "Sign in again to revoke the invitation",
         "confirm": "Sign in and revoke"
+      },
+      "keep": {
+        "title": "Sign in again to keep it public",
+        "confirm": "Sign in and keep public"
+      },
+      "unpublish": {
+        "title": "Sign in again to unpublish",
+        "confirm": "Sign in and unpublish"
       }
     },
     "title": "Admin",
@@ -4998,7 +5006,8 @@
     "tryAgain": "Try again",
     "tabs": {
       "invitations": "Invitations",
-      "waitlist": "Waitlist"
+      "waitlist": "Waitlist",
+      "moderation": "Moderation"
     },
     "inv": {
       "form": {
@@ -5207,6 +5216,87 @@
         "notFound_other": "{{count}} rows were not found and were not invited."
       },
       "caption": "Rows invited from here appear in Invitations with the row's language. A row becomes Joined when that address signs up."
+    },
+    "mod": {
+      "states": {
+        "to_review": "To review",
+        "kept": "Kept",
+        "removed": "Removed"
+      },
+      "filters": "Show the queue by state",
+      "reasons": {
+        "copyright": "Copyright",
+        "inappropriate": "Inappropriate",
+        "spam": "Spam",
+        "misinformation": "Misinformation",
+        "other": "Other"
+      },
+      "types": {
+        "deck": "Deck",
+        "book": "Book"
+      },
+      "list": {
+        "title": "Reported items",
+        "loading": "Loading the queue",
+        "error": "Couldn't load the queue.",
+        "empty": {
+          "title": "Nothing to review",
+          "body": "Content people report from Browse appears here."
+        },
+        "filterEmpty": "Nothing in this state",
+        "by": "by {{owner}}",
+        "reports_one": "{{count}} report",
+        "reports_other": "{{count}} reports"
+      },
+      "item": {
+        "label": "The selected item",
+        "publicSince": "public since {{date}}",
+        "cards_one": "{{count}} card",
+        "cards_other": "{{count}} cards",
+        "pages_one": "{{count}} page",
+        "pages_other": "{{count}} pages",
+        "learners_one": "{{count}} learner",
+        "learners_other": "{{count}} learners",
+        "reporters_one": "{{count}} reporter",
+        "reporters_other": "{{count}} reporters",
+        "removed": "Removed {{date}} · {{reason}}",
+        "removedNote": "Note for the owner: {{note}}"
+      },
+      "actions": {
+        "openDeck": "Open the deck",
+        "openBook": "Open the book",
+        "openAria": "Open “{{title}}” in Browse, in a new tab",
+        "keep": "Keep public",
+        "unpublish": "Unpublish…"
+      },
+      "confirm": {
+        "title": "Unpublish “{{title}}”?",
+        "body": "It leaves Browse at once, and the owner cannot publish it again.",
+        "copies_one": "{{count}} public copy of it goes too; private copies stay.",
+        "copies_other": "{{count}} public copies of it go too; private copies stay.",
+        "log_one": "It goes into the admin log.",
+        "log_other": "Each one goes into the admin log.",
+        "reason": "Reason",
+        "fromReport": "{{reason}} · from the report",
+        "note": "Note for the owner",
+        "noteHint": "optional · up to {{max}} characters",
+        "email": "The owner gets an email in their language, if their address is verified.",
+        "emailCopies_one": "The owner and the copy’s owner each get an email in their language, if their address is verified.",
+        "emailCopies_other": "The owner and the copies’ owners each get an email in their language, if their address is verified.",
+        "confirm_one": "Unpublish",
+        "confirm_other": "Unpublish {{count}} items"
+      },
+      "result": {
+        "kept_one": "Kept public. {{count}} report closed.",
+        "kept_other": "Kept public. {{count}} reports closed.",
+        "removed_one": "Unpublished {{count}} item.",
+        "removed_other": "Unpublished {{count}} items.",
+        "emailed_one": "{{count}} owner was emailed; {{notTold}} could not be.",
+        "emailed_other": "{{count}} owners were emailed; {{notTold}} could not be.",
+        "failed": "That didn't work, and nothing changed. Try again.",
+        "alreadyRemoved": "Someone had already removed it, so nothing changed. The queue is up to date.",
+        "notFound": "It no longer exists, so nothing changed. The queue is up to date."
+      }
     }
   }
 }

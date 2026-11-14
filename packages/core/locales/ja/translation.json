@@ -4308,6 +4308,14 @@
       "revoke": {
         "title": "招待を取り消すには再度サインインしてください",
         "confirm": "サインインして取り消す"
+      },
+      "keep": {
+        "title": "公開のままにするには再度サインインしてください",
+        "confirm": "サインインして公開を続ける"
+      },
+      "unpublish": {
+        "title": "非公開にするには再度サインインしてください",
+        "confirm": "サインインして非公開にする"
       }
     },
     "title": "管理",
@@ -4318,7 +4326,8 @@
     "tryAgain": "もう一度試す",
     "tabs": {
       "invitations": "招待",
-      "waitlist": "ウェイトリスト"
+      "waitlist": "ウェイトリスト",
+      "moderation": "モデレーション"
     },
     "inv": {
       "form": {
@@ -4506,6 +4515,75 @@
         "notFound_other": "{{count}}行が見つからず、招待されませんでした。"
       },
       "caption": "ここから招待した行は、その行の言語で「招待」に表示されます。そのアドレスがアカウントを作成すると、行は「登録済み」になります。"
+    },
+    "mod": {
+      "states": {
+        "to_review": "要確認",
+        "kept": "公開を継続",
+        "removed": "削除済み"
+      },
+      "filters": "状態でキューを表示",
+      "reasons": {
+        "copyright": "著作権",
+        "inappropriate": "不適切",
+        "spam": "スパム",
+        "misinformation": "誤情報",
+        "other": "その他"
+      },
+      "types": {
+        "deck": "デッキ",
+        "book": "ブック"
+      },
+      "list": {
+        "title": "通報されたコンテンツ",
+        "loading": "キューを読み込み中",
+        "error": "キューを読み込めませんでした。",
+        "empty": {
+          "title": "確認するものはありません",
+          "body": "「探す」から通報されたコンテンツがここに表示されます。"
+        },
+        "filterEmpty": "この状態のものはありません",
+        "by": "作成者 {{owner}}",
+        "reports_other": "通報 {{count}} 件"
+      },
+      "item": {
+        "label": "選択中のコンテンツ",
+        "publicSince": "{{date}} から公開",
+        "cards_other": "カード {{count}} 枚",
+        "pages_other": "{{count}} ページ",
+        "learners_other": "学習者 {{count}} 人",
+        "reporters_other": "通報者 {{count}} 人",
+        "removed": "{{date}} に削除 · {{reason}}",
+        "removedNote": "作成者へのメモ：{{note}}"
+      },
+      "actions": {
+        "openDeck": "デッキを開く",
+        "openBook": "ブックを開く",
+        "openAria": "「{{title}}」を「探す」で新しいタブに開く",
+        "keep": "公開を続ける",
+        "unpublish": "非公開にする…"
+      },
+      "confirm": {
+        "title": "「{{title}}」を非公開にしますか？",
+        "body": "すぐに「探す」から消え、作成者は再び公開できなくなります。",
+        "copies_other": "その公開コピー {{count}} 件も非公開になります。非公開のコピーはそのままです。",
+        "log_other": "それぞれ管理ログに記録されます。",
+        "reason": "理由",
+        "fromReport": "{{reason}} · 通報より",
+        "note": "作成者へのメモ",
+        "noteHint": "任意 · {{max}} 文字まで",
+        "email": "メールアドレスが確認済みなら、作成者に本人の言語でメールが届きます。",
+        "emailCopies_other": "メールアドレスが確認済みなら、作成者とコピーの所有者それぞれに本人の言語でメールが届きます。",
+        "confirm_other": "{{count}} 件を非公開にする"
+      },
+      "result": {
+        "kept_other": "公開を続けます。通報 {{count}} 件を閉じました。",
+        "removed_other": "{{count}} 件を非公開にしました。",
+        "emailed_other": "{{count}} 人の所有者にメールしました。{{notTold}} 人には送れませんでした。",
+        "failed": "うまくいかず、何も変わりませんでした。もう一度お試しください。",
+        "alreadyRemoved": "すでに削除されていたため、何も変わりませんでした。キューは最新の状態です。",
+        "notFound": "もう存在しないため、何も変わりませんでした。キューは最新の状態です。"
+      }
     }
   }
 }

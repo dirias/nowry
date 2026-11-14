@@ -65,6 +65,7 @@ const AccountSettings = lazy(() => import('./components/User/Profile/AccountSett
 const AgentSettings = lazy(() => import('./components/Agent/AgentSettings'))
 const BugDashboard = lazy(() => import('./components/Bugs/BugDashboard'))
 const AdminPage = lazy(() => import('./components/Admin/AdminPage'))
+const ModerationTab = lazy(() => import('./components/Admin/moderation/ModerationTab'))
 const InvitationsTab = lazy(() => import('./components/Admin/invitations/InvitationsTab'))
 const WaitlistTab = lazy(() => import('./components/Admin/waitlist/WaitlistTab'))
 const News = lazy(() => import('./pages/News'))
@@ -351,6 +352,7 @@ const AppContent = () => {
                 }
               >
                 <Route index element={<Navigate to={ADMIN_HOME} replace />} />
+                <Route path='moderation' element={<ModerationTab />} />
                 <Route path='invitations' element={<InvitationsTab />} />
                 <Route path='waitlist' element={<WaitlistTab />} />
                 <Route path='*' element={<Navigate to={ADMIN_HOME} replace />} />

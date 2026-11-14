@@ -4453,6 +4453,14 @@
       "revoke": {
         "title": "Melde dich erneut an, um die Einladung zu widerrufen",
         "confirm": "Anmelden und widerrufen"
+      },
+      "keep": {
+        "title": "Melde dich erneut an, um es öffentlich zu lassen",
+        "confirm": "Anmelden und öffentlich lassen"
+      },
+      "unpublish": {
+        "title": "Melde dich erneut an, um es zu entfernen",
+        "confirm": "Anmelden und entfernen"
       }
     },
     "title": "Verwaltung",
@@ -4463,7 +4471,8 @@
     "tryAgain": "Erneut versuchen",
     "tabs": {
       "invitations": "Einladungen",
-      "waitlist": "Warteliste"
+      "waitlist": "Warteliste",
+      "moderation": "Moderation"
     },
     "inv": {
       "form": {
@@ -4672,6 +4681,87 @@
         "notFound_other": "{{count}} Zeilen wurden nicht gefunden und nicht eingeladen."
       },
       "caption": "Von hier eingeladene Zeilen erscheinen unter Einladungen mit der Sprache der Zeile. Eine Zeile wird zu Beigetreten, sobald sich diese Adresse registriert."
+    },
+    "mod": {
+      "states": {
+        "to_review": "Zu prüfen",
+        "kept": "Behalten",
+        "removed": "Entfernt"
+      },
+      "filters": "Die Warteschlange nach Status zeigen",
+      "reasons": {
+        "copyright": "Urheberrecht",
+        "inappropriate": "Unangemessen",
+        "spam": "Spam",
+        "misinformation": "Falschinformation",
+        "other": "Sonstiges"
+      },
+      "types": {
+        "deck": "Stapel",
+        "book": "Buch"
+      },
+      "list": {
+        "title": "Gemeldete Inhalte",
+        "loading": "Die Warteschlange wird geladen",
+        "error": "Die Warteschlange konnte nicht geladen werden.",
+        "empty": {
+          "title": "Nichts zu prüfen",
+          "body": "Inhalte, die in Entdecken gemeldet werden, erscheinen hier."
+        },
+        "filterEmpty": "Nichts in diesem Status",
+        "by": "von {{owner}}",
+        "reports_one": "{{count}} Meldung",
+        "reports_other": "{{count}} Meldungen"
+      },
+      "item": {
+        "label": "Der ausgewählte Inhalt",
+        "publicSince": "öffentlich seit {{date}}",
+        "cards_one": "{{count}} Karte",
+        "cards_other": "{{count}} Karten",
+        "pages_one": "{{count}} Seite",
+        "pages_other": "{{count}} Seiten",
+        "learners_one": "{{count}} lernende Person",
+        "learners_other": "{{count}} Lernende",
+        "reporters_one": "{{count}} meldende Person",
+        "reporters_other": "{{count}} meldende Personen",
+        "removed": "Entfernt am {{date}} · {{reason}}",
+        "removedNote": "Notiz für die Person: {{note}}"
+      },
+      "actions": {
+        "openDeck": "Stapel öffnen",
+        "openBook": "Buch öffnen",
+        "openAria": "„{{title}}“ in Entdecken in einem neuen Tab öffnen",
+        "keep": "Öffentlich lassen",
+        "unpublish": "Entfernen…"
+      },
+      "confirm": {
+        "title": "„{{title}}“ aus Entdecken entfernen?",
+        "body": "Es verschwindet sofort aus Entdecken, und die Person kann es nicht wieder veröffentlichen.",
+        "copies_one": "{{count}} öffentliche Kopie davon wird auch entfernt; private Kopien bleiben.",
+        "copies_other": "{{count}} öffentliche Kopien davon werden auch entfernt; private Kopien bleiben.",
+        "log_one": "Das wird im Admin-Protokoll vermerkt.",
+        "log_other": "Jede Entfernung wird im Admin-Protokoll vermerkt.",
+        "reason": "Grund",
+        "fromReport": "{{reason}} · aus der Meldung",
+        "note": "Notiz für die Person",
+        "noteHint": "optional · bis zu {{max}} Zeichen",
+        "email": "Die Person bekommt eine E-Mail in ihrer Sprache, wenn ihre Adresse bestätigt ist.",
+        "emailCopies_one": "Die Person und die Person mit der Kopie bekommen je eine E-Mail in ihrer Sprache, wenn ihre Adresse bestätigt ist.",
+        "emailCopies_other": "Die Person und die Personen mit den Kopien bekommen je eine E-Mail in ihrer Sprache, wenn ihre Adresse bestätigt ist.",
+        "confirm_one": "Entfernen",
+        "confirm_other": "{{count}} Inhalte entfernen"
+      },
+      "result": {
+        "kept_one": "Bleibt öffentlich. {{count}} Meldung geschlossen.",
+        "kept_other": "Bleibt öffentlich. {{count}} Meldungen geschlossen.",
+        "removed_one": "{{count}} Inhalt entfernt.",
+        "removed_other": "{{count}} Inhalte entfernt.",
+        "emailed_one": "{{count}} Person wurde per E-Mail informiert; {{notTold}} nicht.",
+        "emailed_other": "{{count}} Personen wurden per E-Mail informiert; {{notTold}} nicht.",
+        "failed": "Das hat nicht geklappt, und nichts wurde geändert. Versuch es noch einmal.",
+        "alreadyRemoved": "Es wurde schon entfernt, also hat sich nichts geändert. Die Warteschlange ist aktuell.",
+        "notFound": "Es existiert nicht mehr, also hat sich nichts geändert. Die Warteschlange ist aktuell."
+      }
     }
   }
 }

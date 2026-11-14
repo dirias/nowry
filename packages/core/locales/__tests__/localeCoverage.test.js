@@ -183,6 +183,8 @@ const IDENTICAL_BY_DESIGN = {
     ...COMPANION_NAME,
     // "General" is the Spanish word for a deck of anything (CHAT-009).
     'agent.ready.field.general',
+    // ADMIN-003: "Spam" is the word Spanish moderation uses for it, as in the report form's "Spam o baja calidad".
+    'admin.mod.reasons.spam',
     // "General" and "Plan" are the Spanish words for the chat subject labels (CHAT-010).
     'agent.subject.general',
     'agent.subject.plan',
@@ -231,6 +233,9 @@ const IDENTICAL_BY_DESIGN = {
   fr: [
     // MEDIA-005: the phone reader's accessible name for an image with no alt text is the French word.
     'books.reader.imageUnnamed',
+    // ADMIN-003: "page" and "pages" are the French words, so a book's size reads the same.
+    'admin.mod.item.pages_one',
+    'admin.mod.item.pages_other',
     // Boards (BOARD-006/008/009): file extensions, format names and the list comma are universal; "Image (PNG)", "note" and "Question" are the French words.
     'boards.menu.importTypes',
     'boards.menu.exportCanvas',
@@ -325,6 +330,9 @@ const IDENTICAL_BY_DESIGN = {
     'boards.inOut.list.separator',
     // "Routine" is the word in de too (PLAN-012).
     'items.reading.routine',
+    // ADMIN-003: "Moderation" and "Spam" are the German words, spelled as in English.
+    'admin.tabs.moderation',
+    'admin.mod.reasons.spam',
     ...BETA_MARK,
     'taxonomy.topics.design',
     'news.categories.design',

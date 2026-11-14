@@ -4988,6 +4988,14 @@
       "revoke": {
         "title": "Vuelve a iniciar sesión para revocar la invitación",
         "confirm": "Iniciar sesión y revocar"
+      },
+      "keep": {
+        "title": "Vuelve a iniciar sesión para mantenerlo público",
+        "confirm": "Iniciar sesión y mantener"
+      },
+      "unpublish": {
+        "title": "Vuelve a iniciar sesión para retirarlo",
+        "confirm": "Iniciar sesión y retirar"
       }
     },
     "title": "Administración",
@@ -4998,7 +5006,8 @@
     "tryAgain": "Intentar de nuevo",
     "tabs": {
       "invitations": "Invitaciones",
-      "waitlist": "Lista de espera"
+      "waitlist": "Lista de espera",
+      "moderation": "Moderación"
     },
     "inv": {
       "form": {
@@ -5207,6 +5216,87 @@
         "notFound_other": "No se encontraron {{count}} filas y no se invitaron."
       },
       "caption": "Las filas invitadas desde aquí aparecen en Invitaciones con el idioma de la fila. Una fila pasa a Registrado cuando esa dirección crea su cuenta."
+    },
+    "mod": {
+      "states": {
+        "to_review": "Por revisar",
+        "kept": "Mantenidos",
+        "removed": "Retirados"
+      },
+      "filters": "Mostrar la cola por estado",
+      "reasons": {
+        "copyright": "Derechos de autor",
+        "inappropriate": "Inapropiado",
+        "spam": "Spam",
+        "misinformation": "Desinformación",
+        "other": "Otro"
+      },
+      "types": {
+        "deck": "Mazo",
+        "book": "Libro"
+      },
+      "list": {
+        "title": "Contenido denunciado",
+        "loading": "Cargando la cola",
+        "error": "No se pudo cargar la cola.",
+        "empty": {
+          "title": "Nada que revisar",
+          "body": "Aquí aparece el contenido que la gente denuncia desde Explorar."
+        },
+        "filterEmpty": "Nada en este estado",
+        "by": "de {{owner}}",
+        "reports_one": "{{count}} denuncia",
+        "reports_other": "{{count}} denuncias"
+      },
+      "item": {
+        "label": "El contenido seleccionado",
+        "publicSince": "público desde el {{date}}",
+        "cards_one": "{{count}} tarjeta",
+        "cards_other": "{{count}} tarjetas",
+        "pages_one": "{{count}} página",
+        "pages_other": "{{count}} páginas",
+        "learners_one": "{{count}} estudiante",
+        "learners_other": "{{count}} estudiantes",
+        "reporters_one": "{{count}} denunciante",
+        "reporters_other": "{{count}} denunciantes",
+        "removed": "Retirado el {{date}} · {{reason}}",
+        "removedNote": "Nota para el autor: {{note}}"
+      },
+      "actions": {
+        "openDeck": "Abrir el mazo",
+        "openBook": "Abrir el libro",
+        "openAria": "Abrir «{{title}}» en Explorar, en una pestaña nueva",
+        "keep": "Mantener público",
+        "unpublish": "Retirar…"
+      },
+      "confirm": {
+        "title": "¿Retirar «{{title}}»?",
+        "body": "Sale de Explorar de inmediato y el autor no podrá volver a publicarlo.",
+        "copies_one": "También se retira {{count}} copia pública; las copias privadas se quedan.",
+        "copies_other": "También se retiran {{count}} copias públicas; las copias privadas se quedan.",
+        "log_one": "Queda anotado en el registro de administración.",
+        "log_other": "Cada uno queda anotado en el registro de administración.",
+        "reason": "Motivo",
+        "fromReport": "{{reason}} · de la denuncia",
+        "note": "Nota para el autor",
+        "noteHint": "opcional · hasta {{max}} caracteres",
+        "email": "El autor recibe un correo en su idioma, si su dirección está verificada.",
+        "emailCopies_one": "El autor y el dueño de la copia reciben cada uno un correo en su idioma, si su dirección está verificada.",
+        "emailCopies_other": "El autor y los dueños de las copias reciben cada uno un correo en su idioma, si su dirección está verificada.",
+        "confirm_one": "Retirar",
+        "confirm_other": "Retirar {{count}} elementos"
+      },
+      "result": {
+        "kept_one": "Se mantiene público. Se cerró {{count}} denuncia.",
+        "kept_other": "Se mantiene público. Se cerraron {{count}} denuncias.",
+        "removed_one": "Se retiró {{count}} elemento.",
+        "removed_other": "Se retiraron {{count}} elementos.",
+        "emailed_one": "Se avisó por correo a {{count}} autor; a {{notTold}} no se pudo.",
+        "emailed_other": "Se avisó por correo a {{count}} autores; a {{notTold}} no se pudo.",
+        "failed": "No funcionó y no cambió nada. Inténtalo de nuevo.",
+        "alreadyRemoved": "Ya lo había retirado otra persona, así que no cambió nada. La cola está al día.",
+        "notFound": "Ya no existe, así que no cambió nada. La cola está al día."
+      }
     }
   }
 }

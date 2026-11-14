@@ -4464,6 +4464,14 @@
       "revoke": {
         "title": "Reconnectez-vous pour révoquer l'invitation",
         "confirm": "Se connecter et révoquer"
+      },
+      "keep": {
+        "title": "Reconnectez-vous pour le laisser public",
+        "confirm": "Se connecter et laisser public"
+      },
+      "unpublish": {
+        "title": "Reconnectez-vous pour le dépublier",
+        "confirm": "Se connecter et dépublier"
       }
     },
     "title": "Administration",
@@ -4474,7 +4482,8 @@
     "tryAgain": "Réessayer",
     "tabs": {
       "invitations": "Inviter",
-      "waitlist": "Liste d'attente"
+      "waitlist": "Liste d'attente",
+      "moderation": "Modération"
     },
     "inv": {
       "form": {
@@ -4683,6 +4692,87 @@
         "notFound_other": "{{count}} lignes sont introuvables et n'ont pas été invitées."
       },
       "caption": "Les lignes invitées d'ici apparaissent dans Invitations avec la langue de la ligne. Une ligne passe à Inscrit quand cette adresse crée son compte."
+    },
+    "mod": {
+      "states": {
+        "to_review": "À examiner",
+        "kept": "Conservés",
+        "removed": "Retirés"
+      },
+      "filters": "Afficher la file par état",
+      "reasons": {
+        "copyright": "Droit d’auteur",
+        "inappropriate": "Inapproprié",
+        "spam": "Indésirable",
+        "misinformation": "Désinformation",
+        "other": "Autre"
+      },
+      "types": {
+        "deck": "Paquet",
+        "book": "Livre"
+      },
+      "list": {
+        "title": "Contenus signalés",
+        "loading": "Chargement de la file",
+        "error": "Impossible de charger la file.",
+        "empty": {
+          "title": "Rien à examiner",
+          "body": "Les contenus signalés depuis Explorer apparaissent ici."
+        },
+        "filterEmpty": "Rien dans cet état",
+        "by": "par {{owner}}",
+        "reports_one": "{{count}} signalement",
+        "reports_other": "{{count}} signalements"
+      },
+      "item": {
+        "label": "Le contenu sélectionné",
+        "publicSince": "public depuis le {{date}}",
+        "cards_one": "{{count}} carte",
+        "cards_other": "{{count}} cartes",
+        "pages_one": "{{count}} page",
+        "pages_other": "{{count}} pages",
+        "learners_one": "{{count}} apprenant",
+        "learners_other": "{{count}} apprenants",
+        "reporters_one": "{{count}} personne l’a signalé",
+        "reporters_other": "{{count}} personnes l’ont signalé",
+        "removed": "Retiré le {{date}} · {{reason}}",
+        "removedNote": "Note pour l’auteur : {{note}}"
+      },
+      "actions": {
+        "openDeck": "Ouvrir le paquet",
+        "openBook": "Ouvrir le livre",
+        "openAria": "Ouvrir « {{title}} » dans Explorer, dans un nouvel onglet",
+        "keep": "Laisser public",
+        "unpublish": "Dépublier…"
+      },
+      "confirm": {
+        "title": "Dépublier « {{title}} » ?",
+        "body": "Il quitte Explorer immédiatement, et son auteur ne pourra plus le publier.",
+        "copies_one": "{{count}} copie publique part aussi ; les copies privées restent.",
+        "copies_other": "{{count}} copies publiques partent aussi ; les copies privées restent.",
+        "log_one": "Le retrait est inscrit au journal d’administration.",
+        "log_other": "Chaque retrait est inscrit au journal d’administration.",
+        "reason": "Motif",
+        "fromReport": "{{reason}} · d’après le signalement",
+        "note": "Note pour l’auteur",
+        "noteHint": "facultative · {{max}} caractères au plus",
+        "email": "L’auteur reçoit un e-mail dans sa langue, si son adresse est vérifiée.",
+        "emailCopies_one": "L’auteur et le propriétaire de la copie reçoivent chacun un e-mail dans leur langue, si leur adresse est vérifiée.",
+        "emailCopies_other": "L’auteur et les propriétaires des copies reçoivent chacun un e-mail dans leur langue, si leur adresse est vérifiée.",
+        "confirm_one": "Dépublier",
+        "confirm_other": "Dépublier {{count}} éléments"
+      },
+      "result": {
+        "kept_one": "Laissé public. {{count}} signalement clos.",
+        "kept_other": "Laissé public. {{count}} signalements clos.",
+        "removed_one": "{{count}} élément dépublié.",
+        "removed_other": "{{count}} éléments dépubliés.",
+        "emailed_one": "{{count}} auteur a été prévenu par e-mail ; {{notTold}} n’a pas pu l’être.",
+        "emailed_other": "{{count}} auteurs ont été prévenus par e-mail ; {{notTold}} n’ont pas pu l’être.",
+        "failed": "Cela n'a pas fonctionné et rien n'a changé. Réessayez.",
+        "alreadyRemoved": "Il avait déjà été retiré, donc rien n’a changé. La file est à jour.",
+        "notFound": "Il n’existe plus, donc rien n’a changé. La file est à jour."
+      }
     }
   }
 }
