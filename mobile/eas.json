@@ -67,7 +67,12 @@
     }
   },
   "submit": {
-    "production": {},
+    "production": {
+      "android": {
+        "track": "alpha",
+        "releaseStatus": "draft"
+      }
+    },
     "beta-play": {
       "android": {
         "track": "internal",
