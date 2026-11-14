@@ -3232,7 +3232,8 @@
     "publishBlocked": {
       "imported_deck": "Dieser Stapel wurde aus einer Datei importiert und kann deshalb nicht in der Community veröffentlicht werden. In Nowry erstellte Stapel können es.",
       "imported_book": "Dieses Buch wurde aus einer Datei importiert und kann deshalb nicht in der Community veröffentlicht werden. In Nowry geschriebene Bücher können es.",
-      "cards_from_imported_book": "Einige dieser Karten stammen aus einem importierten Buch, deshalb kann dieser Stapel nicht in der Community veröffentlicht werden."
+      "cards_from_imported_book": "Einige dieser Karten stammen aus einem importierten Buch, deshalb kann dieser Stapel nicht in der Community veröffentlicht werden.",
+      "removed_by_moderation": "Nowry hat das aus dem öffentlichen Entdecken-Bereich entfernt, und es kann nicht erneut veröffentlicht werden. Die E-Mail, die wir dir geschickt haben, erklärt den Grund."
     },
     "publishInstant": "Mit der Community teilen",
     "add": "Hinzufügen",
@@ -3324,7 +3325,8 @@
     "nothingSharedHint": "Decks und Bücher, die andere Lernende veröffentlichen, erscheinen hier.",
     "gridView": "Rasteransicht",
     "listView": "Listenansicht",
-    "unpublishConfirm": "Veröffentlichung dieses Buchs aufheben? Es erscheint dann nicht mehr in der öffentlichen Bibliothek."
+    "unpublishConfirm": "Veröffentlichung dieses Buchs aufheben? Es erscheint dann nicht mehr in der öffentlichen Bibliothek.",
+    "publishRemovedNote": "Du kannst es hier weiter lernen und bearbeiten; nur das Veröffentlichen ist geschlossen."
   },
   "editor": {
     "mode": {

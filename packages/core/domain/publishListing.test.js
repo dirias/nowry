@@ -1,7 +1,15 @@
 /**
  * The refusal a listing can meet (ADR-037), mapped once for every client.
  */
-import { PUBLISH_BLOCK_CODE, hasFileOrigin, publishBlockKey, publishBlockKeyFor, publishBlockReason } from './publishListing'
+import {
+  PUBLISH_BLOCK_CODE,
+  REMOVED_BY_MODERATION,
+  hasFileOrigin,
+  isRemovedByModeration,
+  publishBlockKey,
+  publishBlockKeyFor,
+  publishBlockReason
+} from './publishListing'
 
 const refusal = (reason) => ({ response: { status: 409, data: { detail: { code: PUBLISH_BLOCK_CODE, reason } } } })
 
@@ -46,5 +54,27 @@ describe('publishBlockKeyFor', () => {
     expect(hasFileOrigin({ source: 'imported' })).toBe(true)
     expect(hasFileOrigin({ source: 'written' })).toBe(false)
     expect(hasFileOrigin(undefined)).toBe(false)
+  })
+})
+
+describe('removed by moderation (ADMIN-003, FR-005)', () => {
+  it('reads the new reason from the same refusal, and from a code of its own', () => {
+    expect(REMOVED_BY_MODERATION).toBe('removed_by_moderation')
+    expect(publishBlockReason(refusal('removed_by_moderation'))).toBe('removed_by_moderation')
+    expect(publishBlockReason({ response: { status: 409, data: { detail: { code: 'removed_by_moderation' } } } })).toBe('removed_by_moderation')
+  })
+
+  it('names its own sentence', () => {
+    expect(publishBlockKey('removed_by_moderation')).toBe('public.publishBlocked.removed_by_moderation')
+  })
+
+  it('says so before asking when the item carries the removal marker, file origin or not', () => {
+    const removal = { removed_at: '2026-11-14T10:00:00Z', reason: 'copyright' }
+    expect(isRemovedByModeration({ removal })).toBe(true)
+    expect(isRemovedByModeration({ removal: null })).toBe(false)
+    expect(isRemovedByModeration(undefined)).toBe(false)
+    expect(publishBlockKeyFor('deck', { removal })).toBe('public.publishBlocked.removed_by_moderation')
+    expect(publishBlockKeyFor('book', { removal, source: 'imported' })).toBe('public.publishBlocked.removed_by_moderation')
+    expect(publishBlockKeyFor('book', { removal: null, source: 'written' })).toBeNull()
   })
 })

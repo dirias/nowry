@@ -33,7 +33,7 @@ import { COVER_PRESETS } from '@nowry/core/constants/bookCovers'
 import useBookForm from '@nowry/core/hooks/useBookForm'
 import { importFactsLine } from '@nowry/core/domain/books/importFacts'
 import { publicContentService } from '@nowry/core/api/services'
-import { isPublished, publishBlockKeyFor } from '@nowry/core/domain/publishListing'
+import { isPublished, isRemovedByModeration, publishBlockKeyFor } from '@nowry/core/domain/publishListing'
 import { describeApiError } from '@nowry/core/utils/formUtils'
 import { useTheme } from '../theme'
 import {
@@ -244,8 +244,9 @@ export function BookDetailsSheet({ book, open, onSaved, onPublished, onClose }) 
             ) : null}
             {!published && publishBlockKeyFor('book', book) ? (
               // ADR-037: a document that arrived from a file cannot be published;
-              // the sentence stands where the key would, before any request.
-              <Typography level='body-sm' color='text.secondary'>
+              // the sentence stands where the key would, before any request. One
+              // an admin removed from Browse says so in danger (ADMIN-003, board M).
+              <Typography level='body-sm' color={isRemovedByModeration(book) ? 'danger.plainColor' : 'text.secondary'}>
                 {t(publishBlockKeyFor('book', book))}
               </Typography>
             ) : (

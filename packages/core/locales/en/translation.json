@@ -3091,7 +3091,8 @@
     "publishBlocked": {
       "imported_deck": "This deck was imported from a file, so it can't be published to the community. Decks written in Nowry can.",
       "imported_book": "This book was imported from a file, so it can't be published to the community. Books written in Nowry can.",
-      "cards_from_imported_book": "Some of these cards were made from an imported book, so this deck can't be published to the community."
+      "cards_from_imported_book": "Some of these cards were made from an imported book, so this deck can't be published to the community.",
+      "removed_by_moderation": "This was removed from public Browse by Nowry and can't be published again. The email we sent explains why."
     },
     "published": "Published",
     "browse": "Browse",
@@ -3226,7 +3227,8 @@
     "nothingSharedHint": "Decks and books other learners publish show up here.",
     "gridView": "Grid view",
     "listView": "List view",
-    "unpublishConfirm": "Unpublish this book? It will no longer appear in the public library."
+    "unpublishConfirm": "Unpublish this book? It will no longer appear in the public library.",
+    "publishRemovedNote": "You can still study and edit it here; only publishing is closed."
   },
   "focusBar": {
     "overdue": "Overdue",

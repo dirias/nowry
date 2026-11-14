@@ -3,7 +3,9 @@ import { useTranslation } from 'react-i18next'
 import { Button, Chip, Skeleton, Stack, Typography } from '@mui/joy'
 import { Public } from '@mui/icons-material'
 
-import { publishBlockKeyFor } from '@nowry/core/domain/publishListing'
+import { isRemovedByModeration, publishBlockKeyFor } from '@nowry/core/domain/publishListing'
+
+import PublishRemovedNotice from '../../Public/PublishRemovedNotice'
 
 import { focusRing, touchTarget } from '../../Common/Form/formStyles'
 
@@ -26,7 +28,8 @@ import { focusRing, touchTarget } from '../../Common/Form/formStyles'
  *
  * A deck that arrived from a file cannot be published (ADR-037). The section
  * says so in place of the control, so the user is told before filling in a
- * listing the server would refuse.
+ * listing the server would refuse. A deck an admin removed from Browse says
+ * so as the danger alert of board M (ADMIN-003, FR-005).
  */
 const DeckPublishingSection = ({ loading, deck, onManage }) => {
   const { t } = useTranslation()
@@ -53,7 +56,9 @@ const DeckPublishingSection = ({ loading, deck, onManage }) => {
         )}
       </Stack>
 
-      {blockedKey ? (
+      {blockedKey && isRemovedByModeration(deck) ? (
+        <PublishRemovedNotice />
+      ) : blockedKey ? (
         <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
           {t(blockedKey)}
         </Typography>

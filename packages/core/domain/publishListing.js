@@ -103,15 +103,26 @@ export const isPublished = (content) => Boolean(content?.is_public)
  */
 export const PUBLISH_BLOCK_CODE = 'source_not_publishable'
 
-export const PUBLISH_BLOCK_REASONS = ['imported_deck', 'imported_book', 'cards_from_imported_book']
+/**
+ * An item an admin removed from Browse (ADMIN-003, FR-005, ADR-087) is refused
+ * for good with this reason, on the same 409; it may also carry the removal
+ * marker, so the sentence can stand before any request.
+ */
+export const REMOVED_BY_MODERATION = 'removed_by_moderation'
+
+export const PUBLISH_BLOCK_REASONS = ['imported_deck', 'imported_book', 'cards_from_imported_book', REMOVED_BY_MODERATION]
 
 /** Whether a deck or document came from a file rather than being written here. */
 export const hasFileOrigin = (content) => content?.source === 'imported'
+
+/** Whether an admin removed this item from Browse; it can't be published again. */
+export const isRemovedByModeration = (content) => Boolean(content?.removal)
 
 /** The reason the server refused a listing, or null when the error is something else. */
 export const publishBlockReason = (error) => {
   const detail = error?.response?.data?.detail
   if (!detail || typeof detail !== 'object' || Array.isArray(detail)) return null
+  if (detail.code === REMOVED_BY_MODERATION) return REMOVED_BY_MODERATION
   if (detail.code !== PUBLISH_BLOCK_CODE) return null
   return PUBLISH_BLOCK_REASONS.includes(detail.reason) ? detail.reason : PUBLISH_BLOCK_REASONS[0]
 }
@@ -122,6 +133,8 @@ export const publishBlockKey = (reason) =>
 
 /** The sentence to show instead of the publish control, or null when publishing may be offered. */
 export const publishBlockKeyFor = (contentType, content) => {
-  if (!hasFileOrigin(content) || isPublished(content)) return null
+  if (isPublished(content)) return null
+  if (isRemovedByModeration(content)) return publishBlockKey(REMOVED_BY_MODERATION)
+  if (!hasFileOrigin(content)) return null
   return publishBlockKey(contentType === 'book' ? 'imported_book' : 'imported_deck')
 }

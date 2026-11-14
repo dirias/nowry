@@ -260,6 +260,15 @@ describe('publishing', () => {
     expect(within(alert).getByText('books.unpublishFailed')).toBeInTheDocument()
     expect(within(alert).getByText('Still public')).toBeInTheDocument()
   })
+
+  // ADMIN-003 (FR-005, board M): a book an admin removed cannot be published again.
+  it('shows the removal as the danger alert in place of Publish when the book carries the marker', () => {
+    renderSheet({ removal: { removed_at: '2026-11-14T10:00:00Z', reason: 'spam' } })
+    const alert = screen.getByRole('alert')
+    expect(within(alert).getByText('public.publishBlocked.removed_by_moderation')).toBeInTheDocument()
+    expect(screen.getByText('public.publishRemovedNote')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'public.publish' })).not.toBeInTheDocument()
+  })
 })
 
 /**

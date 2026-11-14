@@ -13,10 +13,17 @@ import FormTextField from '../Common/Form/FormTextField'
 import { focusRing } from '../Common/Form/formStyles'
 import { describeApiError } from '@nowry/core/utils/formUtils'
 import { publicContentService } from '@nowry/core/api/services'
-import { publishBlockKey, publishBlockKeyFor, publishBlockReason } from '@nowry/core/domain/publishListing'
+import {
+  REMOVED_BY_MODERATION,
+  isRemovedByModeration,
+  publishBlockKey,
+  publishBlockKeyFor,
+  publishBlockReason
+} from '@nowry/core/domain/publishListing'
 import { useThemePreferences } from '../../theme/DynamicThemeProvider'
 import useBookForm from '@nowry/core/hooks/useBookForm'
 import PublishModal from '../Public/PublishModal'
+import PublishRemovedNotice from '../Public/PublishRemovedNotice'
 import BookCoverField from './book/BookCoverField'
 import BookHeaderPreview from './book/BookHeaderPreview'
 import { focusFirstControl } from '../Common/Form/formUtils'
@@ -55,6 +62,8 @@ export default function BookEditSheet({ book, open = true, onSaved, onClose }) {
   const [published, setPublished] = useState(Boolean(book.is_public))
   const [publishOpen, setPublishOpen] = useState(false)
   const [publishError, setPublishError] = useState(null)
+  // ADMIN-003 (FR-005): the server said an admin removed it, though the book did not carry the marker.
+  const [refusedRemoved, setRefusedRemoved] = useState(false)
 
   const form = useBookForm({ open, book, defaultCoverColor: themeColor, onSaved, onClose, focusControl: focusFirstControl })
 
@@ -69,6 +78,11 @@ export default function BookEditSheet({ book, open = true, onSaved, onClose }) {
       // `top: 80, right: 20, zIndex: 10000`, which landed over the header at
       // 375px. It is the same banner as every other failure now.
       const blockReason = publishBlockReason(error)
+      if (blockReason === REMOVED_BY_MODERATION) {
+        setRefusedRemoved(true)
+        setPublishOpen(false)
+        return
+      }
       if (blockReason) {
         // ADR-037: the server refused for origin; the sentence is the whole message.
         setPublishError({ key: publishBlockKey(blockReason), detail: '' })
@@ -79,6 +93,7 @@ export default function BookEditSheet({ book, open = true, onSaved, onClose }) {
   }, [])
 
   const blockedKey = published ? null : publishBlockKeyFor('book', book)
+  const removed = !published && (refusedRemoved || isRemovedByModeration(book))
 
   const failure = publishError || (form.saveError ? { key: 'books.saveFailed', detail: form.saveError } : null)
 
@@ -159,7 +174,9 @@ export default function BookEditSheet({ book, open = true, onSaved, onClose }) {
               the footer's action row (§7). Consolidating it with the deck
               publish flows is a separate piece of work. */}
           <Box sx={{ pt: 1 }}>
-            {blockedKey ? (
+            {removed ? (
+              <PublishRemovedNotice />
+            ) : blockedKey ? (
               <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
                 {t(blockedKey)}
               </Typography>
