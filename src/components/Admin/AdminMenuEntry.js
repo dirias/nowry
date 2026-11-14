@@ -8,14 +8,15 @@ import { useAuth } from '@nowry/core/context/AuthContext'
 /**
  * "Admin" in the account menu, in its own group between Pomodoro and Log out
  * (ADMIN-007a, FR-011, board F). Admins only; everyone else sees nothing.
+ * `divider={false}` when "Report a problem" already opened the group (BUG-001).
  */
-export function AdminMenuEntry() {
+export function AdminMenuEntry({ divider = true }) {
   const { isAdmin } = useAuth()
   const { t } = useTranslation()
   if (!isAdmin) return null
   return (
     <>
-      <ListDivider sx={{ my: 0.5 }} />
+      {divider && <ListDivider sx={{ my: 0.5 }} />}
       <MenuItem component={Link} to='/admin' aria-label={t('admin.menu')} sx={{ gap: 1.5 }}>
         <ListItemDecorator sx={{ minWidth: 'unset' }}>
           <AdminPanelSettingsRounded sx={{ fontSize: 'lg' }} />
@@ -27,13 +28,13 @@ export function AdminMenuEntry() {
 }
 
 /** The same entry in the phone-width drawer. */
-export function AdminDrawerEntry({ onNavigate, selected }) {
+export function AdminDrawerEntry({ onNavigate, selected, divider = true }) {
   const { isAdmin } = useAuth()
   const { t } = useTranslation()
   if (!isAdmin) return null
   return (
     <>
-      <ListDivider sx={{ my: 1 }} />
+      {divider && <ListDivider sx={{ my: 1 }} />}
       <ListItem>
         <ListItemButton component={Link} to='/admin' onClick={onNavigate} selected={selected} aria-label={t('admin.menu')}>
           <ListItemDecorator>

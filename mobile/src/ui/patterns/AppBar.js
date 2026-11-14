@@ -63,7 +63,7 @@ const AVATAR = 32
  * arrow cannot know: it pops the tab navigator and lands on Home. The chat
  * carries its own close control instead (MOB-087).
  */
-const PUSHED_IN_TABS = ['profile', 'settings']
+const PUSHED_IN_TABS = ['profile', 'settings', 'report-problem']
 
 /** The guest group and its root. Every other screen in the group is pushed from it. */
 const PUBLIC_GROUP = '(auth)'

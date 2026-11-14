@@ -31,10 +31,12 @@
  * with the session, so the next account never reads the last one's data.
  */
 import { useEffect, useState } from 'react'
-import { View } from 'react-native'
+import { Pressable, View } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@nowry/core/context/AuthContext'
+import { useBeta } from '@nowry/core/context/BetaContext'
+import { canReport } from '@nowry/core/domain/bugReports'
 import { useUserProfile } from '@nowry/core/hooks/useUserProfile'
 import { useEmailVerification } from '@nowry/core/hooks/useEmailVerification'
 import { userService } from '@nowry/core/api/services'
@@ -44,7 +46,22 @@ import { membershipDays, planMeters, profileStats } from '@nowry/core/domain/acc
 import { betaBadgeTone, planBadge, planLabelKey } from '@nowry/core/domain/access'
 import { useTheme } from '../theme'
 import { unregisterFromPush } from '../platform/push'
-import { Avatar, Button, Divider, FormField, Input, Progress, Readout, Screen, Skeleton, Stack, Typography } from '../ui'
+import {
+  Avatar,
+  Button,
+  Divider,
+  FormField,
+  Icon,
+  Input,
+  Progress,
+  Readout,
+  Screen,
+  Skeleton,
+  Stack,
+  Typography,
+  resolveColor
+} from '../ui'
+import { MIN_TOUCH_TARGET } from '../ui/buttonSpec'
 
 /** Large enough to be a portrait rather than a marker beside a name. */
 const PORTRAIT = 72
@@ -189,6 +206,8 @@ export function Profile() {
 
         <VerifyEmail />
 
+        <HelpGroup />
+
         <Button variant='secondary' onPress={() => router.push('/settings')}>
           {t('nav.settings')}
         </Button>
@@ -290,6 +309,53 @@ function PlanLine({ subscription }) {
         {t('beta.fullAccess')}
       </Typography>
     </View>
+  )
+}
+
+/**
+ * Help (BUG-001, FR-007, board H): one row, "Report a problem ›", shown while
+ * the beta is on to every signed-in account. It opens the text-only form.
+ */
+function HelpGroup() {
+  const { t } = useTranslation()
+  const theme = useTheme()
+  const router = useRouter()
+  const { user } = useAuth()
+  const { config: beta } = useBeta()
+  if (!canReport(user, beta)) return null
+  return (
+    <>
+      <Typography
+        level='body-xs'
+        weight='lg'
+        color='text.tertiary'
+        accessibilityRole='header'
+        style={{ textTransform: 'uppercase', letterSpacing: 0.5 }}
+      >
+        {t('report.help')}
+      </Typography>
+      <Pressable
+        onPress={() => router.push('/report-problem')}
+        accessibilityRole='button'
+        accessibilityLabel={t('report.menu')}
+        style={({ pressed }) => ({
+          minHeight: MIN_TOUCH_TARGET,
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingHorizontal: theme.spacing[1.5],
+          borderRadius: theme.radius.md,
+          borderWidth: 1,
+          borderColor: resolveColor(theme, 'divider'),
+          backgroundColor: resolveColor(theme, pressed ? 'background.level1' : 'background.surface')
+        })}
+      >
+        <Typography level='body-md' style={{ flex: 1 }}>
+          {t('report.menu')}
+        </Typography>
+        <Icon name='ChevronRight' size='sm' color='text.tertiary' />
+      </Pressable>
+      <Divider />
+    </>
   )
 }
 

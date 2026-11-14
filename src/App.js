@@ -24,7 +24,6 @@ import './styles/FullCalendar.css'
 import Header from './components/HomePage/Header'
 import PaymentFailureBanner from './components/Subscription/PaymentFailureBanner'
 import Footer from './components/HomePage/Footer'
-import DevBugReportButton from './components/Dev/DevBugReportButton'
 import { AuthProvider, useAuth } from '@nowry/core/context/AuthContext'
 import { PomodoroProvider } from '@nowry/core/context/PomodoroContext'
 import BlockReminders from './components/Common/BlockReminders'
@@ -367,14 +366,6 @@ const AppContent = () => {
                 }
               />
               <Route
-                path='/report-bug'
-                element={
-                  <AdminRoute>
-                    <BugDashboard />
-                  </AdminRoute>
-                }
-              />
-              <Route
                 path='/onboarding'
                 element={
                   <ProtectedRoute>
@@ -492,8 +483,6 @@ const AppContent = () => {
       </main>
 
       {showFooter && <Footer />}
-
-      <DevBugReportButton />
 
       <BlockReminders />
 

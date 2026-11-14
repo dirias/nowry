@@ -175,8 +175,7 @@
     },
     "copyright": "© {{year}} Nowry. All rights reserved.",
     "toggleTheme": "Toggle theme",
-    "language": "Language",
-    "bugReport": "Report Bug"
+    "language": "Language"
   },
   "study": {
     "views": {
@@ -1190,8 +1189,7 @@
       "books": "Books",
       "annualPlanning": "Planning",
       "newsFeed": "News Feed",
-      "taskManager": "Task Manager",
-      "bugReport": "Report Bug"
+      "taskManager": "Task Manager"
     }
   },
   "motivation": {
@@ -4397,46 +4395,6 @@
       "s2": "Drawing the diagram..."
     }
   },
-  "bugs": {
-    "filters": {
-      "allStatus": "All Status",
-      "allSeverity": "All Severity",
-      "allCategories": "All Categories"
-    },
-    "modal": {
-      "title": "Report a Bug",
-      "titleField": "Bug title",
-      "titlePlaceholder": "e.g., Editor crashes when pasting large content",
-      "description": "Description",
-      "descPlaceholder": "Describe what happened in detail...",
-      "steps": "Steps to reproduce",
-      "stepsPlaceholder": "1. Go to...\n2. Click on...\n3. See error",
-      "severity": "Severity",
-      "category": "Category",
-      "screenshots": "Screenshots",
-      "screenshotsHint": "{{count}}/3 screenshots · Images are compressed automatically",
-      "uploadBtn": "Upload screenshot",
-      "maxReached": "Maximum reached",
-      "submit": "Submit bug report",
-      "submitting": "Submitting...",
-      "successMsg": "Bug report submitted. Thank you!",
-      "errorMsg": "Failed to submit bug report. Please try again.",
-      "removeScreenshot": "Remove screenshot"
-    },
-    "severity": {
-      "low": "Low",
-      "medium": "Medium",
-      "high": "High",
-      "critical": "Critical"
-    },
-    "category": {
-      "ui": "UI / Design",
-      "performance": "Performance",
-      "functionality": "Functionality",
-      "data": "Data / Content",
-      "other": "Other"
-    }
-  },
   "calendarPage": {
     "title": "Calendar",
     "addEvent": "Add event",
@@ -4996,6 +4954,10 @@
       "unpublish": {
         "title": "Sign in again to unpublish",
         "confirm": "Sign in and unpublish"
+      },
+      "saveBug": {
+        "title": "Sign in again to save",
+        "confirm": "Sign in and save"
       }
     },
     "title": "Admin",
@@ -5007,7 +4969,8 @@
     "tabs": {
       "invitations": "Invitations",
       "waitlist": "Waitlist",
-      "moderation": "Moderation"
+      "moderation": "Moderation",
+      "bugs": "Bug reports"
     },
     "inv": {
       "form": {
@@ -5297,6 +5260,110 @@
         "alreadyRemoved": "Someone had already removed it, so nothing changed. The queue is up to date.",
         "notFound": "It no longer exists, so nothing changed. The queue is up to date."
       }
+    },
+    "bugs": {
+      "filters": "Bug report states",
+      "states": {
+        "new": "New",
+        "in_progress": "In progress",
+        "fixed": "Fixed",
+        "wont_fix": "Won’t fix"
+      },
+      "list": {
+        "title": "Bug reports",
+        "loading": "Loading bug reports",
+        "empty": "No bug reports in this state",
+        "error": "Couldn’t load bug reports.",
+        "by": "by {{name}}",
+        "head": {
+          "report": "Report",
+          "severity": "Severity",
+          "device": "Device",
+          "age": "Age"
+        },
+        "app": "{{os}} app"
+      },
+      "item": {
+        "label": "Bug report",
+        "reported": "Reported {{when}}",
+        "app": "{{os}} app {{version}}",
+        "steps": "Steps to get there",
+        "screenshots": "Screenshots",
+        "openScreenshot": "Open screenshot {{number}}",
+        "screenshot": "Screenshot {{number}}",
+        "closeScreenshot": "Close the screenshot",
+        "status": "Status",
+        "notes": "Notes",
+        "you": "You · {{when}}",
+        "someone": "Another admin · {{when}}",
+        "addNote": "Add a note",
+        "notePlaceholder": "What you found, for next time",
+        "save": "Save"
+      },
+      "result": {
+        "saved": "Saved.",
+        "nothing": "Nothing to save yet",
+        "notFound": "This report is no longer there.",
+        "failed": "Couldn’t save. Try again."
+      }
+    }
+  },
+  "report": {
+    "menu": "Report a problem",
+    "help": "Help",
+    "title": "Report a problem",
+    "lead": "It goes straight to the person who builds Nowry. The page you were on and your device are attached.",
+    "fields": {
+      "title": "What went wrong?",
+      "titlePlaceholder": "Card flips twice on a fast double tap",
+      "description": "What happened",
+      "descriptionPlaceholder": "What you saw, and what you expected instead",
+      "steps": "Steps to get there",
+      "stepsShort": "Steps",
+      "optional": "optional",
+      "stepsPlaceholder": "1. Open a deck… 2. Tap the card twice…",
+      "severity": "How bad is it?",
+      "area": "Area",
+      "screenshots": "Screenshots",
+      "screenshotsCaption": "{{used}} of 3 · PNG, JPEG or WebP · made smaller before sending",
+      "addScreenshot": "Add a screenshot",
+      "removeScreenshot": "Remove screenshot {{number}}",
+      "screenshot": "Screenshot {{number}}",
+      "counter": "{{length}} / {{max}}"
+    },
+    "severity": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "critical": "Critical"
+    },
+    "areas": {
+      "study": "Study",
+      "books": "Books",
+      "planning": "Planning",
+      "focus": "Focus",
+      "other": "Other"
+    },
+    "send": "Send report",
+    "sending": "Sending…",
+    "errors": {
+      "titleRequired": "Say in a few words what went wrong.",
+      "descriptionRequired": "Say what happened.",
+      "tooLong": "Keep it to {{max}} characters.",
+      "imageType": "Only PNG, JPEG or WebP pictures.",
+      "imageTooLarge": "This picture is still over 2 MB after making it smaller. Try a smaller screenshot.",
+      "imageUnreadable": "This picture couldn’t be read. Try another one.",
+      "tooMany": "Three screenshots at most."
+    },
+    "answers": {
+      "sent": "Thanks. Your report reached us.",
+      "dailyLimit": "You’ve sent 10 reports today. You can send more tomorrow.",
+      "tooLarge": "The report is too large to send. Remove a screenshot and try again.",
+      "closed": "Reports are closed: the beta has ended.",
+      "failed": "Your report didn’t send. Check your connection and try again."
+    },
+    "phone": {
+      "sentWith": "Sent with it: {{device}} · Nowry {{version}}. No screenshots from the phone in this version."
     }
   }
 }

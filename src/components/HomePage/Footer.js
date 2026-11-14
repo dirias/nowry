@@ -1,13 +1,11 @@
 import * as React from 'react'
 import { DELETE_ACCOUNT_PATH } from '@nowry/core/constants/site'
-import { Box, Typography, Stack, Button, IconButton, Snackbar, Tooltip, Select, Option, Divider, SvgIcon } from '@mui/joy'
+import { Box, Typography, Stack, Button, IconButton, Tooltip, Select, Option, Divider, SvgIcon } from '@mui/joy'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { BugReportRounded, Brightness4, Brightness7, LanguageRounded } from '@mui/icons-material'
+import { Brightness4, Brightness7, LanguageRounded } from '@mui/icons-material'
 import { useColorScheme } from '@mui/joy/styles'
 import { useAuth } from '@nowry/core/context/AuthContext'
-import BugReportModal from '../Bugs/BugReportModal'
-import { bugsService } from '@nowry/core/api/services/bugs.service'
 import { userService } from '@nowry/core/api/services'
 import { SHOW_PRICING } from '@nowry/core/domain/plans'
 
@@ -37,18 +35,8 @@ const TikTokIcon = () => (
 
 const Footer = () => {
   const { t, i18n } = useTranslation()
-  // ADMIN-004b: `role` is retired; the bug report key stays for admins until batch 4 removes it.
-  const { user, isAdmin } = useAuth()
+  const { user } = useAuth()
   const { mode, setMode } = useColorScheme()
-
-  const [bugReportOpen, setBugReportOpen] = React.useState(false)
-  const [snackbar, setSnackbar] = React.useState({ open: false, message: '', color: 'success' })
-
-  const handleBugSubmit = async (bugData) => {
-    const response = await bugsService.submitBug(bugData)
-    setSnackbar({ open: true, message: response.message || 'Bug report submitted successfully!', color: 'success' })
-    setBugReportOpen(false)
-  }
 
   // Library · Pricing · Contact · Privacy · Terms · the one support address (PRD FR-10).
   const navLinks = [
@@ -200,40 +188,9 @@ const Footer = () => {
                 </IconButton>
               </Tooltip>
             ))}
-
-            {isAdmin && (
-              <Tooltip title={t('footer.bugReport')} placement='top'>
-                <IconButton
-                  variant='plain'
-                  color='neutral'
-                  size='sm'
-                  onClick={() => setBugReportOpen(true)}
-                  aria-label={t('footer.bugReport')}
-                  sx={{
-                    color: 'text.secondary',
-                    '&:hover': { bgcolor: 'background.level2', color: 'text.primary' },
-                    '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)', outlineOffset: '2px' }
-                  }}
-                >
-                  <BugReportRounded fontSize='small' />
-                </IconButton>
-              </Tooltip>
-            )}
           </Stack>
         </Stack>
       </Box>
-
-      <BugReportModal open={bugReportOpen} onClose={() => setBugReportOpen(false)} onSubmit={handleBugSubmit} />
-
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-        color={snackbar.color}
-        variant='soft'
-      >
-        {snackbar.message}
-      </Snackbar>
     </>
   )
 }

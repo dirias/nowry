@@ -212,6 +212,8 @@ export default function TabsLayout() {
             under it, which is how the web serves the two. */}
         <Tabs.Screen name='book' options={{ href: null }} />
         <Tabs.Screen name='settings' options={{ href: null }} />
+        {/* Profile's "Report a problem" (BUG-001, board H): pushed, never a tab. */}
+        <Tabs.Screen name='report-problem' options={{ href: null }} />
       </Tabs>
 
       {/* Over the tabs and clear of the bar, which is measured here rather

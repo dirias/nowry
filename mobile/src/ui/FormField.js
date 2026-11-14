@@ -20,7 +20,7 @@ import { useTheme } from '../theme'
 import { Typography } from './Typography'
 import { messageFor } from './formMessage'
 
-export function FormField({ labelKey, helperKey = null, errorKey = null, required = false, children, style }) {
+export function FormField({ labelKey, qualifierKey = null, helperKey = null, errorKey = null, required = false, children, style }) {
   const { t } = useTranslation()
   const theme = useTheme()
   // The error replaces the helper; never both. The rule lives in formMessage.js
@@ -32,6 +32,12 @@ export function FormField({ labelKey, helperKey = null, errorKey = null, require
       <Typography level='title-sm' color='text.secondary'>
         {t(labelKey)}
         {required ? ' *' : ''}
+        {/* A quieter word after the label: "Steps to get there optional" (BUG-001, board H). */}
+        {qualifierKey ? (
+          <Typography level='body-xs' color='text.tertiary'>
+            {` ${t(qualifierKey)}`}
+          </Typography>
+        ) : null}
       </Typography>
 
       {typeof children === 'function' ? children({ invalid, theme }) : children}

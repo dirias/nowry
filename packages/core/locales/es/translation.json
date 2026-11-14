@@ -175,8 +175,7 @@
     },
     "copyright": "© {{year}} Nowry. Todos los derechos reservados.",
     "toggleTheme": "Cambiar tema",
-    "language": "Idioma",
-    "bugReport": "Reportar error"
+    "language": "Idioma"
   },
   "study": {
     "deck": {
@@ -1149,8 +1148,7 @@
       "books": "Libros",
       "annualPlanning": "Planificación",
       "newsFeed": "Noticias",
-      "taskManager": "Gestor de tareas",
-      "bugReport": "Reportar un error"
+      "taskManager": "Gestor de tareas"
     }
   },
   "motivation": {
@@ -3791,46 +3789,6 @@
       "contextPlaceholder": "Por favor, proporciona más contexto..."
     }
   },
-  "bugs": {
-    "filters": {
-      "allStatus": "Todos los estados",
-      "allSeverity": "Toda la gravedad",
-      "allCategories": "Todas las categorías"
-    },
-    "modal": {
-      "title": "Reportar un error",
-      "titleField": "Título del error",
-      "titlePlaceholder": "Ej., El editor falla al pegar contenido extenso",
-      "description": "Descripción",
-      "descPlaceholder": "Describe con detalle lo que ocurrió...",
-      "steps": "Pasos para reproducir",
-      "stepsPlaceholder": "1. Ir a...\n2. Hacer clic en...\n3. Ver el error",
-      "severity": "Gravedad",
-      "category": "Categoría",
-      "screenshots": "Capturas de pantalla",
-      "screenshotsHint": "{{count}}/3 capturas · Las imágenes se comprimen automáticamente",
-      "uploadBtn": "Subir captura",
-      "maxReached": "Máximo alcanzado",
-      "submit": "Enviar reporte",
-      "submitting": "Enviando...",
-      "successMsg": "Reporte enviado. ¡Gracias!",
-      "errorMsg": "No se pudo enviar el reporte. Inténtalo de nuevo.",
-      "removeScreenshot": "Eliminar captura"
-    },
-    "severity": {
-      "low": "Baja",
-      "medium": "Media",
-      "high": "Alta",
-      "critical": "Crítica"
-    },
-    "category": {
-      "ui": "UI / Diseño",
-      "performance": "Rendimiento",
-      "functionality": "Funcionalidad",
-      "data": "Datos / Contenido",
-      "other": "Otro"
-    }
-  },
   "plans": {
     "plus": "Plus",
     "pro": "Pro",
@@ -4996,6 +4954,10 @@
       "unpublish": {
         "title": "Vuelve a iniciar sesión para retirarlo",
         "confirm": "Iniciar sesión y retirar"
+      },
+      "saveBug": {
+        "title": "Vuelve a iniciar sesión para guardar",
+        "confirm": "Iniciar sesión y guardar"
       }
     },
     "title": "Administración",
@@ -5007,7 +4969,8 @@
     "tabs": {
       "invitations": "Invitaciones",
       "waitlist": "Lista de espera",
-      "moderation": "Moderación"
+      "moderation": "Moderación",
+      "bugs": "Informes de errores"
     },
     "inv": {
       "form": {
@@ -5297,6 +5260,110 @@
         "alreadyRemoved": "Ya lo había retirado otra persona, así que no cambió nada. La cola está al día.",
         "notFound": "Ya no existe, así que no cambió nada. La cola está al día."
       }
+    },
+    "bugs": {
+      "filters": "Estados de los informes de errores",
+      "states": {
+        "new": "Nuevos",
+        "in_progress": "En curso",
+        "fixed": "Corregidos",
+        "wont_fix": "No se corregirán"
+      },
+      "list": {
+        "title": "Informes de errores",
+        "loading": "Cargando informes de errores",
+        "empty": "No hay informes de errores en este estado",
+        "error": "No se pudieron cargar los informes de errores.",
+        "by": "de {{name}}",
+        "head": {
+          "report": "Informe",
+          "severity": "Gravedad",
+          "device": "Dispositivo",
+          "age": "Hace"
+        },
+        "app": "App de {{os}}"
+      },
+      "item": {
+        "label": "Informe de error",
+        "reported": "Informado {{when}}",
+        "app": "App de {{os}} {{version}}",
+        "steps": "Pasos para llegar ahí",
+        "screenshots": "Capturas de pantalla",
+        "openScreenshot": "Abrir la captura {{number}}",
+        "screenshot": "Captura {{number}}",
+        "closeScreenshot": "Cerrar la captura",
+        "status": "Estado",
+        "notes": "Notas",
+        "you": "Tú · {{when}}",
+        "someone": "Otro administrador · {{when}}",
+        "addNote": "Añadir una nota",
+        "notePlaceholder": "Lo que encontraste, para la próxima vez",
+        "save": "Guardar"
+      },
+      "result": {
+        "saved": "Guardado.",
+        "nothing": "Todavía no hay nada que guardar",
+        "notFound": "Este informe ya no existe.",
+        "failed": "No se pudo guardar. Vuelve a intentarlo."
+      }
+    }
+  },
+  "report": {
+    "menu": "Informar de un problema",
+    "help": "Ayuda",
+    "title": "Informar de un problema",
+    "lead": "Llega directamente a la persona que construye Nowry. Se adjuntan la página en la que estabas y tu dispositivo.",
+    "fields": {
+      "title": "¿Qué ha fallado?",
+      "titlePlaceholder": "La tarjeta se gira dos veces con un doble toque rápido",
+      "description": "Qué pasó",
+      "descriptionPlaceholder": "Lo que viste y lo que esperabas en su lugar",
+      "steps": "Pasos para llegar ahí",
+      "stepsShort": "Pasos",
+      "optional": "opcional",
+      "stepsPlaceholder": "1. Abre un mazo… 2. Toca la tarjeta dos veces…",
+      "severity": "¿Qué tan grave es?",
+      "area": "Área",
+      "screenshots": "Capturas de pantalla",
+      "screenshotsCaption": "{{used}} de 3 · PNG, JPEG o WebP · se reducen antes de enviarse",
+      "addScreenshot": "Añadir una captura",
+      "removeScreenshot": "Quitar la captura {{number}}",
+      "screenshot": "Captura {{number}}",
+      "counter": "{{length}} / {{max}}"
+    },
+    "severity": {
+      "low": "Baja",
+      "medium": "Media",
+      "high": "Alta",
+      "critical": "Crítica"
+    },
+    "areas": {
+      "study": "Estudio",
+      "books": "Libros",
+      "planning": "Planificación",
+      "focus": "Enfoque",
+      "other": "Otra"
+    },
+    "send": "Enviar informe",
+    "sending": "Enviando…",
+    "errors": {
+      "titleRequired": "Di en pocas palabras qué ha fallado.",
+      "descriptionRequired": "Cuenta qué pasó.",
+      "tooLong": "Máximo {{max}} caracteres.",
+      "imageType": "Solo imágenes PNG, JPEG o WebP.",
+      "imageTooLarge": "Esta imagen sigue pesando más de 2 MB después de reducirla. Prueba con una captura más pequeña.",
+      "imageUnreadable": "No se pudo leer esta imagen. Prueba con otra.",
+      "tooMany": "Tres capturas como máximo."
+    },
+    "answers": {
+      "sent": "Gracias. Tu informe nos ha llegado.",
+      "dailyLimit": "Hoy ya has enviado 10 informes. Podrás enviar más mañana.",
+      "tooLarge": "El informe es demasiado grande para enviarlo. Quita una captura y vuelve a intentarlo.",
+      "closed": "Los informes están cerrados: la beta ha terminado.",
+      "failed": "Tu informe no se envió. Revisa tu conexión y vuelve a intentarlo."
+    },
+    "phone": {
+      "sentWith": "Se envía con él: {{device}} · Nowry {{version}}. En esta versión no se envían capturas desde el teléfono."
     }
   }
 }

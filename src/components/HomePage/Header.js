@@ -16,7 +16,6 @@ import {
   MenuButton,
   MenuItem,
   ListDivider,
-  Snackbar,
   Drawer,
   List,
   ListItem,
@@ -28,7 +27,6 @@ import {
   AutoStoriesRounded,
   SchoolRounded,
   MenuBookRounded,
-  BugReportRounded,
   LogoutRounded,
   MenuRounded,
   CloseRounded,
@@ -58,8 +56,8 @@ import { BrandLockup } from '../Common/Brand/BrandMark'
 import PlanBadge from '../Subscription/PlanBadge'
 import { planBadge } from '@nowry/core/domain/access'
 import { useTranslation } from 'react-i18next'
-import BugReportModal from '../Bugs/BugReportModal'
-import { bugsService } from '@nowry/core/api/services/bugs.service'
+import ReportProblemDialog from '../Bugs/ReportProblemDialog'
+import { ReportDrawerEntry, ReportMenuEntry, useCanReport } from '../Bugs/ReportProblemEntry'
 import { useAuth } from '@nowry/core/context/AuthContext'
 import { AdminDrawerEntry, AdminMenuEntry } from '../Admin/AdminMenuEntry'
 import { useBeta } from '@nowry/core/context/BetaContext'
@@ -141,9 +139,9 @@ const Header = () => {
   const { memberDark } = useThemePreferences()
   const raisedBar = memberDark && (mode === 'system' ? systemMode : mode) === 'dark'
 
-  // Bug report state
-  const [bugReportOpen, setBugReportOpen] = React.useState(false)
-  const [snackbar, setSnackbar] = React.useState({ open: false, message: '', color: 'success' })
+  // "Report a problem" (BUG-001, board F): every signed-in account while the beta is on.
+  const canReport = useCanReport()
+  const [reportOpen, setReportOpen] = React.useState(false)
 
   // Mobile menu state
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)
@@ -210,16 +208,6 @@ const Header = () => {
   const logout = async () => {
     await contextLogout()
     navigate('/')
-  }
-
-  const handleBugSubmit = async (bugData) => {
-    const response = await bugsService.submitBug(bugData)
-    setSnackbar({
-      open: true,
-      message: response.message || 'Bug report submitted successfully!',
-      color: 'success'
-    })
-    setBugReportOpen(false)
   }
 
   // A board's own page (/boards/:id) still reads as Boards in the bar (BOARD-003).
@@ -529,8 +517,9 @@ const Header = () => {
                       </>
                     )}
 
-                    {/* Group 3 — Admin, for admins only (ADMIN-007a, board F) */}
-                    <AdminMenuEntry />
+                    {/* Group 3 — Report a problem while the beta is on, and Admin for admins (board F) */}
+                    <ReportMenuEntry onOpen={() => setReportOpen(true)} />
+                    <AdminMenuEntry divider={!canReport} />
 
                     <ListDivider sx={{ my: 0.5 }} />
 
@@ -561,19 +550,7 @@ const Header = () => {
         </Stack>
       </Sheet>
 
-      {/* Bug Report Modal */}
-      <BugReportModal open={bugReportOpen} onClose={() => setBugReportOpen(false)} onSubmit={handleBugSubmit} />
-
-      {/* Success Snackbar */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-        color={snackbar.color}
-        variant='soft'
-      >
-        {snackbar.message}
-      </Snackbar>
+      {canReport && <ReportProblemDialog open={reportOpen} onClose={() => setReportOpen(false)} />}
 
       {/* Mobile Navigation Drawer */}
       <Drawer
@@ -693,7 +670,17 @@ const Header = () => {
                   </>
                 )}
 
-                <AdminDrawerEntry onNavigate={() => setMobileMenuOpen(false)} selected={location.pathname.startsWith('/admin')} />
+                <ReportDrawerEntry
+                  onOpen={() => {
+                    setMobileMenuOpen(false)
+                    setReportOpen(true)
+                  }}
+                />
+                <AdminDrawerEntry
+                  onNavigate={() => setMobileMenuOpen(false)}
+                  selected={location.pathname.startsWith('/admin')}
+                  divider={!canReport}
+                />
 
                 <ListDivider sx={{ my: 1 }} />
                 <ListItem>

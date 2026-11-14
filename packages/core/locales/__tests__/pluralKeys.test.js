@@ -91,12 +91,7 @@ const GOVERNS_NOTHING = {
    * would inflect on the wrong axis and be wrong more often than the single
    * string is. Recorded rather than half-fixed.
    */
-  'the noun agrees with another number': [
-    'aiMagic.streaming.progress',
-    'pomodoro.cycleProgress',
-    'pomodoro.status.breakQueued',
-    'bugs.modal.screenshotsHint'
-  ]
+  'the noun agrees with another number': ['aiMagic.streaming.progress', 'pomodoro.cycleProgress', 'pomodoro.status.breakQueued']
 }
 
 const EXEMPT = new Set(Object.values(GOVERNS_NOTHING).flat())

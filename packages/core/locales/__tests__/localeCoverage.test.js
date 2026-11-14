@@ -123,6 +123,9 @@ const END_MINUTES = ['sessions.end.minutes_one', 'sessions.end.minutes_other']
  * screen reader is given (MOB-086).
  */
 const CARD_COUNTER = ['cards.session.cardShort']
+// A field's length against its limit is "{{length}} / {{max}}" in every language,
+// as the card counter is (BUG-001): two numbers and a slash, nothing to translate.
+const REPORT_COUNTER = ['report.fields.counter']
 
 // "Beta" is the word Spanish and German product UI use for a beta, unchanged
 // from English; French writes "Bêta" and Japanese ベータ, so neither is here.
@@ -179,6 +182,7 @@ const IDENTICAL_BY_DESIGN = {
     ...XP_EARNED,
     ...END_MINUTES,
     ...CARD_COUNTER,
+    ...REPORT_COUNTER,
     ...CAP('mod', 'tab', 'esc'),
     ...COMPANION_NAME,
     // "General" is the Spanish word for a deck of anything (CHAT-009).
@@ -231,6 +235,8 @@ const IDENTICAL_BY_DESIGN = {
   // "Portrait(s)" is the French word, so both the heading and the numbered
   // option label land on English by coincidence rather than by neglect.
   fr: [
+    // ADMIN-007b: "Notes" is the French word for the admin's notes on a bug report.
+    'admin.bugs.item.notes',
     // MEDIA-005: the phone reader's accessible name for an image with no alt text is the French word.
     'books.reader.imageUnnamed',
     // ADMIN-003: "page" and "pages" are the French words, so a book's size reads the same.
@@ -306,6 +312,7 @@ const IDENTICAL_BY_DESIGN = {
     ...XP_EARNED,
     ...END_MINUTES,
     ...CARD_COUNTER,
+    ...REPORT_COUNTER,
     // "Note" is the French word for a note, so the Note tool and the tile's
     // count land on English by coincidence (BOARD-003, BOARD-004).
     'boards.tools.note',
@@ -322,6 +329,13 @@ const IDENTICAL_BY_DESIGN = {
   // said "Nach Tag filtern" since the tag filter shipped — so the segment label
   // and its counted form land on English by agreement, not by neglect.
   de: [
+    // BUG-001, ADMIN-007b: "Screenshot(s)", "Status" and "optional" are the German words.
+    'report.fields.optional',
+    'report.fields.screenshot',
+    'report.fields.screenshots',
+    'admin.bugs.item.screenshot',
+    'admin.bugs.item.screenshots',
+    'admin.bugs.item.status',
     // Boards (BOARD-008/009): file extensions, format names (Mermaid, JSON Canvas) and the list comma are the same in every language.
     'boards.menu.importTypes',
     'boards.menu.exportCanvas',
@@ -359,6 +373,7 @@ const IDENTICAL_BY_DESIGN = {
     ...XP_GAINED,
     ...XP_EARNED,
     ...CARD_COUNTER,
+    ...REPORT_COUNTER,
     // "Board" is the loanword German product UI uses for a whiteboard, so the
     // page's title and its top-bar link say it as English does (BOARD-003).
     'boards.title',
@@ -379,6 +394,7 @@ const IDENTICAL_BY_DESIGN = {
     'cards.session.xpGained_other',
     ...XP_EARNED,
     ...CARD_COUNTER,
+    ...REPORT_COUNTER,
     ...CAP('mod', 'tab', 'esc', 'enter', 'delete'),
     ...COMPANION_NAME
   ]

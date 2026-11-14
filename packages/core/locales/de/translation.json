@@ -251,8 +251,7 @@
     },
     "copyright": "© {{year}} Nowry. Alle Rechte vorbehalten.",
     "toggleTheme": "Design wechseln",
-    "language": "Sprache",
-    "bugReport": "Fehler melden"
+    "language": "Sprache"
   },
   "study": {
     "deck": {
@@ -3077,13 +3076,6 @@
       "contextPlaceholder": "Bitte gib mehr Kontext an..."
     }
   },
-  "bugs": {
-    "filters": {
-      "allStatus": "Alle Status",
-      "allSeverity": "Alle Schweregrade",
-      "allCategories": "Alle Kategorien"
-    }
-  },
   "subscription": {
     "title": "Subscription & Billing",
     "currentPlan": "Aktueller Tarif",
@@ -4461,6 +4453,10 @@
       "unpublish": {
         "title": "Melde dich erneut an, um es zu entfernen",
         "confirm": "Anmelden und entfernen"
+      },
+      "saveBug": {
+        "title": "Melde dich erneut an, um zu speichern",
+        "confirm": "Anmelden und speichern"
       }
     },
     "title": "Verwaltung",
@@ -4472,7 +4468,8 @@
     "tabs": {
       "invitations": "Einladungen",
       "waitlist": "Warteliste",
-      "moderation": "Moderation"
+      "moderation": "Moderation",
+      "bugs": "Fehlermeldungen"
     },
     "inv": {
       "form": {
@@ -4762,6 +4759,110 @@
         "alreadyRemoved": "Es wurde schon entfernt, also hat sich nichts geändert. Die Warteschlange ist aktuell.",
         "notFound": "Es existiert nicht mehr, also hat sich nichts geändert. Die Warteschlange ist aktuell."
       }
+    },
+    "bugs": {
+      "filters": "Status der Fehlermeldungen",
+      "states": {
+        "new": "Neu",
+        "in_progress": "In Arbeit",
+        "fixed": "Behoben",
+        "wont_fix": "Wird nicht behoben"
+      },
+      "list": {
+        "title": "Fehlermeldungen",
+        "loading": "Fehlermeldungen werden geladen",
+        "empty": "Keine Fehlermeldungen in diesem Status",
+        "error": "Fehlermeldungen konnten nicht geladen werden.",
+        "by": "von {{name}}",
+        "head": {
+          "report": "Meldung",
+          "severity": "Schwere",
+          "device": "Gerät",
+          "age": "Alter"
+        },
+        "app": "{{os}}-App"
+      },
+      "item": {
+        "label": "Fehlermeldung",
+        "reported": "Gemeldet {{when}}",
+        "app": "{{os}}-App {{version}}",
+        "steps": "Schritte bis dahin",
+        "screenshots": "Screenshots",
+        "openScreenshot": "Screenshot {{number}} öffnen",
+        "screenshot": "Screenshot {{number}}",
+        "closeScreenshot": "Screenshot schließen",
+        "status": "Status",
+        "notes": "Notizen",
+        "you": "Du · {{when}}",
+        "someone": "Andere Admin-Person · {{when}}",
+        "addNote": "Notiz hinzufügen",
+        "notePlaceholder": "Was du herausgefunden hast, fürs nächste Mal",
+        "save": "Speichern"
+      },
+      "result": {
+        "saved": "Gespeichert.",
+        "nothing": "Noch nichts zu speichern",
+        "notFound": "Diese Meldung gibt es nicht mehr.",
+        "failed": "Speichern fehlgeschlagen. Versuch es noch einmal."
+      }
+    }
+  },
+  "report": {
+    "menu": "Problem melden",
+    "help": "Hilfe",
+    "title": "Problem melden",
+    "lead": "Die Meldung geht direkt an die Person, die Nowry baut. Die Seite, auf der du warst, und dein Gerät werden mitgeschickt.",
+    "fields": {
+      "title": "Was ist schiefgelaufen?",
+      "titlePlaceholder": "Karte dreht sich bei schnellem Doppeltippen zweimal",
+      "description": "Was passiert ist",
+      "descriptionPlaceholder": "Was du gesehen hast und was du stattdessen erwartet hast",
+      "steps": "Schritte bis dahin",
+      "stepsShort": "Schritte",
+      "optional": "optional",
+      "stepsPlaceholder": "1. Öffne ein Deck… 2. Tippe die Karte zweimal an…",
+      "severity": "Wie schlimm ist es?",
+      "area": "Bereich",
+      "screenshots": "Screenshots",
+      "screenshotsCaption": "{{used}} von 3 · PNG, JPEG oder WebP · vor dem Senden verkleinert",
+      "addScreenshot": "Screenshot hinzufügen",
+      "removeScreenshot": "Screenshot {{number}} entfernen",
+      "screenshot": "Screenshot {{number}}",
+      "counter": "{{length}} / {{max}}"
+    },
+    "severity": {
+      "low": "Gering",
+      "medium": "Mittel",
+      "high": "Hoch",
+      "critical": "Kritisch"
+    },
+    "areas": {
+      "study": "Lernen",
+      "books": "Bücher",
+      "planning": "Planung",
+      "focus": "Fokus",
+      "other": "Sonstiges"
+    },
+    "send": "Meldung senden",
+    "sending": "Wird gesendet…",
+    "errors": {
+      "titleRequired": "Sag in wenigen Worten, was schiefgelaufen ist.",
+      "descriptionRequired": "Sag, was passiert ist.",
+      "tooLong": "Höchstens {{max}} Zeichen.",
+      "imageType": "Nur PNG-, JPEG- oder WebP-Bilder.",
+      "imageTooLarge": "Dieses Bild ist auch verkleinert noch größer als 2 MB. Versuch es mit einem kleineren Screenshot.",
+      "imageUnreadable": "Dieses Bild konnte nicht gelesen werden. Versuch ein anderes.",
+      "tooMany": "Höchstens drei Screenshots."
+    },
+    "answers": {
+      "sent": "Danke. Deine Meldung ist bei uns angekommen.",
+      "dailyLimit": "Du hast heute schon 10 Meldungen gesendet. Morgen kannst du wieder welche senden.",
+      "tooLarge": "Die Meldung ist zu groß zum Senden. Entferne einen Screenshot und versuch es noch einmal.",
+      "closed": "Meldungen sind geschlossen: Die Beta ist vorbei.",
+      "failed": "Deine Meldung wurde nicht gesendet. Prüfe deine Verbindung und versuch es noch einmal."
+    },
+    "phone": {
+      "sentWith": "Wird mitgeschickt: {{device}} · Nowry {{version}}. In dieser Version keine Screenshots vom Handy."
     }
   }
 }

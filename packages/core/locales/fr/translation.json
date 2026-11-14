@@ -251,8 +251,7 @@
     },
     "copyright": "© {{year}} Nowry. Tous droits réservés.",
     "toggleTheme": "Changer le thème",
-    "language": "Langue",
-    "bugReport": "Signaler un bug"
+    "language": "Langue"
   },
   "study": {
     "views": {
@@ -3088,13 +3087,6 @@
       "contextPlaceholder": "Veuillez fournir plus de contexte..."
     }
   },
-  "bugs": {
-    "filters": {
-      "allStatus": "Tous les statuts",
-      "allSeverity": "Toutes les gravités",
-      "allCategories": "Toutes les catégories"
-    }
-  },
   "subscription": {
     "title": "Subscription & Billing",
     "currentPlan": "Formule actuelle",
@@ -4472,6 +4464,10 @@
       "unpublish": {
         "title": "Reconnectez-vous pour le dépublier",
         "confirm": "Se connecter et dépublier"
+      },
+      "saveBug": {
+        "title": "Reconnectez-vous pour enregistrer",
+        "confirm": "Se connecter et enregistrer"
       }
     },
     "title": "Administration",
@@ -4483,7 +4479,8 @@
     "tabs": {
       "invitations": "Inviter",
       "waitlist": "Liste d'attente",
-      "moderation": "Modération"
+      "moderation": "Modération",
+      "bugs": "Signalements de bugs"
     },
     "inv": {
       "form": {
@@ -4773,6 +4770,110 @@
         "alreadyRemoved": "Il avait déjà été retiré, donc rien n’a changé. La file est à jour.",
         "notFound": "Il n’existe plus, donc rien n’a changé. La file est à jour."
       }
+    },
+    "bugs": {
+      "filters": "États des signalements de bugs",
+      "states": {
+        "new": "Nouveaux",
+        "in_progress": "En cours",
+        "fixed": "Corrigés",
+        "wont_fix": "Non corrigés"
+      },
+      "list": {
+        "title": "Signalements de bugs",
+        "loading": "Chargement des signalements de bugs",
+        "empty": "Aucun signalement de bug dans cet état",
+        "error": "Impossible de charger les signalements de bugs.",
+        "by": "par {{name}}",
+        "head": {
+          "report": "Signalement",
+          "severity": "Gravité",
+          "device": "Appareil",
+          "age": "Âge"
+        },
+        "app": "Appli {{os}}"
+      },
+      "item": {
+        "label": "Signalement de bug",
+        "reported": "Signalé {{when}}",
+        "app": "Appli {{os}} {{version}}",
+        "steps": "Étapes pour y arriver",
+        "screenshots": "Captures d’écran",
+        "openScreenshot": "Ouvrir la capture {{number}}",
+        "screenshot": "Capture {{number}}",
+        "closeScreenshot": "Fermer la capture",
+        "status": "État",
+        "notes": "Notes",
+        "you": "Vous · {{when}}",
+        "someone": "Un autre admin · {{when}}",
+        "addNote": "Ajouter une note",
+        "notePlaceholder": "Ce que vous avez trouvé, pour la prochaine fois",
+        "save": "Enregistrer"
+      },
+      "result": {
+        "saved": "Enregistré.",
+        "nothing": "Rien à enregistrer pour l’instant",
+        "notFound": "Ce signalement n’existe plus.",
+        "failed": "Impossible d’enregistrer. Réessayez."
+      }
+    }
+  },
+  "report": {
+    "menu": "Signaler un problème",
+    "help": "Aide",
+    "title": "Signaler un problème",
+    "lead": "Il arrive directement à la personne qui construit Nowry. La page où vous étiez et votre appareil sont joints.",
+    "fields": {
+      "title": "Qu’est-ce qui n’a pas marché ?",
+      "titlePlaceholder": "La carte se retourne deux fois sur un double appui rapide",
+      "description": "Ce qui s’est passé",
+      "descriptionPlaceholder": "Ce que vous avez vu, et ce que vous attendiez à la place",
+      "steps": "Étapes pour y arriver",
+      "stepsShort": "Étapes",
+      "optional": "facultatif",
+      "stepsPlaceholder": "1. Ouvrez un paquet… 2. Touchez la carte deux fois…",
+      "severity": "C’est grave à quel point ?",
+      "area": "Domaine",
+      "screenshots": "Captures d’écran",
+      "screenshotsCaption": "{{used}} sur 3 · PNG, JPEG ou WebP · réduites avant l’envoi",
+      "addScreenshot": "Ajouter une capture",
+      "removeScreenshot": "Retirer la capture {{number}}",
+      "screenshot": "Capture {{number}}",
+      "counter": "{{length}} / {{max}}"
+    },
+    "severity": {
+      "low": "Faible",
+      "medium": "Moyenne",
+      "high": "Élevée",
+      "critical": "Critique"
+    },
+    "areas": {
+      "study": "Étude",
+      "books": "Livres",
+      "planning": "Planification",
+      "focus": "Concentration",
+      "other": "Autre"
+    },
+    "send": "Envoyer le signalement",
+    "sending": "Envoi…",
+    "errors": {
+      "titleRequired": "Dites en quelques mots ce qui n’a pas marché.",
+      "descriptionRequired": "Dites ce qui s’est passé.",
+      "tooLong": "{{max}} caractères au maximum.",
+      "imageType": "Images PNG, JPEG ou WebP uniquement.",
+      "imageTooLarge": "Cette image dépasse encore 2 Mo une fois réduite. Essayez une capture plus petite.",
+      "imageUnreadable": "Impossible de lire cette image. Essayez-en une autre.",
+      "tooMany": "Trois captures au maximum."
+    },
+    "answers": {
+      "sent": "Merci. Votre signalement nous est bien parvenu.",
+      "dailyLimit": "Vous avez envoyé 10 signalements aujourd’hui. Vous pourrez en envoyer d’autres demain.",
+      "tooLarge": "Le signalement est trop volumineux. Retirez une capture et réessayez.",
+      "closed": "Les signalements sont fermés : la bêta est terminée.",
+      "failed": "Votre signalement n’est pas parti. Vérifiez votre connexion et réessayez."
+    },
+    "phone": {
+      "sentWith": "Envoyé avec : {{device}} · Nowry {{version}}. Pas de captures depuis le téléphone dans cette version."
     }
   }
 }
