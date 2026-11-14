@@ -129,11 +129,22 @@ app before reaching Google ("Google sign-in is not configured for this build"). 
 |---|---|---|
 | `EXPO_PUBLIC_GOOGLE_CLIENT_ID_ANDROID` | plaintext | the Android OAuth client (type 1) in Firebase `nowry-prod`'s `google-services.json` |
 | `EXPO_PUBLIC_GOOGLE_CLIENT_ID_WEB` | plaintext | the web OAuth client (type 3) in the same file |
-| `GOOGLE_SERVICES_JSON` | file, secret | that `google-services.json`; `app.config.js` uses it when set |
+| `GOOGLE_SERVICES_JSON` | file, sensitive | that `google-services.json`; `app.config.js` uses it when set (cloud builds) |
 
 Dev keeps its own: `mobile/.env` (client IDs from `nowry-88f05`) and the git-ignored local
-`mobile/google-services.json`, which is the **development** project's. Without `GOOGLE_SERVICES_JSON`
-a build takes that local file — which is how builds 27–29 carried dev's file to the store.
+`mobile/google-services.json`, which is the **development** project's. EAS packs a build the way git
+does, so a git-ignored file never reaches a build: store builds 27–29 carried **no** native Firebase
+file at all (checked in the bundles), neither production's nor dev's.
+
+**Local builds do not fetch EAS file variables** (they load plain-text and sensitive strings only), so a
+local production build sets the path itself:
+
+```bash
+GOOGLE_SERVICES_JSON=$HOME/.secrets/nowry/google-services.prod.json npx -y eas-cli@latest build --local -p android --profile production
+```
+
+Check the bundle afterwards: `unzip -p <aab> base/resources.pb | grep -c -a nowry-prod` must be non-zero
+and `nowry-88f05` zero. Build 30 (2026-11-14) was the first store build with the production file.
 
 The production Android client has **custom URI schemes off by default** (see above): it must be
 switched on in Google Cloud console → project Nowry-Prod → Credentials → the Android client for

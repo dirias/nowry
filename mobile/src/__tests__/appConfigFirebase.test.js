@@ -1,11 +1,12 @@
 /**
  * Which Firebase project a build's native config belongs to (PLAY-001).
  *
- * Every build used to take `mobile/google-services.json`, which on this Mac is
- * the DEVELOPMENT project's (nowry-88f05) — so production builds 27, 28 and 29
- * carried dev's file. Production builds now take theirs from the EAS file
- * variable `GOOGLE_SERVICES_JSON`, set in the production environment only;
- * without it (a dev build, the emulator) the local file is used as before.
+ * Every build named `mobile/google-services.json`, which on this Mac is the
+ * DEVELOPMENT project's (nowry-88f05) and git-ignored, so EAS never packed it:
+ * store builds 27–29 carried no native Firebase file at all. Production builds
+ * now take theirs from `GOOGLE_SERVICES_JSON` (the EAS variable for cloud
+ * builds; the shell for a local one, see EAS-SECRETS.md); without it (a dev
+ * build, the emulator) the local file is used as before.
  */
 const path = require('path')
 
