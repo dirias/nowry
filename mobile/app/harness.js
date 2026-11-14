@@ -125,7 +125,7 @@ function Panel({ title }) {
         <Section label='Buttons — every size'>
           {BUTTON_SIZE_NAMES.map((size) => (
             <Button key={size} size={size} onPress={() => {}}>
-              size {size}
+              {`size ${size}`}
             </Button>
           ))}
         </Section>
@@ -281,17 +281,22 @@ function Panel({ title }) {
   )
 }
 
+/** The level each stage after the first is reached at: the API's STAGE_LEVEL_THRESHOLDS (app/routers/agent.py). */
+const STAGE_LEVELS = [3, 6, 10, 14, 18]
+
 /** Every stage change there is, each replayed in this panel's scheme. */
 function EvolutionDemo() {
   const [pair, setPair] = useState(null)
   return (
     <Stack direction='row' spacing={1} style={{ flexWrap: 'wrap' }}>
       {[1, 2, 3, 4, 5].map((from) => (
-        <Button key={from} size='sm' variant='soft' color='neutral' onPress={() => setPair({ from, to: from + 1 })}>
+        <Button key={from} size='sm' variant='secondary' onPress={() => setPair({ from, to: from + 1 })}>
           {`${from} → ${from + 1}`}
         </Button>
       ))}
-      {pair ? <EvolutionReveal fromStage={pair.from} toStage={pair.to} level={pair.to * 3} onClose={() => setPair(null)} /> : null}
+      {pair ? (
+        <EvolutionReveal fromStage={pair.from} toStage={pair.to} level={STAGE_LEVELS[pair.from - 1]} onClose={() => setPair(null)} />
+      ) : null}
     </Stack>
   )
 }
