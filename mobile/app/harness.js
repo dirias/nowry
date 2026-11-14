@@ -11,8 +11,7 @@
  * `nowry://harness`.
  */
 import { ScrollView, View } from 'react-native'
-import { ThemeProvider, useTheme } from '../src/theme'
-import { CompanionForm } from '../src/ui/patterns/CompanionForm'
+import { ThemeProvider } from '../src/theme'
 import { useState } from 'react'
 import {
   ActionSheet,
@@ -26,7 +25,6 @@ import {
   EvolutionReveal,
   FormField,
   PetOrb,
-  resolveColor,
   Icon,
   IconButton,
   IdentityTile,
@@ -313,33 +311,9 @@ function EvolutionDemo() {
 /** Where the app draws the companion: the session note, the chat, the bubble, and its own size in settings and the level-up row. */
 const COMPANION_SIZES = [24, 40, 44, null]
 
-/** The alternative for 24 px, for comparison only: the web's chat disc — paper, the form at 90 %, no rings or motes. */
-function DiscAlternative() {
-  const theme = useTheme()
-  return (
-    <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
-      {[1, 2, 3, 4, 5, 6].map((stage) => (
-        <View
-          key={stage}
-          style={{
-            width: 24,
-            height: 24,
-            borderRadius: 12,
-            overflow: 'hidden',
-            backgroundColor: resolveColor(theme, 'background.surface')
-          }}
-        >
-          <CompanionForm stage={stage} size={24} fill={0.9} />
-        </View>
-      ))}
-    </View>
-  )
-}
-
 function CompanionSizes() {
   return (
     <Stack spacing={2}>
-      <DiscAlternative />
       {COMPANION_SIZES.map((size) => (
         <View key={String(size)} style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
           {[1, 2, 3, 4, 5, 6].map((stage) => (

@@ -25,6 +25,16 @@ export const artColor = (accent, stage) => resolveColor(accent, stage)
 /** How much of its frame a form fills: each stage stands bigger than the one before. */
 export const artShare = (stage) => stageConfig(stage).artFill
 
+/**
+ * At this size and under the companion is the web's chat disc: paper, the form
+ * at `DISC_FILL`, no aura rings or motes. Around a 24 px orb the rings stood up
+ * to two and a half times the form's size and said more than the creature did
+ * (decided 2026-11-14, artifact version 5). Every larger size keeps the orb.
+ */
+export const DISC_MAX = 24
+export const DISC_FILL = 0.9
+export const drawsAsDisc = (size) => typeof size === 'number' && size <= DISC_MAX
+
 /** The file one stage in one colour is kept in. */
 export const artFileName = (stage, color) =>
   `companion-v${COMPANION_ART_VERSION}-${stage}-${String(color).replace('#', '').toLowerCase()}.png`

@@ -37,6 +37,15 @@ describe('the orb wears Nowry as the real form', () => {
   })
 })
 
+describe("at 24 px the orb is the web's chat disc", () => {
+  it('asks the shared rule, and draws paper, the form at the disc fill, and no rings or motes', () => {
+    expect(orb).toMatch(/drawsAsDisc\(size\)/)
+    expect(orb).toMatch(/<CompanionForm[^>]*fill=\{DISC_FILL\}/)
+    expect(orb).toMatch(/const rings = disc \? 0 :/)
+    expect(orb).toMatch(/const orbits = disc \? 0 :/)
+  })
+})
+
 describe('the reveal draws the form bare, as the approved artifact', () => {
   it('asks the orb for the form alone, with no disc or rings', () => {
     const orbs = reveal.match(/<PetOrb\b[^>]*>/g) ?? []

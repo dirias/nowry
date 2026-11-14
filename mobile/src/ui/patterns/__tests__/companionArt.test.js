@@ -13,7 +13,7 @@ const UPNG = require('upng-js')
 import { resolveColor } from '@nowry/core/utils/petColor'
 import { stageConfig } from '@nowry/core/domain/petStages'
 import { hexToOklch } from '@nowry/core/tokens/oklch'
-import { artColor, artFileName, artShare, recolorPng, COMPANION_ART_VERSION } from '../companionArt'
+import { artColor, artFileName, artShare, recolorPng, drawsAsDisc, DISC_FILL, COMPANION_ART_VERSION } from '../companionArt'
 
 const ASSETS = path.join(__dirname, '..', '..', '..', '..', 'assets', 'companion')
 const png = (stage) => new Uint8Array(fs.readFileSync(path.join(ASSETS, `stage-${stage}.png`)))
@@ -44,6 +44,20 @@ describe('the forms the phone draws', () => {
     expect(artFileName(3, '#3D8A94')).toBe(`companion-v${COMPANION_ART_VERSION}-3-3d8a94.png`)
     expect(artFileName(3, '#3d8a94')).toBe(artFileName(3, '#3D8A94'))
     expect(artFileName(4, '#3d8a94')).not.toBe(artFileName(3, '#3d8a94'))
+  })
+})
+
+describe('the smallest companion is a disc, not an orb (EVO-018, decided 2026-11-14)', () => {
+  it("draws 24 px and under as the web's chat disc; every larger size keeps the orb and its rings", () => {
+    expect(drawsAsDisc(24)).toBe(true)
+    expect(drawsAsDisc(16)).toBe(true)
+    for (const size of [25, 40, 44, 56, 132, 200]) expect(drawsAsDisc(size)).toBe(false)
+    // No size given means the stage's own size, which is never that small.
+    expect(drawsAsDisc(null)).toBe(false)
+  })
+
+  it("fills 90 % of the disc, as the web's CompanionArtDisc", () => {
+    expect(DISC_FILL).toBe(0.9)
   })
 })
 
