@@ -11,6 +11,13 @@ const { alias } = require('../lib/run')
 const { signIn } = require('../lib/ui')
 const { api, bearer, makeAccount, firebaseSignIn } = require('../lib/api')
 const { db } = require('../lib/db')
+const { API_HOST } = require('../lib/env')
+
+/** A response from the API itself; the page at /admin/overview is HTML from the site. */
+const fromApi = (response, path) => {
+  const url = new URL(response.url())
+  return url.host === API_HOST && url.pathname === path
+}
 
 const COHORT = 'e2e'
 const THREE_DAYS = 3 * 24 * 3600 * 1000
@@ -68,7 +75,7 @@ test('[happy] a sent invitation shows in the Overview and in the admin log, unde
   // same time, so ours may already be pushed off by newer ones. Judge the card by the answer the page
   // itself loaded: our line is drawn, or the card is full of actions newer than it.
   await signIn(page, adminEmail)
-  const loaded = page.waitForResponse((response) => response.url().includes('/admin/overview') && response.ok())
+  const loaded = page.waitForResponse((response) => fromApi(response, '/admin/overview') && response.ok())
   await page.goto('/admin/overview')
   const recent = (await (await loaded).json()).recent_actions
   const card = page.getByRole('region', { name: 'What admins did' })
@@ -128,7 +135,7 @@ test('[edge] the Needs you counts are the API’s, and the invitations ending in
 
   // Other scenarios run beside this one, so the screen is checked against the answer it drew from.
   await signIn(page, adminEmail)
-  const drawn = page.waitForResponse((response) => new URL(response.url()).pathname.endsWith('/admin/overview'))
+  const drawn = page.waitForResponse((response) => fromApi(response, '/admin/overview'))
   await page.goto('/admin/overview')
   const shown = (await (await drawn).json()).needs
   const counts = {
@@ -140,7 +147,7 @@ test('[edge] the Needs you counts are the API’s, and the invitations ending in
   for (const [title, count] of Object.entries(counts)) {
     await expect(page.getByRole('link', { name: `${title}: ${count}` })).toBeVisible({ timeout: 30000 })
   }
-  const opened = page.waitForResponse((response) => new URL(response.url()).pathname.endsWith('/beta/admin/invites'))
+  const opened = page.waitForResponse((response) => fromApi(response, '/beta/admin/invites'))
   await page.getByRole('link', { name: `Invitations ending in 3 days: ${shown.invitations_ending.count}` }).click()
   await expect(page).toHaveURL(/\/admin\/invitations\?state=open$/)
   const open = (await (await opened).json()).totals.open
