@@ -127,7 +127,9 @@ test('[edge] a batch larger than the invitations left today is refused whole', a
   const cohorts = await (await client.get('/beta/admin/cohorts', { headers })).json()
   const needed = cohorts.invitations_left_today + 1
   test.skip(needed > 50, `the day's share (${cohorts.invitations_left_today}) is above one batch`)
-  const addresses = Array.from({ length: needed }, (_, i) => alias(`inv-budget-${i}`))
+  // Suite aliases are kept by the dev outbox and spend no budget; only real addresses count. One more
+  // than today has left is always refused before anything is written, so no example.org row is ever made.
+  const addresses = Array.from({ length: needed }, (_, i) => `e2e-budget-${i}@example.org`)
   const response = await client.post('/beta/admin/invites/batch', {
     headers,
     data: { addresses, cohort: 'e2e', expires_in_days: 14, locale: 'en', dry_run: false }

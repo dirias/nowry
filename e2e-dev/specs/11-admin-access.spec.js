@@ -26,7 +26,6 @@ const setAdmin = (email, ...flags) =>
         'Nowry',
         '--',
         '.venv/bin/python',
-        '-I',
         '-m',
         'scripts.set_admin',
         '--email',
