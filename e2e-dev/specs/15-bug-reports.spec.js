@@ -58,6 +58,9 @@ test('[happy] a tester reports from the account menu; the admin sets a status an
   await adminPage.getByLabel('Add a note').fill('Reproduced on a Pixel 7.')
   await adminPage.getByRole('button', { name: 'Save', exact: true }).click()
   await expect(adminPage.getByText('Saved.')).toBeVisible({ timeout: 30000 })
+  // In progress, it has left the New list; it is found under In progress with its note.
+  await adminPage.getByRole('button', { name: /^In progress · / }).click()
+  await adminPage.getByText(title).first().click({ timeout: 30000 })
   await expect(adminPage.getByText('Reproduced on a Pixel 7.')).toBeVisible()
 
   const client = await api()
