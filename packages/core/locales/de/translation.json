@@ -4419,5 +4419,39 @@
     "mistake": "Wenn du es versehentlich gelöscht hast, schreib an support@nowry.app, um es wiederherzustellen, statt neu anzufangen.",
     "dismiss": "Verstanden",
     "dismissAria": "Hinweis schließen"
+  },
+  "reauth": {
+    "google": "Weiter mit Google",
+    "orPassword": "oder mit deinem Passwort",
+    "passwordLabel": "Passwort",
+    "wrongPassword": "Das Passwort stimmt nicht. Versuch es noch einmal.",
+    "failed": "Wir konnten nicht bestätigen, dass du es bist. Versuch es noch einmal."
+  },
+  "admin": {
+    "reauth": {
+      "body": "Änderungen in der Verwaltung brauchen eine Anmeldung aus den letzten 12 Stunden.",
+      "lastSignIn": "Deine letzte war am {{when}}.",
+      "nothingYet": "Es wurde noch nichts geändert.",
+      "check": {
+        "title": "Melde dich erneut an, um die Adressen zu prüfen",
+        "confirm": "Anmelden und prüfen"
+      },
+      "send": {
+        "title": "Melde dich erneut an, um Einladungen zu senden",
+        "confirm": "Anmelden und senden"
+      },
+      "resend": {
+        "title": "Melde dich erneut an, um einen neuen Link zu senden",
+        "confirm": "Anmelden und Link senden"
+      },
+      "inviteAgain": {
+        "title": "Melde dich erneut an, um erneut einzuladen",
+        "confirm": "Anmelden und einladen"
+      },
+      "revoke": {
+        "title": "Melde dich erneut an, um die Einladung zu widerrufen",
+        "confirm": "Anmelden und widerrufen"
+      }
+    }
   }
 }

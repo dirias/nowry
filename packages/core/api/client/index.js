@@ -2,6 +2,7 @@ import axios from 'axios'
 import i18n from 'i18next'
 import { auth, env, notify, session, storage, telemetry } from '../../platform'
 import { isInviteRefusal, isVerifyEmailRefusal } from '../../domain/beta'
+import { isReauthRequired } from '../../domain/recentSignIn'
 
 /**
  * Told when the server answers that the signed-in identity has no Nowry
@@ -189,6 +190,13 @@ apiClient.interceptors.response.use(
       // /users/me is used as an auth probe on startup — a 401 there is expected
       // when not logged in. Do NOT redirect; just let AuthContext handle it.
       if (url.includes('/users/me')) {
+        return Promise.reject(error)
+      }
+
+      // A refusal for an old sign-in (ADR-089, FR-010) is not an invalid
+      // session: the caller asks for the sign-in again and retries. Signing the
+      // person out here would end the very session they are proving.
+      if (isReauthRequired(error)) {
         return Promise.reject(error)
       }
 

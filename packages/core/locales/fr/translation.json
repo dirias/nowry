@@ -4430,5 +4430,39 @@
     "mistake": "Si vous l'avez supprimé par erreur, écrivez à support@nowry.app pour le récupérer au lieu de repartir de zéro.",
     "dismiss": "Compris",
     "dismissAria": "Fermer cet avis"
+  },
+  "reauth": {
+    "google": "Continuer avec Google",
+    "orPassword": "ou avec votre mot de passe",
+    "passwordLabel": "Mot de passe",
+    "wrongPassword": "Ce mot de passe n'est pas le bon. Réessayez.",
+    "failed": "Nous n'avons pas pu confirmer que c'est vous. Réessayez."
+  },
+  "admin": {
+    "reauth": {
+      "body": "Les modifications d'administration demandent une connexion datant de moins de 12 heures.",
+      "lastSignIn": "La dernière date de {{when}}.",
+      "nothingYet": "Rien n'a encore été modifié.",
+      "check": {
+        "title": "Reconnectez-vous pour vérifier les adresses",
+        "confirm": "Se connecter et vérifier"
+      },
+      "send": {
+        "title": "Reconnectez-vous pour envoyer les invitations",
+        "confirm": "Se connecter et envoyer"
+      },
+      "resend": {
+        "title": "Reconnectez-vous pour envoyer un nouveau lien",
+        "confirm": "Se connecter et envoyer le lien"
+      },
+      "inviteAgain": {
+        "title": "Reconnectez-vous pour inviter à nouveau",
+        "confirm": "Se connecter et inviter"
+      },
+      "revoke": {
+        "title": "Reconnectez-vous pour révoquer l'invitation",
+        "confirm": "Se connecter et révoquer"
+      }
+    }
   }
 }

@@ -4954,5 +4954,39 @@
     "mistake": "If you deleted it by mistake, write to support@nowry.app to recover it instead of starting over.",
     "dismiss": "Got it",
     "dismissAria": "Dismiss this notice"
+  },
+  "reauth": {
+    "google": "Continue with Google",
+    "orPassword": "or with your password",
+    "passwordLabel": "Password",
+    "wrongPassword": "That password isn't right. Try again.",
+    "failed": "We couldn't confirm it's you. Try again."
+  },
+  "admin": {
+    "reauth": {
+      "body": "Admin changes need a sign-in from the last 12 hours.",
+      "lastSignIn": "Your last one was {{when}}.",
+      "nothingYet": "Nothing has been changed yet.",
+      "check": {
+        "title": "Sign in again to check the addresses",
+        "confirm": "Sign in and check"
+      },
+      "send": {
+        "title": "Sign in again to send invitations",
+        "confirm": "Sign in and send"
+      },
+      "resend": {
+        "title": "Sign in again to send a new link",
+        "confirm": "Sign in and send link"
+      },
+      "inviteAgain": {
+        "title": "Sign in again to invite again",
+        "confirm": "Sign in and invite"
+      },
+      "revoke": {
+        "title": "Sign in again to revoke the invitation",
+        "confirm": "Sign in and revoke"
+      }
+    }
   }
 }

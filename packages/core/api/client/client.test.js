@@ -90,6 +90,15 @@ describe('a 401', () => {
     expect(platform.storage.get('firebase_user')).toBeNull()
   })
 
+  it('asking for a recent sign-in keeps the session: the caller signs in again (FR-010)', async () => {
+    platform.storage.set('firebase_token', 'kept')
+    const answer = { status: 401, data: { detail: { code: 'reauth_required' } } }
+    const error = await request('/beta/admin/invites/batch', { adapter: transport(answer).adapter })
+    expect(error.response.status).toBe(401)
+    expect(platform.session.onUnauthorized).not.toHaveBeenCalled()
+    expect(platform.storage.get('firebase_token')).toBe('kept')
+  })
+
   it('on the startup probe /users/me is only an answer: nobody was signed in', async () => {
     platform.storage.set('firebase_token', 'kept')
     await request('/users/me', { adapter: transport({ status: 401 }).adapter })

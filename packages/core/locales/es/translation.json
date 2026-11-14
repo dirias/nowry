@@ -4954,5 +4954,39 @@
     "mistake": "Si la eliminaste por error, escribe a support@nowry.app para recuperarla en lugar de empezar de cero.",
     "dismiss": "Entendido",
     "dismissAria": "Cerrar este aviso"
+  },
+  "reauth": {
+    "google": "Continuar con Google",
+    "orPassword": "o con tu contraseña",
+    "passwordLabel": "Contraseña",
+    "wrongPassword": "Esa contraseña no es correcta. Inténtalo de nuevo.",
+    "failed": "No pudimos confirmar que eres tú. Inténtalo de nuevo."
+  },
+  "admin": {
+    "reauth": {
+      "body": "Los cambios de administración necesitan un inicio de sesión de las últimas 12 horas.",
+      "lastSignIn": "El último fue {{when}}.",
+      "nothingYet": "Todavía no se ha cambiado nada.",
+      "check": {
+        "title": "Vuelve a iniciar sesión para revisar las direcciones",
+        "confirm": "Iniciar sesión y revisar"
+      },
+      "send": {
+        "title": "Vuelve a iniciar sesión para enviar invitaciones",
+        "confirm": "Iniciar sesión y enviar"
+      },
+      "resend": {
+        "title": "Vuelve a iniciar sesión para enviar un enlace nuevo",
+        "confirm": "Iniciar sesión y enviar enlace"
+      },
+      "inviteAgain": {
+        "title": "Vuelve a iniciar sesión para invitar de nuevo",
+        "confirm": "Iniciar sesión e invitar"
+      },
+      "revoke": {
+        "title": "Vuelve a iniciar sesión para revocar la invitación",
+        "confirm": "Iniciar sesión y revocar"
+      }
+    }
   }
 }
