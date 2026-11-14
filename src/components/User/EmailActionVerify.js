@@ -21,7 +21,8 @@ const applyOnce = (code) => {
 
 /** Where a confirmed person goes next: back to a waiting sign-up, into Nowry, or to sign in. */
 const nextStep = (signedIn) => {
-  if (authService.heldSignUp()) return { to: '/register', label: 'auth.action.finish' }
+  // `finish=1`: the confirm step finishes on arrival, with no second press (E2E-006).
+  if (authService.heldSignUp()) return { to: '/register?finish=1', label: 'auth.action.finish' }
   return signedIn ? { to: '/', label: 'auth.action.open' } : { to: '/login', label: 'auth.action.signIn' }
 }
 

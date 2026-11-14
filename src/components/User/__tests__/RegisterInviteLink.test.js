@@ -215,6 +215,32 @@ describe('the confirm-your-email step', () => {
     expect(container.querySelector('form')).toBeNull()
   })
 
+  it('arriving from the confirmed email link finishes the sign-up without a press (E2E-006)', async () => {
+    mockAuthService.heldSignUp.mockReturnValue({ inviteCode: TOKEN, username: 'ana_typed', email: 'ana@example.com' })
+    mockAuthService.finishHeldSignUp.mockResolvedValue({ status: 'done', backendUser: { wizard_completed: false } })
+    open('/register?finish=1')
+    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/onboarding', { replace: true }))
+    expect(mockAuthService.finishHeldSignUp).toHaveBeenCalledTimes(1)
+    expect(mockCheckUser).toHaveBeenCalled()
+  })
+
+  it('arriving from the link before the address is confirmed shows the step without an error', async () => {
+    mockAuthService.heldSignUp.mockReturnValue({ inviteCode: TOKEN, username: 'ana_typed', email: 'ana@example.com' })
+    mockAuthService.finishHeldSignUp.mockResolvedValue({ status: 'unverified' })
+    open('/register?finish=1')
+    expect(await screen.findByText('beta.personal.confirmBody ana@example.com')).toBeInTheDocument()
+    await waitFor(() => expect(mockAuthService.finishHeldSignUp).toHaveBeenCalledTimes(1))
+    expect(screen.queryByText('auth.verify.notYet')).toBeNull()
+    expect(mockNavigate).not.toHaveBeenCalledWith('/onboarding', { replace: true })
+  })
+
+  it('opened any other way, the step waits for the press', async () => {
+    mockAuthService.heldSignUp.mockReturnValue({ inviteCode: TOKEN, username: 'ana_typed', email: 'ana@example.com' })
+    open('/register')
+    expect(await screen.findByText('beta.personal.confirmBody ana@example.com')).toBeInTheDocument()
+    expect(mockAuthService.finishHeldSignUp).not.toHaveBeenCalled()
+  })
+
   it('holds a link opened by an identity that has no account, and opens the step', async () => {
     mockAuthService.holdInviteForCurrentUser.mockReturnValue(true)
     mockAuthService.heldSignUp.mockReturnValue({ inviteCode: TOKEN, username: '', email: 'ana@example.com' })

@@ -81,7 +81,7 @@ describe('a verification link', () => {
     first.unmount()
     mockAuthService.heldSignUp.mockReturnValue({ inviteCode: 'nwi_x', username: 'ana', email: 'ana@x.io' })
     open(`?mode=verifyEmail&oobCode=${fresh()}`)
-    await waitFor(() => expect(key('auth.action.finish').getAttribute('href')).toBe('/register'))
+    await waitFor(() => expect(key('auth.action.finish').getAttribute('href')).toBe('/register?finish=1'))
   })
 
   it('reads a spent code as confirmed when the address already is', async () => {
