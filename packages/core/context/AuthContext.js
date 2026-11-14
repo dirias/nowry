@@ -5,6 +5,7 @@ import { authService, registration } from '../api/services'
 import { queryClient } from '../api/queryClient'
 import { auth as authPort, session, storage } from '../platform'
 import { isSignInProblem, signInProblem as classifySignInProblem } from '../domain/signInProblem'
+import { isAdmin as isAdminAccount } from '../domain/admin'
 
 /*
  * The i18next singleton, not the client's `i18n.js`. Both clients initialise
@@ -323,6 +324,8 @@ export const AuthProvider = ({ children }) => {
         clearSignInProblem,
         loading,
         isAuthenticated: !!user,
+        // ADMIN-004b: what the client shows an admin; the API still decides every call.
+        isAdmin: isAdminAccount(user),
         subscriptionTier: user?.subscription?.tier ?? 'free',
         subscriptionStatus: user?.subscription?.status ?? 'active'
       }

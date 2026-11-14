@@ -7,17 +7,18 @@ import BugReportModal from '../Bugs/BugReportModal'
 import { bugsService } from '@nowry/core/api/services/bugs.service'
 
 /**
- * Floating dev-only bug report button — fixed bottom-left.
- * Renders nothing for non-dev users.
+ * Floating admin-only bug report button — fixed bottom-left.
+ * Renders nothing for anyone but an admin.
  */
 const DevBugReportButton = () => {
-  const { user } = useAuth()
+  const { isAdmin } = useAuth()
   const { t } = useTranslation()
 
   const [bugReportOpen, setBugReportOpen] = React.useState(false)
   const [snackbar, setSnackbar] = React.useState({ open: false, message: '', color: 'success' })
 
-  if (user?.role !== 'dev') return null
+  // ADMIN-004b: `role` is retired; admins keep this until batch 4 removes it.
+  if (!isAdmin) return null
 
   const handleBugSubmit = async (bugData) => {
     const response = await bugsService.submitBug(bugData)

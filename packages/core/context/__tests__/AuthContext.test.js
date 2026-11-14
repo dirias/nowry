@@ -414,3 +414,24 @@ test('a server fault keeps the session and names no reason', async () => {
   expect(read().signInProblem).toBeNull()
   expect(mockSignOut).not.toHaveBeenCalled()
 })
+
+/* ADMIN-004b, FR-009: `/users/me` says `is_admin: true` for an admin only; `role` is never read. */
+test('isAdmin follows is_admin on /users/me', async () => {
+  apiClient.get.mockResolvedValue({ data: { username: 'didier', is_admin: true } })
+  const ctx = renderWithConsumer()
+  await act(async () => {
+    await mockAuthCallback({ uid: 'u1' })
+  })
+  await waitFor(() => expect(ctx().user?.username).toBe('didier'))
+  expect(ctx().isAdmin).toBe(true)
+})
+
+test('an account without the flag is not an admin, whatever role it once had', async () => {
+  apiClient.get.mockResolvedValue({ data: { username: 'tester', role: 'dev' } })
+  const ctx = renderWithConsumer()
+  await act(async () => {
+    await mockAuthCallback({ uid: 'u2' })
+  })
+  await waitFor(() => expect(ctx().user?.username).toBe('tester'))
+  expect(ctx().isAdmin).toBe(false)
+})

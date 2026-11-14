@@ -37,7 +37,8 @@ const TikTokIcon = () => (
 
 const Footer = () => {
   const { t, i18n } = useTranslation()
-  const { user } = useAuth()
+  // ADMIN-004b: `role` is retired; the bug report key stays for admins until batch 4 removes it.
+  const { user, isAdmin } = useAuth()
   const { mode, setMode } = useColorScheme()
 
   const [bugReportOpen, setBugReportOpen] = React.useState(false)
@@ -200,7 +201,7 @@ const Footer = () => {
               </Tooltip>
             ))}
 
-            {user?.role === 'dev' && (
+            {isAdmin && (
               <Tooltip title={t('footer.bugReport')} placement='top'>
                 <IconButton
                   variant='plain'
