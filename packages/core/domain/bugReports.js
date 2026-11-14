@@ -1,3 +1,4 @@
+import { apiTime } from './apiInstant'
 /**
  * Bug reports, for the tester who sends one and the admin who triages it
  * (BUG-001, ADMIN-008a, ADMIN-007b; FR-007, FR-008, FR-011 Bug reports; boards C, G, H).
@@ -225,7 +226,7 @@ export const bugFacts = (bug) => {
 }
 
 const time = (value) => {
-  const ms = value ? Date.parse(value) : NaN
+  const ms = apiTime(value)
   return Number.isNaN(ms) ? 0 : ms
 }
 

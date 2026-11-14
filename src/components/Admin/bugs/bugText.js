@@ -4,13 +4,14 @@
  */
 import { REPORT_AREAS, bugDevice, bugFacts, isAppReport, isOwnNote } from '@nowry/core/domain/bugReports'
 import { timeAgo } from '../moderation/moderationText'
+import { apiTime } from '@nowry/core/domain/apiInstant'
 
 const SEP = ' · '
 const HOUR = 3600
 const DAY = 86400
 
 const secondsSince = (value, now) => {
-  const ms = value ? Date.parse(value) : NaN
+  const ms = apiTime(value)
   return Number.isNaN(ms) ? null : Math.max(0, Math.round((now - ms) / 1000))
 }
 
