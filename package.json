@@ -79,7 +79,9 @@
     "test:core": "jest --config packages/core/jest.config.js",
     "e2e": "playwright test --config e2e/playwright.config.js",
     "e2e:dev": "node e2e-dev/run.js",
-    "e2e:prod": "node e2e-dev/run.js prod"
+    "e2e:prod": "node e2e-dev/run.js prod",
+    "release:guard": "node scripts/release-guard.js",
+    "test:release-guard": "node --test scripts/release-guard/__tests__"
   },
   "eslintConfig": {
     "extends": [
