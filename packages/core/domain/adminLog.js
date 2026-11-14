@@ -48,6 +48,8 @@ const copiesOf = (details) => Math.max(0, Number(details?.copies) || 0)
 const TYPE_WORD = Object.freeze({ deck: 'Deck', book: 'Book' })
 
 const describeRemoval = (row) => {
+  // A public copy taken by a removal: the item's own row names how many went.
+  if (row.details?.is_copy) return { id: 'removeCopy', values: { title: titleOf(row) } }
   const type = TYPE_WORD[row.target_type] ?? 'Item'
   const count = copiesOf(row.details)
   const title = titleOf(row)

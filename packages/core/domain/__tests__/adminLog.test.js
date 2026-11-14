@@ -98,6 +98,7 @@ describe('describeAction', () => {
       values: { title: 'JLPT N5', count: 2 }
     })
     expect(describeAction({ ...removal, details: {} })).toEqual({ id: 'removeDeck', values: { title: 'JLPT N5' } })
+    expect(describeAction({ ...removal, details: { is_copy: true } })).toEqual({ id: 'removeCopy', values: { title: 'JLPT N5' } })
     expect(describeAction({ ...removal, target_type: 'book', details: { copies: 0 } }).id).toBe('removeBook')
     expect(describeAction({ ...removal, target_type: 'book', details: { copies: 3 } }).id).toBe('removeBookCopies')
     expect(describeAction({ ...removal, target_type: 'note', details: null }).id).toBe('removeItem')
