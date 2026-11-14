@@ -24,6 +24,7 @@ import {
   Divider,
   EvolutionReveal,
   FormField,
+  PetOrb,
   Icon,
   IconButton,
   IdentityTile,
@@ -276,6 +277,12 @@ function Panel({ title }) {
             <EvolutionDemo />
           </Section>
         ) : null}
+        {/* The six forms at every size the app draws the companion (EVO-018). */}
+        {__DEV__ ? (
+          <Section label='Companion forms (EVO-018)'>
+            <CompanionSizes />
+          </Section>
+        ) : null}
       </Stack>
     </Box>
   )
@@ -297,6 +304,23 @@ function EvolutionDemo() {
       {pair ? (
         <EvolutionReveal fromStage={pair.from} toStage={pair.to} level={STAGE_LEVELS[pair.from - 1]} onClose={() => setPair(null)} />
       ) : null}
+    </Stack>
+  )
+}
+
+/** Where the app draws the companion: the session note, the chat, the bubble, and its own size in settings and the level-up row. */
+const COMPANION_SIZES = [24, 40, 44, null]
+
+function CompanionSizes() {
+  return (
+    <Stack spacing={2}>
+      {COMPANION_SIZES.map((size) => (
+        <View key={String(size)} style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
+          {[1, 2, 3, 4, 5, 6].map((stage) => (
+            <PetOrb key={stage} stage={stage} size={size} still />
+          ))}
+        </View>
+      ))}
     </Stack>
   )
 }

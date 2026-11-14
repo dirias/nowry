@@ -20,6 +20,10 @@ describe('the phone reveal swaps the form under the gold', () => {
     for (const layer of ['from', 'flash', 'to']) expect(source).toContain(`'${layer}')`)
   })
 
+  it('lets the gold go in the shared fade, not across the whole reveal', () => {
+    expect(source).toMatch(/flashFadeShare\(VARIANT\)/)
+  })
+
   it('never removes the old form when the flash starts', () => {
     expect(source).not.toMatch(/beat === 'flash' \? null/)
   })

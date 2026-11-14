@@ -31,10 +31,16 @@
  * the ground the portrait sits on, and it is what is drawn when there is no
  * portrait at all, or when one fails to load.
  *
- * **Nowry is the Spiral, drawn (BRAND-007).** The six owl illustrations are
- * gone; the default companion is the coil from the shared geometry, one turn
- * further at every stage, in whichever of paper or ink reads on the accent
- * body — the same parts the web draws, from the same module.
+ * **Nowry is drawn as its six forms (EVO-018, ADR-051).** The phone used to
+ * draw the Spiral glyph on an accent disc while the web drew the painted
+ * forms, so the companion evolved into a creature on one and stayed a disc on
+ * the other. Now the orb draws the web's form for the stage, in the stage's
+ * colour, on a paper ground with an accent rim — the web's orb — because the
+ * form already wears the accent and on an accent disc it would vanish. This is
+ * the one place the phone draws the companion, so every screen agrees.
+ *
+ * `bare` is the form alone, with no ground, rings or motes: the evolution
+ * reveal draws it that way, as the web's reveal does.
  */
 import { useState } from 'react'
 import { Animated, Image, View } from 'react-native'
@@ -46,7 +52,9 @@ import { stageConfig } from '@nowry/core/domain/petStages'
 import { earnedGold } from '@nowry/core/tokens/colorSystem'
 import { useTheme } from '../../theme'
 import { Icon } from '../icons'
-import { CompanionMark } from './CompanionMark'
+import { resolveColor } from '../Typography'
+import { CompanionForm } from './CompanionForm'
+import { DISC_FILL, drawsAsDisc } from './companionArt'
 import { useOrbMotion } from './useOrbMotion'
 
 /** The mark each stage earns, as this client's glyphs. */
@@ -63,7 +71,8 @@ export function PetOrb({
   isDefaultCompanion = true,
   species = null,
   mood = 'idle',
-  still = false
+  still = false,
+  bare = false
 }) {
   const config = stageConfig(stage)
   const theme = useTheme()
@@ -74,7 +83,11 @@ export function PetOrb({
   })
   const body = size ?? config.sizePx
   const color = petColorFor(accent, stage)
-  const rings = config.ringCount
+  // At 24 px and under, the web's chat disc: no rings or motes, a round paper ground.
+  const disc = drawsAsDisc(size)
+  const rings = disc ? 0 : config.ringCount
+  const orbits = disc ? 0 : config.orbitCount
+  const egg = config.form === 'egg' && !disc
   const outer = body + rings * RING_STEP * 2
 
   /*
@@ -92,6 +105,14 @@ export function PetOrb({
   // presence: a 24px speaker beside a sentence, a row in a settings list.
   const drift = still ? [] : motion.drift
   const gait = still ? [] : motion.gait
+
+  if (bare && wearsNowry) {
+    return (
+      <Animated.View importantForAccessibility='no' accessible={false} style={{ transform: [...drift, ...gait] }}>
+        <CompanionForm stage={portrait.stage} accent={accent} size={body} />
+      </Animated.View>
+    )
+  }
 
   return (
     <Animated.View
@@ -119,8 +140,8 @@ export function PetOrb({
       })}
 
       {/* The motes of the last two stages, spaced evenly around the aura. */}
-      {Array.from({ length: config.orbitCount }, (_, i) => {
-        const angle = (2 * Math.PI * i) / config.orbitCount
+      {Array.from({ length: orbits }, (_, i) => {
+        const angle = (2 * Math.PI * i) / orbits
         const radius = outer / 2 - 2
         return (
           <View
@@ -149,11 +170,14 @@ export function PetOrb({
         style={{
           width: body,
           height: body,
-          backgroundColor: color,
-          borderTopLeftRadius: config.form === 'egg' ? body * 0.56 : body / 2,
-          borderTopRightRadius: config.form === 'egg' ? body * 0.56 : body / 2,
-          borderBottomLeftRadius: config.form === 'egg' ? body * 0.44 : body / 2,
-          borderBottomRightRadius: config.form === 'egg' ? body * 0.44 : body / 2,
+          backgroundColor: wearsNowry ? resolveColor(theme, 'background.surface') : color,
+          // The web's rim: the stage's colour, faint, round a paper ground.
+          borderWidth: wearsNowry && !disc ? 2 : 0,
+          borderColor: `${color}55`,
+          borderTopLeftRadius: egg ? body * 0.56 : body / 2,
+          borderTopRightRadius: egg ? body * 0.56 : body / 2,
+          borderBottomLeftRadius: egg ? body * 0.44 : body / 2,
+          borderBottomRightRadius: egg ? body * 0.44 : body / 2,
           alignItems: 'center',
           justifyContent: 'center',
           // Clips the portrait to the body's silhouette — an egg stays an egg.
@@ -180,7 +204,11 @@ export function PetOrb({
           />
         ) : wearsNowry ? (
           <Animated.View style={{ transform: gait }}>
-            <CompanionMark stage={portrait.stage} mood={mood} size={Math.round(body * 0.78)} literalColor={readableTextOn(color)} />
+            {disc ? (
+              <CompanionForm stage={portrait.stage} accent={accent} size={body} fill={DISC_FILL} />
+            ) : (
+              <CompanionForm stage={portrait.stage} accent={accent} size={body} />
+            )}
           </Animated.View>
         ) : config.mark ? (
           <Animated.View style={{ transform: gait }}>

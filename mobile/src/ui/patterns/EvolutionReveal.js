@@ -33,6 +33,7 @@ import {
   EVOLUTION_DONE,
   MOTE_COUNT,
   evolutionLayer,
+  flashFadeShare,
   beatDuration,
   firstBeat,
   motePath,
@@ -48,7 +49,8 @@ import { PetOrb } from './PetOrb'
 
 const VARIANT = 'full'
 const FRAME = 220
-const ORB = 132
+/** The form's square: the web's reveal draws it at its frame's size. */
+const FORM = 200
 const STROKE = 3
 const MOTE = 5
 const AnimatedPath = Animated.createAnimatedComponent(Path)
@@ -167,7 +169,7 @@ export function EvolutionReveal({ fromStage, toStage, level, accent = null, onCl
                   : { position: 'absolute' }
               }
             >
-              <PetOrb stage={fromStage} accent={accent} size={ORB} still />
+              <PetOrb stage={fromStage} accent={accent} size={FORM} still bare />
             </Animated.View>
           )}
 
@@ -183,7 +185,7 @@ export function EvolutionReveal({ fromStage, toStage, level, accent = null, onCl
                   : { position: 'absolute' }
               }
             >
-              <PetOrb stage={toStage} accent={accent} size={ORB} still={!done} />
+              <PetOrb stage={toStage} accent={accent} size={FORM} still={!done} bare />
             </Animated.View>
           )}
 
@@ -193,7 +195,10 @@ export function EvolutionReveal({ fromStage, toStage, level, accent = null, onCl
               pointerEvents='none'
               style={{
                 position: 'absolute',
-                opacity: flashLayer === 'arriving' ? flash : open.interpolate({ inputRange: [0, 1], outputRange: [1, 0] }),
+                opacity:
+                  flashLayer === 'arriving'
+                    ? flash
+                    : open.interpolate({ inputRange: [0, flashFadeShare(VARIANT), 1], outputRange: [1, 0, 0] }),
                 transform: [{ scale: flashLayer === 'arriving' ? flash.interpolate({ inputRange: [0, 1], outputRange: [0.6, 1] }) : 1 }]
               }}
             >
