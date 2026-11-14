@@ -4307,6 +4307,143 @@
         "title": "招待を取り消すには再度サインインしてください",
         "confirm": "サインインして取り消す"
       }
+    },
+    "title": "管理",
+    "menu": "管理",
+    "onlyYou": "あなただけに表示されています",
+    "tabsLabel": "管理のセクション",
+    "loading": "管理画面を開いています",
+    "tryAgain": "もう一度試す",
+    "tabs": {
+      "invitations": "招待"
+    },
+    "inv": {
+      "form": {
+        "title": "招待する",
+        "lead": "それぞれのアドレス専用の、一度だけ使える個人リンクが届きます",
+        "addresses": "アドレス（1行に1件）",
+        "addressesPlaceholder": "アドレスを貼り付け（1行に1件、またはカンマ区切り）",
+        "cohort": "コホート",
+        "cohortHelp": "小文字、数字、ハイフンのみ、40文字まで。",
+        "lifetime": "リンクの有効期間",
+        "days_other": "{{count}}日",
+        "language": "ウェイトリストにない場合の言語"
+      },
+      "languages": {
+        "en": "英語",
+        "es": "スペイン語",
+        "fr": "フランス語",
+        "de": "ドイツ語",
+        "ja": "日本語"
+      },
+      "check": {
+        "checking": "アドレスを確認しています…",
+        "failed": "アドレスを確認できませんでした。編集すると再確認されます。",
+        "empty": "アドレスを1件以上貼り付けてください。",
+        "tooMany_other": "{{count}}件のアドレスがあります。一度に送れるのは{{max}}件までです。",
+        "lines_other": "{{lines}}行目",
+        "outcome": {
+          "will_invite_other": "件を招待します",
+          "open_invite_other": "件は招待中です · そのままにします",
+          "invalid_other": "件は完全なアドレスではありません",
+          "has_account_other": "件はすでにアカウントがあります",
+          "left_list_other": "件はウェイトリストを離れました"
+        }
+      },
+      "bar": {
+        "left_other": "本日の招待メールの残り{{count}}通",
+        "preview": "メールをプレビュー",
+        "hidePreview": "メールを隠す",
+        "send_other": "{{count}}件の招待を送信",
+        "sendNone": "招待を送信"
+      },
+      "result": {
+        "none": "何も送信されませんでした。",
+        "sent_other": "{{count}}件の招待を送信しました。",
+        "sendFailed_other": "{{count}}通のメールを送信できませんでした。招待は有効なままなので、再送できます。",
+        "openInvite_other": "{{count}}件のアドレスはすでに招待中だったため、そのままにしました。",
+        "hasAccount_other": "{{count}}件のアドレスはすでにアカウントがあります。",
+        "leftList_other": "{{count}}件のアドレスはウェイトリストを離れたため、招待しませんでした。",
+        "invalid_other": "{{lines}}行目は送信されませんでした。完全なアドレスではありません。",
+        "overBudget_other": "招待は{{count}}件ですが、本日の招待メールの残りは{{left}}通です。何も送信されませんでした。今は{{left}}件以下を送るか、残りを00:00 UTC以降に送ってください。",
+        "failed": "招待を送信できませんでした。もう一度お試しください。"
+      },
+      "states": {
+        "all": "すべて",
+        "open": "有効",
+        "used": "使用済み",
+        "expired": "期限切れ",
+        "revoked": "取り消し済み"
+      },
+      "list": {
+        "title": "送信した招待",
+        "filtersLabel": "状態で招待を表示",
+        "loading": "招待を読み込んでいます",
+        "columns": {
+          "address": "アドレス",
+          "cohort": "コホート",
+          "state": "状態",
+          "sent": "送信日"
+        },
+        "sentEnds": "{{sent}} · {{ends}}まで",
+        "sentUsed": "{{sent}} · {{used}}に使用",
+        "meta": {
+          "open": "{{sent}}に送信 · {{ends}}まで",
+          "used": "{{date}}に使用",
+          "revoked": "{{date}}に取り消し",
+          "expired": "{{date}}に期限切れ、未使用"
+        },
+        "notSent": "メール未送信",
+        "empty": {
+          "title": "まだ招待はありません",
+          "body": "上にアドレスを貼り付けて、最初の招待を送りましょう。"
+        },
+        "filterEmpty": "この状態の招待はありません。",
+        "error": "招待を読み込めませんでした。"
+      },
+      "actions": {
+        "resend": "再送",
+        "inviteAgain": "もう一度招待",
+        "revoke": "取り消す",
+        "resendAria": "{{email}}に新しいリンクを送る",
+        "inviteAgainAria": "{{email}}をもう一度招待",
+        "revokeAria": "{{email}}への招待を取り消す"
+      },
+      "confirm": {
+        "resend": {
+          "title": "{{email}}に新しいリンクを送りますか？",
+          "body": "{{date}}に送ったリンクは使えなくなり、新しいリンクがメールで届きます。",
+          "confirm": "新しいリンクを送る"
+        },
+        "inviteAgain": {
+          "title": "{{email}}をもう一度招待しますか？",
+          "body": "{{cohort}}への新しい招待がメールで届きます。",
+          "confirm": "もう一度招待"
+        },
+        "revoke": {
+          "title": "{{email}}への招待を取り消しますか？",
+          "body": "リンクはすぐに使えなくなります。メールは送られません。ウェイトリストには引き続き登録できます。",
+          "confirm": "取り消す"
+        }
+      },
+      "notice": {
+        "resent": "{{email}}に新しいリンクを送りました。",
+        "invitedAgain": "{{email}}に新しい招待を送りました。",
+        "revoked": "{{email}}への招待を取り消しました。",
+        "tooSoon": "{{email}}には1時間以内に新しいリンクを送っています。{{time}}以降にもう一度送れます。",
+        "used": "{{email}}はこの招待をすでに使っているため、何も変わりませんでした。",
+        "failed": "うまくいかず、何も変わりませんでした。もう一度お試しください。"
+      },
+      "preview": {
+        "title": "メールのプレビュー"
+      },
+      "email": {
+        "from": "差出人: Nowry の Didier",
+        "subject": "件名: Nowry ベータへのご招待",
+        "body": "こんにちは。Nowry ベータへの招待の準備ができました。このアドレス専用で、{{date}}まで一度だけ使えます。",
+        "button": "アカウントを作成",
+        "android": "Android アプリをお試しですか？まずこのボタンでアカウントを作成し、同じアドレスでアプリにサインインしてください。"
+      }
     }
   }
 }

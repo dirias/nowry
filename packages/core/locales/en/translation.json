@@ -4987,6 +4987,160 @@
         "title": "Sign in again to revoke the invitation",
         "confirm": "Sign in and revoke"
       }
+    },
+    "title": "Admin",
+    "menu": "Admin",
+    "onlyYou": "Only you can see this",
+    "tabsLabel": "Admin sections",
+    "loading": "Opening the admin area",
+    "tryAgain": "Try again",
+    "tabs": {
+      "invitations": "Invitations"
+    },
+    "inv": {
+      "form": {
+        "title": "Invite people",
+        "lead": "each gets a personal link that works once, for their address only",
+        "addresses": "Addresses, one per line",
+        "addressesPlaceholder": "Paste addresses, one per line or separated by commas",
+        "cohort": "Cohort",
+        "cohortHelp": "Use lowercase letters, digits and hyphens, up to 40.",
+        "lifetime": "Link works for",
+        "days_one": "{{count}} day",
+        "days_other": "{{count}} days",
+        "language": "Language if not on the waitlist"
+      },
+      "languages": {
+        "en": "English",
+        "es": "Spanish",
+        "fr": "French",
+        "de": "German",
+        "ja": "Japanese"
+      },
+      "check": {
+        "checking": "Checking the addresses…",
+        "failed": "Couldn't check the addresses. They are checked again when you edit them.",
+        "empty": "Paste at least one address.",
+        "tooMany_one": "That is {{count}} address. Send at most {{max}} at a time.",
+        "tooMany_other": "That is {{count}} addresses. Send at most {{max}} at a time.",
+        "lines_one": "line {{lines}}",
+        "lines_other": "lines {{lines}}",
+        "outcome": {
+          "will_invite_one": "will be invited",
+          "will_invite_other": "will be invited",
+          "open_invite_one": "already has an open invitation · left as it is",
+          "open_invite_other": "already have an open invitation · left as they are",
+          "invalid_one": "is not a complete address",
+          "invalid_other": "are not complete addresses",
+          "has_account_one": "already has an account",
+          "has_account_other": "already have an account",
+          "left_list_one": "left the waitlist",
+          "left_list_other": "left the waitlist"
+        }
+      },
+      "bar": {
+        "left_one": "{{count}} invitation email left today",
+        "left_other": "{{count}} invitation emails left today",
+        "preview": "Preview the email",
+        "hidePreview": "Hide the email",
+        "send_one": "Send {{count}} invitation",
+        "send_other": "Send {{count}} invitations",
+        "sendNone": "Send invitations"
+      },
+      "result": {
+        "none": "Nothing was sent.",
+        "sent_one": "Sent {{count}} invitation.",
+        "sent_other": "Sent {{count}} invitations.",
+        "sendFailed_one": "{{count}} email could not be sent; its invitation stays open and can be resent.",
+        "sendFailed_other": "{{count}} emails could not be sent; their invitations stay open and can be resent.",
+        "openInvite_one": "{{count}} address already had an open invitation and was left as it was.",
+        "openInvite_other": "{{count}} addresses already had an open invitation and were left as they were.",
+        "hasAccount_one": "{{count}} address already has an account.",
+        "hasAccount_other": "{{count}} addresses already have an account.",
+        "leftList_one": "{{count}} address left the waitlist and was not invited.",
+        "leftList_other": "{{count}} addresses left the waitlist and were not invited.",
+        "invalid_one": "Line {{lines}} was not sent: it is not a complete address.",
+        "invalid_other": "Lines {{lines}} were not sent: they are not complete addresses.",
+        "overBudget_one": "That is {{count}} invitation, and {{left}} invitation emails are left today. Nothing was sent. Send {{left}} or fewer now, or the rest after 00:00 UTC.",
+        "overBudget_other": "That is {{count}} invitations, and {{left}} invitation emails are left today. Nothing was sent. Send {{left}} or fewer now, or the rest after 00:00 UTC.",
+        "failed": "Couldn't send the invitations. Try again."
+      },
+      "states": {
+        "all": "All",
+        "open": "Open",
+        "used": "Used",
+        "expired": "Expired",
+        "revoked": "Revoked"
+      },
+      "list": {
+        "title": "Invitations sent",
+        "filtersLabel": "Show invitations by state",
+        "loading": "Loading invitations",
+        "columns": {
+          "address": "Address",
+          "cohort": "Cohort",
+          "state": "State",
+          "sent": "Sent"
+        },
+        "sentEnds": "{{sent}} · ends {{ends}}",
+        "sentUsed": "{{sent}} · used {{used}}",
+        "meta": {
+          "open": "Sent {{sent}} · ends {{ends}}",
+          "used": "Used {{date}}",
+          "revoked": "Revoked {{date}}",
+          "expired": "Ended {{date}}, never used"
+        },
+        "notSent": "Email not sent",
+        "empty": {
+          "title": "No invitations yet",
+          "body": "Paste addresses above to send the first ones."
+        },
+        "filterEmpty": "No invitations in this state.",
+        "error": "Couldn't load invitations."
+      },
+      "actions": {
+        "resend": "Resend",
+        "inviteAgain": "Invite again",
+        "revoke": "Revoke",
+        "resendAria": "Send a new link to {{email}}",
+        "inviteAgainAria": "Invite {{email}} again",
+        "revokeAria": "Revoke the invitation for {{email}}"
+      },
+      "confirm": {
+        "resend": {
+          "title": "Send a new link to {{email}}?",
+          "body": "The link sent on {{date}} stops working, and a new one is emailed.",
+          "confirm": "Send new link"
+        },
+        "inviteAgain": {
+          "title": "Invite {{email}} again?",
+          "body": "A new invitation to {{cohort}} is emailed.",
+          "confirm": "Invite again"
+        },
+        "revoke": {
+          "title": "Revoke the invitation for {{email}}?",
+          "body": "The link stops working at once. Nothing is emailed. They can still join the waitlist.",
+          "confirm": "Revoke"
+        }
+      },
+      "notice": {
+        "resent": "A new link went to {{email}}.",
+        "invitedAgain": "A new invitation went to {{email}}.",
+        "revoked": "The invitation for {{email}} was revoked.",
+        "tooSoon": "A new link went to {{email}} less than an hour ago. You can send another after {{time}}.",
+        "used": "{{email}} has already used this invitation, so nothing changed.",
+        "failed": "That didn't work, and nothing changed. Try again."
+      },
+      "preview": {
+        "title": "Preview the email"
+      },
+      "email": {
+        "from": "From: Didier at Nowry",
+        "subject": "Subject: Your place in the Nowry beta",
+        "body": "Hi, your invitation to the Nowry beta is ready. It is for this address only and works once, until {{date}}.",
+        "button": "Create your account",
+        "android": "Testing the Android app? Create your account with this button first, then sign in in the app with the same address."
+      }
     }
   }
 }

@@ -33,6 +33,8 @@ import { AgentProvider, usePet } from '@nowry/core/context/AgentContext'
 import { SubscriptionProvider } from './context/SubscriptionContext'
 import { BetaProvider } from '@nowry/core/context/BetaContext'
 import { ProtectedRoute, PublicOnlyRoute } from './components/ProtectedRoute'
+import AdminRoute from './components/Admin/AdminRoute'
+import { ADMIN_HOME } from './components/Admin/adminTabList'
 import ErrorBoundary from './components/Common/ErrorBoundary'
 import StudyPet from './components/Agent/StudyPet'
 
@@ -62,6 +64,8 @@ const UserProfile = lazy(() => import('./components/User/Profile/UserProfile'))
 const AccountSettings = lazy(() => import('./components/User/Profile/AccountSettings'))
 const AgentSettings = lazy(() => import('./components/Agent/AgentSettings'))
 const BugDashboard = lazy(() => import('./components/Bugs/BugDashboard'))
+const AdminPage = lazy(() => import('./components/Admin/AdminPage'))
+const InvitationsTab = lazy(() => import('./components/Admin/invitations/InvitationsTab'))
 const News = lazy(() => import('./pages/News'))
 const PublicBrowse = lazy(() => import('./pages/PublicBrowse'))
 const PublicView = lazy(() => import('./pages/PublicView'))
@@ -336,20 +340,34 @@ const AppContent = () => {
                   </ProtectedRoute>
                 }
               />
+              {/* The admin area (ADMIN-007a, FR-011): admins only, one route per built tab. */}
+              <Route
+                path='/admin'
+                element={
+                  <AdminRoute>
+                    <AdminPage />
+                  </AdminRoute>
+                }
+              >
+                <Route index element={<Navigate to={ADMIN_HOME} replace />} />
+                <Route path='invitations' element={<InvitationsTab />} />
+                <Route path='*' element={<Navigate to={ADMIN_HOME} replace />} />
+              </Route>
+              {/* Behind the admin route until batch 4 removes them (ADMIN-007a). */}
               <Route
                 path='/bugs/dashboard'
                 element={
-                  <ProtectedRoute>
+                  <AdminRoute>
                     <BugDashboard />
-                  </ProtectedRoute>
+                  </AdminRoute>
                 }
               />
               <Route
                 path='/report-bug'
                 element={
-                  <ProtectedRoute>
+                  <AdminRoute>
                     <BugDashboard />
-                  </ProtectedRoute>
+                  </AdminRoute>
                 }
               />
               <Route

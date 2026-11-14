@@ -61,6 +61,7 @@ import { useTranslation } from 'react-i18next'
 import BugReportModal from '../Bugs/BugReportModal'
 import { bugsService } from '@nowry/core/api/services/bugs.service'
 import { useAuth } from '@nowry/core/context/AuthContext'
+import { AdminDrawerEntry, AdminMenuEntry } from '../Admin/AdminMenuEntry'
 import { useBeta } from '@nowry/core/context/BetaContext'
 import { SHOW_PRICING } from '@nowry/core/domain/plans'
 import { BRAND, BETA_MARK } from '@nowry/core/tokens/colorSystem'
@@ -528,9 +529,12 @@ const Header = () => {
                       </>
                     )}
 
+                    {/* Group 3 — Admin, for admins only (ADMIN-007a, board F) */}
+                    <AdminMenuEntry />
+
                     <ListDivider sx={{ my: 0.5 }} />
 
-                    {/* Group 3 — Danger */}
+                    {/* Group 4 — Danger */}
                     <MenuItem onClick={logout} color='danger' sx={{ gap: 1.5 }}>
                       <ListItemDecorator sx={{ minWidth: 'unset' }}>
                         <LogoutRounded sx={{ fontSize: 18 }} />
@@ -688,6 +692,8 @@ const Header = () => {
                     </ListItem>
                   </>
                 )}
+
+                <AdminDrawerEntry onNavigate={() => setMobileMenuOpen(false)} selected={location.pathname.startsWith('/admin')} />
 
                 <ListDivider sx={{ my: 1 }} />
                 <ListItem>

@@ -4452,6 +4452,160 @@
         "title": "Melde dich erneut an, um die Einladung zu widerrufen",
         "confirm": "Anmelden und widerrufen"
       }
+    },
+    "title": "Verwaltung",
+    "menu": "Verwaltung",
+    "onlyYou": "Nur du siehst das",
+    "tabsLabel": "Bereiche der Verwaltung",
+    "loading": "Verwaltung wird geöffnet",
+    "tryAgain": "Erneut versuchen",
+    "tabs": {
+      "invitations": "Einladungen"
+    },
+    "inv": {
+      "form": {
+        "title": "Personen einladen",
+        "lead": "jede Person bekommt einen persönlichen Link, der einmal funktioniert, nur für ihre Adresse",
+        "addresses": "Adressen, eine pro Zeile",
+        "addressesPlaceholder": "Adressen einfügen, eine pro Zeile oder durch Kommas getrennt",
+        "cohort": "Kohorte",
+        "cohortHelp": "Nur Kleinbuchstaben, Ziffern und Bindestriche, höchstens 40.",
+        "lifetime": "Link gilt für",
+        "days_one": "{{count}} Tag",
+        "days_other": "{{count}} Tage",
+        "language": "Sprache, falls nicht auf der Warteliste"
+      },
+      "languages": {
+        "en": "Englisch",
+        "es": "Spanisch",
+        "fr": "Französisch",
+        "de": "Deutsch",
+        "ja": "Japanisch"
+      },
+      "check": {
+        "checking": "Adressen werden geprüft…",
+        "failed": "Die Adressen konnten nicht geprüft werden. Sie werden erneut geprüft, wenn du sie bearbeitest.",
+        "empty": "Füge mindestens eine Adresse ein.",
+        "tooMany_one": "Das ist {{count}} Adresse. Sende höchstens {{max}} auf einmal.",
+        "tooMany_other": "Das sind {{count}} Adressen. Sende höchstens {{max}} auf einmal.",
+        "lines_one": "Zeile {{lines}}",
+        "lines_other": "Zeilen {{lines}}",
+        "outcome": {
+          "will_invite_one": "wird eingeladen",
+          "will_invite_other": "werden eingeladen",
+          "open_invite_one": "hat schon eine offene Einladung · bleibt, wie sie ist",
+          "open_invite_other": "haben schon eine offene Einladung · bleiben, wie sie sind",
+          "invalid_one": "ist keine vollständige Adresse",
+          "invalid_other": "sind keine vollständigen Adressen",
+          "has_account_one": "hat schon ein Konto",
+          "has_account_other": "haben schon ein Konto",
+          "left_list_one": "hat die Warteliste verlassen",
+          "left_list_other": "haben die Warteliste verlassen"
+        }
+      },
+      "bar": {
+        "left_one": "Heute noch {{count}} Einladungs-E-Mail",
+        "left_other": "Heute noch {{count}} Einladungs-E-Mails",
+        "preview": "E-Mail ansehen",
+        "hidePreview": "E-Mail ausblenden",
+        "send_one": "{{count}} Einladung senden",
+        "send_other": "{{count}} Einladungen senden",
+        "sendNone": "Einladungen senden"
+      },
+      "result": {
+        "none": "Es wurde nichts gesendet.",
+        "sent_one": "{{count}} Einladung gesendet.",
+        "sent_other": "{{count}} Einladungen gesendet.",
+        "sendFailed_one": "{{count}} E-Mail konnte nicht gesendet werden; ihre Einladung bleibt offen und kann erneut gesendet werden.",
+        "sendFailed_other": "{{count}} E-Mails konnten nicht gesendet werden; ihre Einladungen bleiben offen und können erneut gesendet werden.",
+        "openInvite_one": "{{count}} Adresse hatte schon eine offene Einladung und blieb, wie sie war.",
+        "openInvite_other": "{{count}} Adressen hatten schon eine offene Einladung und blieben, wie sie waren.",
+        "hasAccount_one": "{{count}} Adresse hat schon ein Konto.",
+        "hasAccount_other": "{{count}} Adressen haben schon ein Konto.",
+        "leftList_one": "{{count}} Adresse hat die Warteliste verlassen und wurde nicht eingeladen.",
+        "leftList_other": "{{count}} Adressen haben die Warteliste verlassen und wurden nicht eingeladen.",
+        "invalid_one": "Zeile {{lines}} wurde nicht gesendet: Sie ist keine vollständige Adresse.",
+        "invalid_other": "Die Zeilen {{lines}} wurden nicht gesendet: Sie sind keine vollständigen Adressen.",
+        "overBudget_one": "Das ist {{count}} Einladung, und heute sind noch {{left}} Einladungs-E-Mails übrig. Es wurde nichts gesendet. Sende jetzt {{left}} oder weniger oder den Rest nach 00:00 UTC.",
+        "overBudget_other": "Das sind {{count}} Einladungen, und heute sind noch {{left}} Einladungs-E-Mails übrig. Es wurde nichts gesendet. Sende jetzt {{left}} oder weniger oder den Rest nach 00:00 UTC.",
+        "failed": "Die Einladungen konnten nicht gesendet werden. Versuch es noch einmal."
+      },
+      "states": {
+        "all": "Alle",
+        "open": "Offen",
+        "used": "Genutzt",
+        "expired": "Abgelaufen",
+        "revoked": "Widerrufen"
+      },
+      "list": {
+        "title": "Gesendete Einladungen",
+        "filtersLabel": "Einladungen nach Status zeigen",
+        "loading": "Einladungen werden geladen",
+        "columns": {
+          "address": "Adresse",
+          "cohort": "Kohorte",
+          "state": "Status",
+          "sent": "Gesendet"
+        },
+        "sentEnds": "{{sent}} · endet am {{ends}}",
+        "sentUsed": "{{sent}} · genutzt am {{used}}",
+        "meta": {
+          "open": "Gesendet am {{sent}} · endet am {{ends}}",
+          "used": "Genutzt am {{date}}",
+          "revoked": "Widerrufen am {{date}}",
+          "expired": "Abgelaufen am {{date}}, nie genutzt"
+        },
+        "notSent": "E-Mail nicht gesendet",
+        "empty": {
+          "title": "Noch keine Einladungen",
+          "body": "Füge oben Adressen ein, um die ersten zu senden."
+        },
+        "filterEmpty": "Keine Einladungen in diesem Status.",
+        "error": "Die Einladungen konnten nicht geladen werden."
+      },
+      "actions": {
+        "resend": "Erneut senden",
+        "inviteAgain": "Erneut einladen",
+        "revoke": "Widerrufen",
+        "resendAria": "Einen neuen Link an {{email}} senden",
+        "inviteAgainAria": "{{email}} erneut einladen",
+        "revokeAria": "Die Einladung für {{email}} widerrufen"
+      },
+      "confirm": {
+        "resend": {
+          "title": "Einen neuen Link an {{email}} senden?",
+          "body": "Der am {{date}} gesendete Link funktioniert nicht mehr, und ein neuer wird per E-Mail gesendet.",
+          "confirm": "Neuen Link senden"
+        },
+        "inviteAgain": {
+          "title": "{{email}} erneut einladen?",
+          "body": "Eine neue Einladung zu {{cohort}} wird per E-Mail gesendet.",
+          "confirm": "Erneut einladen"
+        },
+        "revoke": {
+          "title": "Die Einladung für {{email}} widerrufen?",
+          "body": "Der Link funktioniert sofort nicht mehr. Es wird keine E-Mail gesendet. Die Person kann sich weiter auf die Warteliste setzen.",
+          "confirm": "Widerrufen"
+        }
+      },
+      "notice": {
+        "resent": "Ein neuer Link ging an {{email}}.",
+        "invitedAgain": "Eine neue Einladung ging an {{email}}.",
+        "revoked": "Die Einladung für {{email}} wurde widerrufen.",
+        "tooSoon": "Vor weniger als einer Stunde ging ein neuer Link an {{email}}. Du kannst nach {{time}} einen weiteren senden.",
+        "used": "{{email}} hat diese Einladung schon genutzt, daher hat sich nichts geändert.",
+        "failed": "Das hat nicht geklappt, und nichts wurde geändert. Versuch es noch einmal."
+      },
+      "preview": {
+        "title": "Vorschau der E-Mail"
+      },
+      "email": {
+        "from": "Von: Didier bei Nowry",
+        "subject": "Betreff: Dein Platz in der Nowry-Beta",
+        "body": "Hallo, deine Einladung zur Nowry-Beta ist bereit. Sie gilt nur für diese Adresse und funktioniert einmal, bis zum {{date}}.",
+        "button": "Konto erstellen",
+        "android": "Du testest die Android-App? Erstelle dein Konto zuerst mit diesem Button und melde dich dann in der App mit derselben Adresse an."
+      }
     }
   }
 }
