@@ -81,6 +81,31 @@ export const evolutionDuration = (variant) => evolutionBeats(variant).reduce((to
 /** Whether the new form is the one on show at this beat. */
 export const showsNewForm = (beat) => beat === 'reveal' || beat === EVOLUTION_DONE
 
+/**
+ * What each layer in the reveal's frame is doing at a beat (EVO-016): the old
+ * form (`from`), the gold (`flash`) and the new form (`to`), each one of
+ * `held`, `fading`, `arriving`, `shown` or `gone`.
+ *
+ * The swap happens under the gold: the flash lights over the old form as it
+ * fades, and the new form arrives as the gold fades, so the frame is never
+ * empty. Both clients draw from this, so neither can wait out an exit and
+ * drop the flash again. The short variant has no gold.
+ */
+export const evolutionLayer = (variant, beat, layer) => {
+  const gold = variant === 'full'
+  if (layer === 'from') {
+    if (beat === 'flash') return 'fading'
+    return showsNewForm(beat) ? 'gone' : 'held'
+  }
+  if (layer === 'flash') {
+    if (!gold) return 'gone'
+    if (beat === 'flash') return 'arriving'
+    return beat === 'reveal' ? 'fading' : 'gone'
+  }
+  if (beat === 'reveal') return 'arriving'
+  return beat === EVOLUTION_DONE ? 'shown' : 'gone'
+}
+
 // ── The spiral ──────────────────────────────────────────────────────────────
 /** How many motes ride the spiral inward. At most eight, by the standard. */
 export const MOTE_COUNT = 6

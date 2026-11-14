@@ -26,17 +26,17 @@
  */
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Animated, Easing, Modal, Pressable, View } from 'react-native'
-import Svg, { Path } from 'react-native-svg'
+import Svg, { Circle, Defs, Path, RadialGradient, Stop } from 'react-native-svg'
 import { StatusBar } from 'expo-status-bar'
 import { useTranslation } from 'react-i18next'
 import {
   EVOLUTION_DONE,
   MOTE_COUNT,
+  evolutionLayer,
   beatDuration,
   firstBeat,
   motePath,
   nextBeat,
-  showsNewForm,
   spiralLength,
   spiralPath
 } from '@nowry/core/domain/petEvolution'
@@ -71,7 +71,6 @@ export function EvolutionReveal({ fromStage, toStage, level, accent = null, onCl
   const tighten = useRef(new Animated.Value(0)).current
   const flash = useRef(new Animated.Value(0)).current
   const open = useRef(new Animated.Value(0)).current
-  const arrive = useRef(new Animated.Value(0)).current
 
   const geometry = useMemo(() => {
     const options = { size: FRAME }
@@ -88,12 +87,8 @@ export function EvolutionReveal({ fromStage, toStage, level, accent = null, onCl
   }, [reduceMotion])
 
   useEffect(() => {
+    if (done) return undefined
     const easing = Easing.bezier(...theme.motion.easing.standard)
-    if (done) {
-      const settle = play(arrive, reduceMotion ? 0 : theme.motion.duration.slow, easing)
-      settle.start()
-      return () => settle.stop()
-    }
     const duration = beatDuration(VARIANT, beat)
     const value = { anticipation: draw, transformation: tighten, flash, reveal: open }[beat]
     // The dash offset is an SVG prop, which the native driver cannot reach; the transforms can.
@@ -104,7 +99,7 @@ export function EvolutionReveal({ fromStage, toStage, level, accent = null, onCl
       if (finished) setBeat(nextBeat(VARIANT, beat))
     })
     return () => moving.stop()
-  }, [beat, done, reduceMotion, theme, draw, tighten, flash, open, arrive])
+  }, [beat, done, theme, draw, tighten, flash, open])
 
   const skip = () => {
     if (!done) setBeat(EVOLUTION_DONE)
@@ -112,7 +107,11 @@ export function EvolutionReveal({ fromStage, toStage, level, accent = null, onCl
 
   const toName = t(`pet.stage.${toStage}.name`)
   const fromName = t(`pet.stage.${fromStage}.name`)
-  const newForm = showsNewForm(beat)
+  // What each layer is doing now: the shared rule, so the swap happens under the gold (EVO-016).
+  const fromLayer = evolutionLayer(VARIANT, beat, 'from')
+  const flashLayer = evolutionLayer(VARIANT, beat, 'flash')
+  const toLayer = evolutionLayer(VARIANT, beat, 'to')
+  const gold = earnedGold(theme.scheme)
   const spiralColor = resolveColor(theme, 'primary.plainColor')
   const opening = beat === 'reveal'
 
@@ -156,28 +155,57 @@ export function EvolutionReveal({ fromStage, toStage, level, accent = null, onCl
           style={{ width: FRAME, height: FRAME, alignItems: 'center', justifyContent: 'center' }}
           importantForAccessibility='no-hide-descendants'
         >
-          {/* The flash: earned gold, the one place the swap hides. */}
-          <Animated.View
-            pointerEvents='none'
-            style={{
-              position: 'absolute',
-              width: FRAME * 0.8,
-              height: FRAME * 0.8,
-              borderRadius: 999,
-              backgroundColor: earnedGold(theme.scheme),
-              opacity: beat === 'flash' ? flash.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0, 0.85, 0] }) : 0
-            }}
-          />
-
-          {beat === 'flash' ? null : (
+          {fromLayer === 'gone' ? null : (
             <Animated.View
               style={
-                newForm
-                  ? { opacity: arrive, transform: [{ scale: arrive.interpolate({ inputRange: [0, 1], outputRange: [0.85, 1] }) }] }
-                  : undefined
+                fromLayer === 'fading'
+                  ? {
+                      position: 'absolute',
+                      opacity: flash.interpolate({ inputRange: [0, 1], outputRange: [1, 0] }),
+                      transform: [{ scale: flash.interpolate({ inputRange: [0, 1], outputRange: [1, 0.9] }) }]
+                    }
+                  : { position: 'absolute' }
               }
             >
-              <PetOrb stage={newForm ? toStage : fromStage} accent={accent} size={ORB} still={!done} />
+              <PetOrb stage={fromStage} accent={accent} size={ORB} still />
+            </Animated.View>
+          )}
+
+          {toLayer === 'gone' ? null : (
+            <Animated.View
+              style={
+                toLayer === 'arriving'
+                  ? {
+                      position: 'absolute',
+                      opacity: open,
+                      transform: [{ scale: open.interpolate({ inputRange: [0, 1], outputRange: [0.85, 1] }) }]
+                    }
+                  : { position: 'absolute' }
+              }
+            >
+              <PetOrb stage={toStage} accent={accent} size={ORB} still={!done} />
+            </Animated.View>
+          )}
+
+          {/* The flash: earned gold over the old form as it fades, gone as the new one arrives. */}
+          {flashLayer === 'gone' ? null : (
+            <Animated.View
+              pointerEvents='none'
+              style={{
+                position: 'absolute',
+                opacity: flashLayer === 'arriving' ? flash : open.interpolate({ inputRange: [0, 1], outputRange: [1, 0] }),
+                transform: [{ scale: flashLayer === 'arriving' ? flash.interpolate({ inputRange: [0, 1], outputRange: [0.6, 1] }) : 1 }]
+              }}
+            >
+              <Svg width={FRAME * 0.8} height={FRAME * 0.8}>
+                <Defs>
+                  <RadialGradient id='evolution-gold' cx='50%' cy='50%' r='50%'>
+                    <Stop offset='0' stopColor={gold} stopOpacity={1} />
+                    <Stop offset='0.7' stopColor={gold} stopOpacity={0} />
+                  </RadialGradient>
+                </Defs>
+                <Circle cx={FRAME * 0.4} cy={FRAME * 0.4} r={FRAME * 0.4} fill='url(#evolution-gold)' />
+              </Svg>
             </Animated.View>
           )}
 

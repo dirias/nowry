@@ -12,6 +12,7 @@ import {
   nextBeat,
   showsGenerationsLeft,
   showsNewForm,
+  evolutionLayer,
   motePath,
   spiralLength,
   spiralPath,
@@ -84,6 +85,48 @@ describe('the timeline', () => {
     expect(showsNewForm('sweep')).toBe(false)
     expect(showsNewForm('reveal')).toBe(true)
     expect(showsNewForm(EVOLUTION_DONE)).toBe(true)
+  })
+})
+
+describe('the layers in the frame: the swap happens under the gold (ADR-075, EVO-016)', () => {
+  const at = (beat) => ({
+    from: evolutionLayer('full', beat, 'from'),
+    flash: evolutionLayer('full', beat, 'flash'),
+    to: evolutionLayer('full', beat, 'to')
+  })
+
+  it('holds the old form still while the spiral draws and tightens', () => {
+    expect(at('anticipation')).toEqual({ from: 'held', flash: 'gone', to: 'gone' })
+    expect(at('transformation')).toEqual({ from: 'held', flash: 'gone', to: 'gone' })
+  })
+
+  it('lights the gold over the old form as it fades, never after it has gone', () => {
+    expect(at('flash')).toEqual({ from: 'fading', flash: 'arriving', to: 'gone' })
+  })
+
+  it('brings the new form in as the gold fades, so the frame is never empty', () => {
+    expect(at('reveal')).toEqual({ from: 'gone', flash: 'fading', to: 'arriving' })
+    for (const beat of ['anticipation', 'transformation', 'flash', 'reveal', EVOLUTION_DONE]) {
+      const layers = at(beat)
+      expect(layers.from !== 'gone' || layers.to !== 'gone').toBe(true)
+    }
+  })
+
+  it('ends on the new form alone', () => {
+    expect(at(EVOLUTION_DONE)).toEqual({ from: 'gone', flash: 'gone', to: 'shown' })
+  })
+
+  it('has no gold in the short variant: a sweep over the old portrait, then the new one arrives', () => {
+    expect(evolutionLayer('short', 'sweep', 'from')).toBe('held')
+    expect(evolutionLayer('short', 'reveal', 'from')).toBe('gone')
+    expect(evolutionLayer('short', 'reveal', 'to')).toBe('arriving')
+    for (const beat of ['sweep', 'reveal', EVOLUTION_DONE]) expect(evolutionLayer('short', beat, 'flash')).toBe('gone')
+  })
+
+  it('agrees with showsNewForm', () => {
+    for (const beat of ['anticipation', 'transformation', 'flash', 'reveal', EVOLUTION_DONE]) {
+      expect(evolutionLayer('full', beat, 'to') !== 'gone').toBe(showsNewForm(beat))
+    }
   })
 })
 
