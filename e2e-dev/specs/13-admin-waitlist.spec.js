@@ -82,7 +82,7 @@ test('[edge] only waiting rows can be ticked; the filters ask the API by state',
   await expect(page.getByRole('checkbox', { name: `Select ${waiting}` })).toBeEnabled({ timeout: 30000 })
   await page.getByRole('button', { name: /^Invited/ }).click()
   await expect(page.getByText(waiting)).toHaveCount(0)
-  for (const box of await page.getByRole('checkbox', { name: /^Select / }).all()) {
+  for (const box of await page.getByRole('checkbox', { name: /^Select .+@/ }).all()) {
     await expect(box).toBeDisabled()
   }
 })

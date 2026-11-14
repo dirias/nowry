@@ -14,6 +14,7 @@ export default function AdminPage() {
     <Box
       component='main'
       sx={{
+        width: '100%',
         maxWidth: 1200,
         mx: 'auto',
         px: { xs: 2, md: 4 },
