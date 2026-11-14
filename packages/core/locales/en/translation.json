@@ -4995,7 +4995,8 @@
     "loading": "Opening the admin area",
     "tryAgain": "Try again",
     "tabs": {
-      "invitations": "Invitations"
+      "invitations": "Invitations",
+      "waitlist": "Waitlist"
     },
     "inv": {
       "form": {
@@ -5143,6 +5144,67 @@
         "button": "Create your account",
         "android": "Testing the Android app? Create your account with this button first, then sign in in the app with the same address."
       }
+    },
+    "wl": {
+      "states": {
+        "waiting": "Waiting",
+        "invited": "Invited",
+        "joined": "Joined",
+        "left": "Left"
+      },
+      "filters": {
+        "states": "Show the waitlist by state",
+        "language": "Language",
+        "allLanguages": "All"
+      },
+      "bar": {
+        "selected_one": "{{count}} selected",
+        "selected_other": "{{count}} selected",
+        "oldestFirst": "oldest first",
+        "selectAll": "Select every waiting row shown",
+        "clear": "Clear",
+        "invite_one": "Invite {{count}} to {{cohort}}",
+        "invite_other": "Invite {{count}} to {{cohort}}",
+        "inviteNone": "Invite to {{cohort}}",
+        "tickFirst": "Tick at least one waiting row to invite."
+      },
+      "list": {
+        "title": "Waitlist",
+        "loading": "Loading the waitlist",
+        "select": "Select {{email}}",
+        "columns": {
+          "language": "Lang.",
+          "source": "Came from",
+          "listed": "Joined list"
+        },
+        "meta": {
+          "invited": "invited {{date}}",
+          "joined": "joined {{date}}"
+        },
+        "empty": {
+          "title": "No one is waiting",
+          "body": "People who join the waitlist on the site appear here."
+        },
+        "filterEmpty": "No one in this state",
+        "error": "Couldn't load the waitlist."
+      },
+      "sources": {
+        "hero": "Landing hero",
+        "register": "Register",
+        "pricing": "Pricing",
+        "invitation": "Invited directly"
+      },
+      "sourcesShort": {
+        "hero": "hero",
+        "register": "register",
+        "pricing": "pricing",
+        "invitation": "direct"
+      },
+      "result": {
+        "notFound_one": "{{count}} row was not found and was not invited.",
+        "notFound_other": "{{count}} rows were not found and were not invited."
+      },
+      "caption": "Rows invited from here appear in Invitations with the row's language. A row becomes Joined when that address signs up."
     }
   }
 }

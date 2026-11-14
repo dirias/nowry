@@ -4471,7 +4471,8 @@
     "loading": "Ouverture de l'administration",
     "tryAgain": "Réessayer",
     "tabs": {
-      "invitations": "Inviter"
+      "invitations": "Inviter",
+      "waitlist": "Liste d'attente"
     },
     "inv": {
       "form": {
@@ -4619,6 +4620,67 @@
         "button": "Créer votre compte",
         "android": "Vous testez l'app Android ? Créez d'abord votre compte avec ce bouton, puis connectez-vous dans l'app avec la même adresse."
       }
+    },
+    "wl": {
+      "states": {
+        "waiting": "En attente",
+        "invited": "Invité",
+        "joined": "Inscrit",
+        "left": "Parti"
+      },
+      "filters": {
+        "states": "Afficher la liste d'attente par état",
+        "language": "Langue",
+        "allLanguages": "Toutes"
+      },
+      "bar": {
+        "selected_one": "{{count}} sélectionnée",
+        "selected_other": "{{count}} sélectionnées",
+        "oldestFirst": "les plus anciennes en premier",
+        "selectAll": "Sélectionner toutes les lignes en attente affichées",
+        "clear": "Effacer",
+        "invite_one": "Inviter {{count}} dans {{cohort}}",
+        "invite_other": "Inviter {{count}} dans {{cohort}}",
+        "inviteNone": "Inviter dans {{cohort}}",
+        "tickFirst": "Cochez au moins une ligne en attente pour inviter."
+      },
+      "list": {
+        "title": "Liste d'attente",
+        "loading": "Chargement de la liste d'attente",
+        "select": "Sélectionner {{email}}",
+        "columns": {
+          "language": "Langue",
+          "source": "Provenance",
+          "listed": "Inscrit le"
+        },
+        "meta": {
+          "invited": "invité le {{date}}",
+          "joined": "inscrit le {{date}}"
+        },
+        "empty": {
+          "title": "Personne n'attend",
+          "body": "Les personnes qui rejoignent la liste d'attente sur le site apparaissent ici."
+        },
+        "filterEmpty": "Personne dans cet état",
+        "error": "Impossible de charger la liste d'attente."
+      },
+      "sources": {
+        "hero": "Page d'accueil",
+        "register": "Inscription",
+        "pricing": "Tarifs",
+        "invitation": "Invitation directe"
+      },
+      "sourcesShort": {
+        "hero": "accueil",
+        "register": "inscription",
+        "pricing": "tarifs",
+        "invitation": "directe"
+      },
+      "result": {
+        "notFound_one": "{{count}} ligne est introuvable et n'a pas été invitée.",
+        "notFound_other": "{{count}} lignes sont introuvables et n'ont pas été invitées."
+      },
+      "caption": "Les lignes invitées d'ici apparaissent dans Invitations avec la langue de la ligne. Une ligne passe à Inscrit quand cette adresse crée son compte."
     }
   }
 }

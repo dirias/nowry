@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
-import { Alert, Box, Button, Chip, Skeleton, Stack, Typography } from '@mui/joy'
+import { Alert, Box, Stack, Typography } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
 import { adminInvitesService } from '@nowry/core/api/services/adminInvites.service'
 import { useInviteList } from '@nowry/core/hooks/useAdminInvites'
 import { isReauthCancelled } from '@nowry/core/domain/recentSignIn'
 import { INVITE_STATES, apiErrorCode, apiErrorDetail } from '@nowry/core/domain/invitations'
-import { focusRing } from '../../Common/Form/formStyles'
+import { EmptyRows, FilterChip, LoadError, LoadingRows } from '../AdminListParts'
 import InviteRow, { ROW_GRID } from './InviteRow'
 import InviteConfirm from './InviteConfirm'
 import { localTime } from './inviteDates'
@@ -63,71 +63,14 @@ const StateFilters = ({ value, totals, onChange }) => {
   const filters = [{ state: null, count: all }, ...INVITE_STATES.map((state) => ({ state, count: totals[state] ?? 0 }))]
   return (
     <Stack direction='row' gap={1} flexWrap='wrap' role='group' aria-label={t('admin.inv.list.filtersLabel')}>
-      {filters.map(({ state, count }) => {
-        const on = value === state
-        const label = `${t(`admin.inv.states.${state ?? 'all'}`)} · ${count}`
-        return (
-          <Chip
-            key={state ?? 'all'}
-            size='sm'
-            variant='soft'
-            color='neutral'
-            onClick={() => onChange(state)}
-            slotProps={{ action: { 'aria-pressed': on, 'aria-label': label, sx: focusRing } }}
-            sx={{
-              bgcolor: on ? 'background.level2' : 'background.level1',
-              color: on ? 'text.primary' : 'text.secondary',
-              fontWeight: on ? 'lg' : 'md',
-              fontVariantNumeric: 'tabular-nums'
-            }}
-          >
-            {label}
-          </Chip>
-        )
-      })}
-    </Stack>
-  )
-}
-
-const LoadingRows = () => {
-  const { t } = useTranslation()
-  return (
-    <Stack aria-busy='true' aria-label={t('admin.inv.list.loading')} data-testid='invite-list-loading'>
-      {[70, 100, 85, 60].map((width) => (
-        <Box key={width} sx={{ py: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
-          <Skeleton variant='text' level='body-md' sx={{ width: `${width}%` }} />
-        </Box>
+      {filters.map(({ state, count }) => (
+        <FilterChip
+          key={state ?? 'all'}
+          on={value === state}
+          label={`${t(`admin.inv.states.${state ?? 'all'}`)} · ${count}`}
+          onClick={() => onChange(state)}
+        />
       ))}
-    </Stack>
-  )
-}
-
-const EmptyState = ({ filtered }) => {
-  const { t } = useTranslation()
-  return (
-    <Box sx={{ py: 6, textAlign: 'center' }}>
-      <Typography level='title-md' sx={{ mb: 0.5, color: 'text.secondary' }}>
-        {filtered ? t('admin.inv.list.filterEmpty') : t('admin.inv.list.empty.title')}
-      </Typography>
-      {!filtered && (
-        <Typography level='body-sm' sx={{ color: 'text.tertiary' }}>
-          {t('admin.inv.list.empty.body')}
-        </Typography>
-      )}
-    </Box>
-  )
-}
-
-const LoadError = ({ onRetry }) => {
-  const { t } = useTranslation()
-  return (
-    <Stack gap={1.5} alignItems='flex-start'>
-      <Alert variant='soft' color='danger' sx={{ alignSelf: 'stretch' }}>
-        {t('admin.inv.list.error')}
-      </Alert>
-      <Button size='sm' variant='soft' color='neutral' onClick={onRetry}>
-        {t('admin.tryAgain')}
-      </Button>
     </Stack>
   )
 }
@@ -182,12 +125,16 @@ export default function InviteList({ run }) {
   const [filter, setFilter] = useState(null)
   const list = useInviteList(filter)
   const rowAction = useRowAction({ run, reload: list.reload, language: i18n?.language })
+  const filtered = filter !== null
   const body = list.loading ? (
-    <LoadingRows />
+    <LoadingRows label={t('admin.inv.list.loading')} testId='invite-list-loading' />
   ) : list.error ? (
-    <LoadError onRetry={list.retry} />
+    <LoadError message={t('admin.inv.list.error')} onRetry={list.retry} />
   ) : list.invites.length === 0 ? (
-    <EmptyState filtered={filter !== null} />
+    <EmptyRows
+      title={filtered ? t('admin.inv.list.filterEmpty') : t('admin.inv.list.empty.title')}
+      body={filtered ? null : t('admin.inv.list.empty.body')}
+    />
   ) : (
     <Rows invites={list.invites} rowAction={rowAction} label={t('admin.inv.list.title')} />
   )

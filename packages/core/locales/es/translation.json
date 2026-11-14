@@ -4995,7 +4995,8 @@
     "loading": "Abriendo la administración",
     "tryAgain": "Intentar de nuevo",
     "tabs": {
-      "invitations": "Invitaciones"
+      "invitations": "Invitaciones",
+      "waitlist": "Lista de espera"
     },
     "inv": {
       "form": {
@@ -5143,6 +5144,67 @@
         "button": "Crear tu cuenta",
         "android": "¿Pruebas la app de Android? Crea tu cuenta primero con este botón y luego inicia sesión en la app con la misma dirección."
       }
+    },
+    "wl": {
+      "states": {
+        "waiting": "En espera",
+        "invited": "Invitado",
+        "joined": "Registrado",
+        "left": "Salió"
+      },
+      "filters": {
+        "states": "Mostrar la lista de espera por estado",
+        "language": "Idioma",
+        "allLanguages": "Todos"
+      },
+      "bar": {
+        "selected_one": "{{count}} seleccionada",
+        "selected_other": "{{count}} seleccionadas",
+        "oldestFirst": "las más antiguas primero",
+        "selectAll": "Seleccionar todas las filas en espera visibles",
+        "clear": "Borrar",
+        "invite_one": "Invitar a {{count}} a {{cohort}}",
+        "invite_other": "Invitar a {{count}} a {{cohort}}",
+        "inviteNone": "Invitar a {{cohort}}",
+        "tickFirst": "Marca al menos una fila en espera para invitar."
+      },
+      "list": {
+        "title": "Lista de espera",
+        "loading": "Cargando la lista de espera",
+        "select": "Seleccionar {{email}}",
+        "columns": {
+          "language": "Idioma",
+          "source": "Origen",
+          "listed": "Se apuntó"
+        },
+        "meta": {
+          "invited": "invitado el {{date}}",
+          "joined": "registrado el {{date}}"
+        },
+        "empty": {
+          "title": "Nadie está esperando",
+          "body": "Quienes se apunten a la lista de espera en la web aparecerán aquí."
+        },
+        "filterEmpty": "Nadie en este estado",
+        "error": "No se pudo cargar la lista de espera."
+      },
+      "sources": {
+        "hero": "Portada",
+        "register": "Registro",
+        "pricing": "Precios",
+        "invitation": "Invitación directa"
+      },
+      "sourcesShort": {
+        "hero": "portada",
+        "register": "registro",
+        "pricing": "precios",
+        "invitation": "directa"
+      },
+      "result": {
+        "notFound_one": "No se encontró {{count}} fila y no se invitó.",
+        "notFound_other": "No se encontraron {{count}} filas y no se invitaron."
+      },
+      "caption": "Las filas invitadas desde aquí aparecen en Invitaciones con el idioma de la fila. Una fila pasa a Registrado cuando esa dirección crea su cuenta."
     }
   }
 }

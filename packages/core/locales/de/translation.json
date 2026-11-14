@@ -4460,7 +4460,8 @@
     "loading": "Verwaltung wird geöffnet",
     "tryAgain": "Erneut versuchen",
     "tabs": {
-      "invitations": "Einladungen"
+      "invitations": "Einladungen",
+      "waitlist": "Warteliste"
     },
     "inv": {
       "form": {
@@ -4608,6 +4609,67 @@
         "button": "Konto erstellen",
         "android": "Du testest die Android-App? Erstelle dein Konto zuerst mit diesem Button und melde dich dann in der App mit derselben Adresse an."
       }
+    },
+    "wl": {
+      "states": {
+        "waiting": "Wartet",
+        "invited": "Eingeladen",
+        "joined": "Beigetreten",
+        "left": "Ausgetragen"
+      },
+      "filters": {
+        "states": "Warteliste nach Status zeigen",
+        "language": "Sprache",
+        "allLanguages": "Alle"
+      },
+      "bar": {
+        "selected_one": "{{count}} ausgewählt",
+        "selected_other": "{{count}} ausgewählt",
+        "oldestFirst": "älteste zuerst",
+        "selectAll": "Alle angezeigten wartenden Zeilen auswählen",
+        "clear": "Leeren",
+        "invite_one": "{{count}} in {{cohort}} einladen",
+        "invite_other": "{{count}} in {{cohort}} einladen",
+        "inviteNone": "In {{cohort}} einladen",
+        "tickFirst": "Wähle mindestens eine wartende Zeile zum Einladen aus."
+      },
+      "list": {
+        "title": "Warteliste",
+        "loading": "Warteliste wird geladen",
+        "select": "{{email}} auswählen",
+        "columns": {
+          "language": "Spr.",
+          "source": "Herkunft",
+          "listed": "Eingetragen"
+        },
+        "meta": {
+          "invited": "eingeladen am {{date}}",
+          "joined": "beigetreten am {{date}}"
+        },
+        "empty": {
+          "title": "Niemand wartet",
+          "body": "Wer sich auf der Website in die Warteliste einträgt, erscheint hier."
+        },
+        "filterEmpty": "Niemand in diesem Status",
+        "error": "Die Warteliste konnte nicht geladen werden."
+      },
+      "sources": {
+        "hero": "Startseite",
+        "register": "Registrierung",
+        "pricing": "Preise",
+        "invitation": "Direkt eingeladen"
+      },
+      "sourcesShort": {
+        "hero": "Startseite",
+        "register": "Registrierung",
+        "pricing": "Preise",
+        "invitation": "direkt"
+      },
+      "result": {
+        "notFound_one": "{{count}} Zeile wurde nicht gefunden und nicht eingeladen.",
+        "notFound_other": "{{count}} Zeilen wurden nicht gefunden und nicht eingeladen."
+      },
+      "caption": "Von hier eingeladene Zeilen erscheinen unter Einladungen mit der Sprache der Zeile. Eine Zeile wird zu Beigetreten, sobald sich diese Adresse registriert."
     }
   }
 }

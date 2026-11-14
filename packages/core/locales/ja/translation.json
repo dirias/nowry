@@ -4315,7 +4315,8 @@
     "loading": "管理画面を開いています",
     "tryAgain": "もう一度試す",
     "tabs": {
-      "invitations": "招待"
+      "invitations": "招待",
+      "waitlist": "ウェイトリスト"
     },
     "inv": {
       "form": {
@@ -4445,6 +4446,64 @@
         "button": "アカウントを作成",
         "android": "Android アプリをお試しですか？まずこのボタンでアカウントを作成し、同じアドレスでアプリにサインインしてください。"
       }
+    },
+    "wl": {
+      "states": {
+        "waiting": "待機中",
+        "invited": "招待済み",
+        "joined": "登録済み",
+        "left": "離脱"
+      },
+      "filters": {
+        "states": "状態でウェイトリストを表示",
+        "language": "言語",
+        "allLanguages": "すべて"
+      },
+      "bar": {
+        "selected_other": "{{count}}件を選択",
+        "oldestFirst": "古い順",
+        "selectAll": "表示中の待機中の行をすべて選択",
+        "clear": "クリア",
+        "invite_other": "{{count}}人を{{cohort}}に招待",
+        "inviteNone": "{{cohort}}に招待",
+        "tickFirst": "招待するには待機中の行を1つ以上選択してください。"
+      },
+      "list": {
+        "title": "ウェイトリスト",
+        "loading": "ウェイトリストを読み込み中",
+        "select": "{{email}}を選択",
+        "columns": {
+          "language": "言語",
+          "source": "経路",
+          "listed": "登録日"
+        },
+        "meta": {
+          "invited": "{{date}}に招待",
+          "joined": "{{date}}に登録"
+        },
+        "empty": {
+          "title": "待っている人はいません",
+          "body": "サイトでウェイトリストに登録した人がここに表示されます。"
+        },
+        "filterEmpty": "この状態の人はいません",
+        "error": "ウェイトリストを読み込めませんでした。"
+      },
+      "sources": {
+        "hero": "トップページ",
+        "register": "登録ページ",
+        "pricing": "料金ページ",
+        "invitation": "直接招待"
+      },
+      "sourcesShort": {
+        "hero": "トップ",
+        "register": "登録",
+        "pricing": "料金",
+        "invitation": "直接"
+      },
+      "result": {
+        "notFound_other": "{{count}}行が見つからず、招待されませんでした。"
+      },
+      "caption": "ここから招待した行は、その行の言語で「招待」に表示されます。そのアドレスがアカウントを作成すると、行は「登録済み」になります。"
     }
   }
 }
