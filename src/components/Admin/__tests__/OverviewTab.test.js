@@ -23,6 +23,24 @@ jest.mock('@nowry/core/api/services/adminOverview.service', () => ({
 }))
 const { adminOverviewService: service } = require('@nowry/core/api/services/adminOverview.service')
 
+// "2 h ago" and "yesterday" depend on the local day: pin the clock to 14:00 local time, so the
+// fixtures never cross midnight whenever the suite runs. Only Date is faked; timers stay real.
+const RealDate = Date
+const PINNED = new RealDate(2026, 10, 14, 14, 0, 0).getTime()
+class PinnedDate extends RealDate {
+  constructor(...args) {
+    super(...(args.length ? args : [PINNED]))
+  }
+  static now() {
+    return PINNED
+  }
+}
+// Set at load: the fixtures below are built when this file is read.
+global.Date = PinnedDate
+afterAll(() => {
+  global.Date = RealDate
+})
+
 const MARK = '⁣'
 const ME = { kind: 'admin', username: 'didier', is_you: true }
 const ago = (minutes) => new Date(Date.now() - minutes * 60000).toISOString()
