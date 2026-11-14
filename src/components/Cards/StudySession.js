@@ -1134,6 +1134,10 @@ export default function StudySession() {
         if (response && response.xp) {
           applyReviewXp(response.xp)
           setXpFloater({ id: Date.now(), amount: response.xp.xp_awarded })
+          // The last card's review answers after the summary has released what
+          // was banked; release again, or a level-up crossed on that card waits
+          // until the learner leaves (EVO-020). A no-op when nothing is banked.
+          if (sessionCompleteHandledRef.current) flushPendingLevelUp()
         }
       } catch (error) {
         console.error('Error syncing review to backend:', error)
@@ -1158,7 +1162,7 @@ export default function StudySession() {
     // No `cards` here: every read goes through latestStateRef and every write
     // is a functional setCards patch, so the handler holds no closure over the
     // deck that could go stale.
-    [handleNext, goTo, mode, isDrill, deckId, queueIntervention, applyReviewXp, cheer]
+    [handleNext, goTo, mode, isDrill, deckId, queueIntervention, applyReviewXp, cheer, flushPendingLevelUp]
   )
 
   const handlePrev = React.useCallback(() => {

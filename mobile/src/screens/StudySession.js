@@ -459,6 +459,8 @@ export function StudySession() {
   // The form held BEFORE this session's grants: the grants refresh the pet, so
   // once they settle `pet.stage` is already the new one and says nothing changed.
   const stageBeforeRef = useRef(null)
+  // What each graded review answered about XP (EVO-020): a review can cross a level too.
+  const reviewReplies = useRef([])
   // Only a stage the server actually reported: while the pet is loading, or failed to, the hook
   // answers stage 1, and "evolved from 1" would be invented.
   if (grants === null && !pet.loading && !pet.error && Number.isInteger(pet.stage)) stageBeforeRef.current = pet.stage
@@ -553,25 +555,31 @@ export function StudySession() {
     Promise.allSettled([
       isDrill ? Promise.resolve(null) : agentService.awardSessionXp(Math.min(500, answers.length), id === DAILY_REVIEW ? null : id),
       isDrill ? Promise.resolve(null) : agentService.awardStreakXp()
-    ]).then((results) => {
-      // The panel on Home reads a cached level; a level earned here is a level
-      // it is now wrong about. The streak moved too, and the ending reads it.
-      queryClient.invalidateQueries({ queryKey: ['pet'] })
-      queryClient.invalidateQueries({ queryKey: ['statistics'] })
-      const replies = results.map((result) => (result.status === 'fulfilled' ? result.value : null))
-      setGrants(replies)
+    ])
+      // The last review can answer after the session ends; its level-up counts.
+      .then((results) => Promise.all(reviewReplies.current).then((reviewed) => [results, reviewed]))
+      .then(([results, reviewed]) => {
+        // The panel on Home reads a cached level; a level earned here is a level
+        // it is now wrong about. The streak moved too, and the ending reads it.
+        queryClient.invalidateQueries({ queryKey: ['pet'] })
+        queryClient.invalidateQueries({ queryKey: ['statistics'] })
+        const replies = results.map((result) => (result.status === 'fulfilled' ? result.value : null))
+        setGrants(replies)
 
-      /*
-       * The reply is the only place a level-up is ever announced — the server
-       * does not push, and the pet's state endpoint says where you are, never
-       * that you just arrived. This threw it away, so a level earned on the
-       * phone was silent (PEND-001). Either grant can cross the line and only
-       * the furthest one is shown: two celebrations for one session is a bug.
-       */
-      const best = bestLevelUp(replies)
-      setLevelUp(best)
-      setEvolution(evolutionFrom(stageBeforeRef.current, best))
-    })
+        /*
+         * The reply is the only place a level-up is ever announced — the server
+         * does not push, and the pet's state endpoint says where you are, never
+         * that you just arrived. This threw it away, so a level earned on the
+         * phone was silent (PEND-001). Either grant can cross the line and only
+         * the furthest one is shown: two celebrations for one session is a bug.
+         */
+        // The reviews' replies too: a stage crossed by a card, not by the session's
+        // bonus, was silent on the phone (EVO-020).
+        const best = bestLevelUp([...reviewed, ...replies])
+        reviewReplies.current = []
+        setLevelUp(best)
+        setEvolution(evolutionFrom(stageBeforeRef.current, best))
+      })
   }, [complete, id, isDaily, isDrill, deckNames, graded])
 
   const grade = useCallback(
@@ -637,8 +645,9 @@ export function StudySession() {
        * being killed, and is sent in order when sending starts working (MOB-026).
        * A successful send is also the moment to try anything already waiting.
        */
-      cardsService
-        .review(cardId, value, 'study', attempt)
+      const sending = cardsService.review(cardId, value, 'study', attempt)
+      reviewReplies.current.push(sending.then((reply) => reply?.xp ?? null).catch(() => null))
+      sending
         .then(() => {
           flushOutbox().then(({ sent, remaining }) => {
             if (sent > 0) setQueued(remaining)

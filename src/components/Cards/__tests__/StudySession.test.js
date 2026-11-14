@@ -493,6 +493,28 @@ describe('session completion XP', () => {
     expect(mockFlushPendingLevelUp).toHaveBeenCalled()
   })
 
+  it('releases a level-up crossed on the LAST card, whose review answers after the summary is up (EVO-020)', async () => {
+    /*
+     * Found by the dev suite: one review over a stage threshold, on a one-card
+     * deck, showed the summary but never the evolution. The summary releases
+     * what is banked, and the last card's review answers after that, so its
+     * level-up was banked behind a release that had already run and waited
+     * until the learner left the session.
+     */
+    const cards = [{ _id: 'l1', id: 'l1', title: 'Only', content: 'A' }]
+    const xp = { xp_awarded: 2, level_up: true, new_level: 3, new_stage: 2 }
+    renderSession({ cards, reviewResponse: { message: 'Card reviewed successfully', xp } })
+
+    fireEvent.click(await screen.findByText('cards.session.grading.good'))
+    await screen.findByTestId('session-end')
+    await waitFor(() => expect(mockApplyReviewXp).toHaveBeenCalledWith(xp))
+
+    const applied = Math.max(...mockApplyReviewXp.mock.invocationCallOrder)
+    const released = Math.max(...mockFlushPendingLevelUp.mock.invocationCallOrder)
+    // Released after the late review, not only before it.
+    expect(released).toBeGreaterThan(applied)
+  })
+
   it('survives a review response that carries no XP block', async () => {
     // grant_xp is fire-and-forget server-side: a failure there returns the
     // review without an xp block rather than failing the whole request.
