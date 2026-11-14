@@ -83,13 +83,17 @@ test('[edge] an ordinary account gets 403 from admin calls, never 500', async ()
   }
 })
 
-test('[happy] the admin opens /admin from the account menu and lands on Invitations', async ({ page }) => {
+test('[happy] the admin opens /admin from the account menu and lands on the Overview', async ({ page }) => {
   await signIn(page, adminEmail)
   await page.getByRole('button', { name: 'Open profile menu' }).click()
   await page.getByRole('menuitem', { name: 'Admin' }).click()
-  await page.waitForURL((url) => url.pathname === '/admin/invitations', { timeout: 30000 })
+  // From batch 5 /admin opens on the Overview, the first tab (FR-011, D9).
+  await page.waitForURL((url) => url.pathname === '/admin/overview', { timeout: 30000 })
   await expect(page.getByRole('heading', { name: 'Admin', level: 1 })).toBeVisible()
   await expect(page.getByText('Only you can see this')).toBeVisible()
+  await expect(page.getByRole('heading', { name: /Needs you/, level: 2 })).toBeVisible()
+  await page.getByRole('navigation', { name: 'Admin sections' }).getByRole('link', { name: 'Invitations' }).click()
+  await expect(page).toHaveURL(/\/admin\/invitations$/)
   await expect(page.getByText('Invite people')).toBeVisible()
   await page.goto('/admin/bugs')
   await expect(page).toHaveURL(/\/admin\/bugs$/)
