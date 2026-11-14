@@ -375,7 +375,7 @@ const DailyRoutinePlanner = () => {
                           justifyContent: 'center',
                           cursor: 'pointer',
                           transition: 'all 0.2s',
-                          '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', borderRadius: 'sm' }
+                          '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)', borderRadius: 'sm' }
                         }}
                       >
                         {routineCompletions[item.id] && (

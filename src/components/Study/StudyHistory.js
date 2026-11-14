@@ -78,7 +78,7 @@ const SessionRow = ({ session, t, navigate, defaultExpanded = false }) => {
           borderRadius: 'sm',
           transition: 'background 0.15s',
           '&:hover': { bgcolor: 'background.level1' },
-          '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
+          '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)', outlineOffset: '2px' }
         }}
       >
         {/* Type icon */}

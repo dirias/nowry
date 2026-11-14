@@ -20,7 +20,7 @@ const focusRingSx = {
   '&:focus-visible': {
     outline: '2px solid',
     outlineOffset: '2px',
-    outlineColor: 'primary.outlinedBorder'
+    outlineColor: 'var(--joy-palette-focusVisible)'
   }
 }
 

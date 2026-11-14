@@ -205,7 +205,7 @@ export default function ContinueObject({
         py: { xs: 2, md: 2.5 },
         mb: 4,
         outline: isDragActive ? '2px dashed' : 'none',
-        outlineColor: 'primary.outlinedBorder',
+        outlineColor: 'var(--joy-palette-focusVisible)',
         outlineOffset: -2
       }}
     >

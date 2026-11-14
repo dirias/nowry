@@ -95,7 +95,7 @@ mermaid.initialize({
 // change, purely visual).
 const selectedGradeSx = {
   outline: '2px solid',
-  outlineColor: 'primary.outlinedBorder',
+  outlineColor: 'var(--joy-palette-focusVisible)',
   outlineOffset: '2px'
 }
 

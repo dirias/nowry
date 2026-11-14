@@ -272,7 +272,7 @@ export default function DeckPublishSheet({ open, onClose, deckId, deck, onPublis
               sx={{
                 '&:focus-visible': {
                   outline: '2px solid',
-                  outlineColor: 'primary.outlinedBorder',
+                  outlineColor: 'var(--joy-palette-focusVisible)',
                   outlineOffset: '3px'
                 }
               }}
@@ -293,7 +293,7 @@ export default function DeckPublishSheet({ open, onClose, deckId, deck, onPublis
               sx={{
                 '&:focus-visible': {
                   outline: '2px solid',
-                  outlineColor: 'primary.outlinedBorder',
+                  outlineColor: 'var(--joy-palette-focusVisible)',
                   outlineOffset: '3px'
                 }
               }}
@@ -310,7 +310,7 @@ export default function DeckPublishSheet({ open, onClose, deckId, deck, onPublis
               sx={{
                 '&:focus-visible': {
                   outline: '2px solid',
-                  outlineColor: 'primary.outlinedBorder',
+                  outlineColor: 'var(--joy-palette-focusVisible)',
                   outlineOffset: '3px'
                 }
               }}

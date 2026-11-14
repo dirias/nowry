@@ -40,7 +40,7 @@ const DevBugReportButton = () => {
             zIndex: 1200,
             opacity: 0.7,
             '&:hover': { opacity: 1 },
-            '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
+            '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)', outlineOffset: '2px' }
           }}
         >
           <BugReportRounded />

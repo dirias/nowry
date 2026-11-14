@@ -515,7 +515,7 @@ export default function AccountSettings() {
                       '&:hover': { bgcolor: 'background.level1', color: 'text.primary' },
                       '&:focus-visible': {
                         outline: '2px solid',
-                        outlineColor: 'primary.outlinedBorder',
+                        outlineColor: 'var(--joy-palette-focusVisible)',
                         outlineOffset: '2px'
                       }
                     }}
@@ -586,7 +586,7 @@ export default function AccountSettings() {
                             sx={{
                               '&:focus-visible': {
                                 outline: '2px solid',
-                                outlineColor: 'primary.outlinedBorder',
+                                outlineColor: 'var(--joy-palette-focusVisible)',
                                 outlineOffset: '2px'
                               }
                             }}
@@ -1088,7 +1088,7 @@ export default function AccountSettings() {
                       justifyContent: 'flex-start',
                       width: '100%',
                       fontWeight: isActive ? 'md' : 'normal',
-                      '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
+                      '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)', outlineOffset: '2px' }
                     }}
                   >
                     {t(`settings.nav.${key}`)}

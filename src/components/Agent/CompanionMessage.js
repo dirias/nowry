@@ -81,7 +81,7 @@ const CompanionMessage = ({ message, isLoading, onDismiss, onTellMeMore }) => {
                     color: 'text.secondary',
                     '&:focus-visible': {
                       outline: '2px solid',
-                      outlineColor: 'primary.outlinedBorder',
+                      outlineColor: 'var(--joy-palette-focusVisible)',
                       outlineOffset: '2px'
                     }
                   }}
@@ -97,7 +97,7 @@ const CompanionMessage = ({ message, isLoading, onDismiss, onTellMeMore }) => {
                   sx={{
                     '&:focus-visible': {
                       outline: '2px solid',
-                      outlineColor: 'primary.outlinedBorder',
+                      outlineColor: 'var(--joy-palette-focusVisible)',
                       outlineOffset: '2px'
                     }
                   }}

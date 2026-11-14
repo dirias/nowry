@@ -20,7 +20,7 @@ import { REST_PRESETS, untilFromPreset } from '@nowry/core/domain/cardRest'
 const FOCUS_RING = {
   '&:focus-visible': {
     outline: '2px solid',
-    outlineColor: 'primary.outlinedBorder',
+    outlineColor: 'var(--joy-palette-focusVisible)',
     outlineOffset: '2px'
   }
 }

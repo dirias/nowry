@@ -65,7 +65,7 @@ const BookCoverSwatch = ({ hex, nameKey, selected }) => {
             borderRadius: 'sm',
             '&.Mui-focusVisible, &:focus-visible': {
               outline: '2px solid',
-              outlineColor: 'primary.outlinedBorder',
+              outlineColor: 'var(--joy-palette-focusVisible)',
               outlineOffset: '2px'
             }
           }
@@ -84,7 +84,7 @@ const BookCoverSwatch = ({ hex, nameKey, selected }) => {
             alignItems: 'center',
             justifyContent: 'center',
             outline: selected ? '2px solid' : 'none',
-            outlineColor: 'primary.outlinedBorder',
+            outlineColor: 'var(--joy-palette-focusVisible)',
             outlineOffset: '2px',
             // Motion is an accessibility setting, not a taste. The hover
             // `scale(1.1)` that used to live here is gone outright: it never

@@ -146,7 +146,7 @@ const Footer = () => {
                   px: 0.5,
                   '--Select-minHeight': { xs: '44px', sm: '2rem' },
                   '&:hover': { bgcolor: 'background.level1' },
-                  '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
+                  '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)', outlineOffset: '2px' }
                 }}
               >
                 <Option value='en'>English</Option>
@@ -168,7 +168,7 @@ const Footer = () => {
                 sx={{
                   color: 'text.secondary',
                   '&:hover': { color: 'text.primary', bgcolor: 'background.level1' },
-                  '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
+                  '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)', outlineOffset: '2px' }
                 }}
               >
                 {mode === 'dark' ? <Brightness7 sx={{ fontSize: 18 }} /> : <Brightness4 sx={{ fontSize: 18 }} />}
@@ -192,7 +192,7 @@ const Footer = () => {
                   sx={{
                     color: 'text.tertiary',
                     '&:hover': { color: 'text.primary', bgcolor: 'background.level1' },
-                    '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
+                    '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)', outlineOffset: '2px' }
                   }}
                 >
                   {icon}
@@ -211,7 +211,7 @@ const Footer = () => {
                   sx={{
                     color: 'text.secondary',
                     '&:hover': { bgcolor: 'background.level2', color: 'text.primary' },
-                    '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
+                    '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)', outlineOffset: '2px' }
                   }}
                 >
                   <BugReportRounded fontSize='small' />

@@ -487,7 +487,7 @@ const CommentAnchorPlugin = forwardRef(function CommentAnchorPlugin(
                         '&:focus-visible': {
                           outline: '2px solid',
                           outlineOffset: '1px',
-                          outlineColor: 'primary.outlinedBorder'
+                          outlineColor: 'var(--joy-palette-focusVisible)'
                         }
                       })
                     }}

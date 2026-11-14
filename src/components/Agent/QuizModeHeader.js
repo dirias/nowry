@@ -59,7 +59,7 @@ const QuizModeHeader = ({ deckName, currentIndex, totalCards, onExit }) => {
               flexShrink: 0,
               '&:focus-visible': {
                 outline: '2px solid',
-                outlineColor: 'primary.outlinedBorder',
+                outlineColor: 'var(--joy-palette-focusVisible)',
                 outlineOffset: '2px'
               }
             }}

@@ -25,7 +25,7 @@ import { ChevronRightRounded, LibraryBooksRounded, SchoolRounded } from '@mui/ic
 const focusVisibleSx = {
   '&:focus-visible': {
     outline: '2px solid',
-    outlineColor: 'primary.outlinedBorder',
+    outlineColor: 'var(--joy-palette-focusVisible)',
     outlineOffset: '2px'
   }
 }

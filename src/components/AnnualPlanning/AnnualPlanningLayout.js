@@ -338,7 +338,7 @@ const AnnualPlanningLayout = () => {
           onClick={handleCreatePlan}
           size='lg'
           endDecorator={<ArrowForwardIcon />}
-          sx={{ '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' } }}
+          sx={{ '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)', outlineOffset: '2px' } }}
         >
           {t('annualPlanning.home.createPlan')}
         </Button>
@@ -388,7 +388,7 @@ const AnnualPlanningLayout = () => {
               sx={{
                 borderRadius: 'lg',
                 fontWeight: 600,
-                '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
+                '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)', outlineOffset: '2px' }
               }}
             >
               {t('annualPlanning.home.reviewNow')}
@@ -442,7 +442,7 @@ const AnnualPlanningLayout = () => {
             size='sm'
             variant='soft'
             onClick={reload}
-            sx={{ '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' } }}
+            sx={{ '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)', outlineOffset: '2px' } }}
           >
             {t('common.retry')}
           </Button>

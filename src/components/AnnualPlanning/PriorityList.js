@@ -138,7 +138,7 @@ const PriorityList = ({
               bgcolor: isSelected ? 'background.surface' : 'transparent',
               boxShadow: isSelected ? 'sm' : 'none',
               '&:hover': { bgcolor: isSelected ? 'background.surface' : 'background.level2' },
-              '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
+              '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)', outlineOffset: '2px' }
             }}
           >
             {option.label}
@@ -176,7 +176,10 @@ const PriorityList = ({
             variant='soft'
             color='neutral'
             onClick={() => setShowAll(true)}
-            sx={{ mt: 2, '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' } }}
+            sx={{
+              mt: 2,
+              '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)', outlineOffset: '2px' }
+            }}
           >
             {t('annualPlanning.priority.showAll', { count: priorities.length })}
           </Button>

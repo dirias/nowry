@@ -311,7 +311,7 @@ export default function GeneratedCards({
                       right: 48,
                       minWidth: 36,
                       p: 0.8,
-                      '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: 2 }
+                      '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)', outlineOffset: 2 }
                     }}
                   >
                     {loading ? <CircularProgress size='sm' /> : <RefreshCw size={18} />}
@@ -385,7 +385,9 @@ export default function GeneratedCards({
                       color='warning'
                       onClick={() => setInputClipDismissed(true)}
                       aria-label={t('common.close')}
-                      sx={{ '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: 2 } }}
+                      sx={{
+                        '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)', outlineOffset: 2 }
+                      }}
                     >
                       <X size={14} />
                     </IconButton>
@@ -409,7 +411,9 @@ export default function GeneratedCards({
                       color='neutral'
                       onClick={handleGenerateMore}
                       aria-label={t('aiMagic.streaming.generateMoreAria')}
-                      sx={{ '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: 2 } }}
+                      sx={{
+                        '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)', outlineOffset: 2 }
+                      }}
                     >
                       {t('aiMagic.streaming.generateMore')}
                     </Button>
@@ -433,7 +437,9 @@ export default function GeneratedCards({
                       size='sm'
                       onClick={onRetry}
                       aria-label={t('aiMagic.streaming.retryAria')}
-                      sx={{ '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: 2 } }}
+                      sx={{
+                        '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)', outlineOffset: 2 }
+                      }}
                     >
                       {t('aiMagic.streaming.retry')}
                     </Button>
@@ -533,7 +539,9 @@ export default function GeneratedCards({
                             color='danger'
                             onClick={onRetry}
                             aria-label={t('aiMagic.streaming.retryAria')}
-                            sx={{ '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: 2 } }}
+                            sx={{
+                              '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)', outlineOffset: 2 }
+                            }}
                           >
                             {t('aiMagic.streaming.retry')}
                           </Button>
@@ -612,7 +620,7 @@ export default function GeneratedCards({
                     color='primary'
                     onClick={openUpgradeModal}
                     aria-label={t('upgrade.modal.cta')}
-                    sx={{ '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: 2 } }}
+                    sx={{ '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)', outlineOffset: 2 } }}
                   >
                     {t('upgrade.modal.cta')}
                   </Button>

@@ -33,7 +33,7 @@ import {
 } from '@mui/icons-material'
 
 const focusRing = {
-  '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
+  '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)', outlineOffset: '2px' }
 }
 
 // Every tier shares this metric box so the three buttons read as one control group

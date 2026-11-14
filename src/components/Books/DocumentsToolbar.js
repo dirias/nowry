@@ -67,7 +67,7 @@ export default function DocumentsToolbar({
           bgcolor: 'background.level1',
           boxShadow: 'none',
           '&::before': { boxShadow: 'none' },
-          '&:focus-within': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
+          '&:focus-within': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)', outlineOffset: '2px' }
         }}
       />
 

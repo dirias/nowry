@@ -65,7 +65,7 @@ const SessionRow = ({ session, formatDate, onOpen }) => {
         cursor: 'pointer',
         borderRadius: 'sm',
         '&:hover': { bgcolor: 'background.level1' },
-        '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
+        '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)', outlineOffset: '2px' }
       }}
     >
       <Box

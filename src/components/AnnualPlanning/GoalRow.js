@@ -65,7 +65,7 @@ const GoalRow = ({
           sx={{
             textAlign: 'left',
             minWidth: 0,
-            '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
+            '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)', outlineOffset: '2px' }
           }}
         >
           <Typography level='title-sm' sx={{ color: 'text.primary', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>

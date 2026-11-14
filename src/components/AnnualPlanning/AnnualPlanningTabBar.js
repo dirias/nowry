@@ -114,7 +114,7 @@ const AnnualPlanningTabBar = () => {
                 }
               }}
               sx={{
-                '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' },
+                '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)', outlineOffset: '2px' },
                 flex: 1,
                 minHeight: 44,
                 py: 1,

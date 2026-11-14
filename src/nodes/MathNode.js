@@ -164,7 +164,7 @@ function MathComponent({ latex, nodeKey }) {
           fontFamily: 'monospace',
           '&:focus-visible': {
             outline: '2px solid',
-            outlineColor: 'primary.outlinedBorder',
+            outlineColor: 'var(--joy-palette-focusVisible)',
             outlineOffset: '2px'
           }
         }}
@@ -190,7 +190,7 @@ function MathComponent({ latex, nodeKey }) {
               fontSize: 'sm',
               cursor: isEditable ? 'pointer' : 'default',
               outline: isSelected ? '2px solid' : 'none',
-              outlineColor: 'primary.outlinedBorder',
+              outlineColor: 'var(--joy-palette-focusVisible)',
               outlineOffset: '2px'
             }}
           >{`$${latex}$`}</Box>
@@ -208,7 +208,7 @@ function MathComponent({ latex, nodeKey }) {
             borderRadius: 'sm',
             '&:hover': isEditable ? { bgcolor: 'background.level1' } : undefined,
             outline: isSelected ? '2px solid' : 'none',
-            outlineColor: 'primary.outlinedBorder',
+            outlineColor: 'var(--joy-palette-focusVisible)',
             outlineOffset: '2px'
           }}
         />
@@ -229,7 +229,7 @@ function MathComponent({ latex, nodeKey }) {
               zIndex: 10,
               '&:focus-visible': {
                 outline: '2px solid',
-                outlineColor: 'primary.outlinedBorder',
+                outlineColor: 'var(--joy-palette-focusVisible)',
                 outlineOffset: '2px'
               }
             }}

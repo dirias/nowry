@@ -167,7 +167,7 @@ export default function BugReportModal({ open, onClose, onSubmit }) {
                   value={formData.title}
                   onChange={set('title')}
                   aria-label={t('bugs.modal.titleField')}
-                  sx={{ '&:focus-within': { outline: '2px solid', outlineColor: 'primary.outlinedBorder' } }}
+                  sx={{ '&:focus-within': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)' } }}
                 />
               </FormControl>
 
@@ -214,7 +214,11 @@ export default function BugReportModal({ open, onClose, onSubmit }) {
                         onClick={() => setFormData((prev) => ({ ...prev, severity: value }))}
                         sx={{
                           cursor: 'pointer',
-                          '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' },
+                          '&:focus-visible': {
+                            outline: '2px solid',
+                            outlineColor: 'var(--joy-palette-focusVisible)',
+                            outlineOffset: '2px'
+                          },
                           '&:active': { transform: 'scale(0.95)' }
                         }}
                       >
@@ -242,7 +246,11 @@ export default function BugReportModal({ open, onClose, onSubmit }) {
                         onClick={() => setFormData((prev) => ({ ...prev, category: value }))}
                         sx={{
                           cursor: 'pointer',
-                          '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' },
+                          '&:focus-visible': {
+                            outline: '2px solid',
+                            outlineColor: 'var(--joy-palette-focusVisible)',
+                            outlineOffset: '2px'
+                          },
                           '&:active': { transform: 'scale(0.95)' }
                         }}
                       >
@@ -272,7 +280,7 @@ export default function BugReportModal({ open, onClose, onSubmit }) {
                   aria-label={t('bugs.modal.uploadBtn')}
                   sx={{
                     alignSelf: 'flex-start',
-                    '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
+                    '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)', outlineOffset: '2px' }
                   }}
                 >
                   {maxReached ? t('bugs.modal.maxReached') : t('bugs.modal.uploadBtn')}
@@ -318,7 +326,11 @@ export default function BugReportModal({ open, onClose, onSubmit }) {
                             aria-label={t('bugs.modal.removeScreenshot')}
                             sx={{
                               flexShrink: 0,
-                              '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
+                              '&:focus-visible': {
+                                outline: '2px solid',
+                                outlineColor: 'var(--joy-palette-focusVisible)',
+                                outlineOffset: '2px'
+                              }
                             }}
                           >
                             <X size={14} />
@@ -356,7 +368,7 @@ export default function BugReportModal({ open, onClose, onSubmit }) {
               disabled={loading}
               aria-label={t('common.cancel')}
               sx={{
-                '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
+                '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)', outlineOffset: '2px' }
               }}
             >
               {t('common.cancel')}
@@ -371,7 +383,7 @@ export default function BugReportModal({ open, onClose, onSubmit }) {
               aria-label={t('bugs.modal.submit')}
               sx={{
                 ml: 'auto',
-                '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
+                '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)', outlineOffset: '2px' }
               }}
             >
               {loading ? t('bugs.modal.submitting') : t('bugs.modal.submit')}

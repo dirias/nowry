@@ -448,7 +448,7 @@ const PublicView = () => {
                     sx={{
                       transition: 'transform 0.15s ease',
                       '&:active': { transform: 'scale(0.9)' },
-                      '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder' }
+                      '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)' }
                     }}
                   >
                     {isLiked ? (
@@ -474,7 +474,7 @@ const PublicView = () => {
                   aria-label={t('public.fork')}
                   sx={{
                     fontWeight: 500,
-                    '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '3px' }
+                    '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)', outlineOffset: '3px' }
                   }}
                 >
                   {t('public.fork')}
@@ -496,7 +496,7 @@ const PublicView = () => {
                   fontWeight: 500,
                   color: 'text.tertiary',
                   '&:hover': { bgcolor: 'background.level1' },
-                  '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '3px' }
+                  '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)', outlineOffset: '3px' }
                 }}
               >
                 {t('public.report')}
@@ -665,7 +665,7 @@ const PublicView = () => {
                   sx={{
                     transition: 'transform 0.15s ease',
                     '&:active': { transform: 'scale(0.9)' },
-                    '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder' }
+                    '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)' }
                   }}
                 >
                   {isLiked ? (
@@ -692,7 +692,7 @@ const PublicView = () => {
                 aria-label={t('public.fork')}
                 sx={{
                   flexShrink: 0,
-                  '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '3px' }
+                  '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)', outlineOffset: '3px' }
                 }}
               >
                 {t('public.fork')}
@@ -822,7 +822,7 @@ const PublicView = () => {
                       loading={isAuthenticated ? actionLoading : false}
                       sx={{
                         mt: 1.5,
-                        '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '3px' }
+                        '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)', outlineOffset: '3px' }
                       }}
                       onClick={isAuthenticated ? handleFork : () => navigate('/register')}
                     >
@@ -867,7 +867,7 @@ const PublicView = () => {
                 color='neutral'
                 aria-label={t('common.close')}
                 onClick={() => setShowReadingHint(false)}
-                sx={{ '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' } }}
+                sx={{ '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)', outlineOffset: '2px' } }}
               >
                 <CloseIcon sx={{ fontSize: 16 }} />
               </IconButton>

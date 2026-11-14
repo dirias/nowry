@@ -91,7 +91,7 @@ const QuizSummaryCard = ({ summary, onReviewWeak, onClose }) => {
               }}
               aria-label={t('quiz.summary.view_history')}
               sx={{
-                '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
+                '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)', outlineOffset: '2px' }
               }}
             >
               {t('quiz.summary.view_history')}
@@ -105,7 +105,7 @@ const QuizSummaryCard = ({ summary, onReviewWeak, onClose }) => {
               onClick={onClose}
               aria-label={t('quiz.done_aria')}
               sx={{
-                '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
+                '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)', outlineOffset: '2px' }
               }}
             >
               {t('quiz.done')}

@@ -39,7 +39,7 @@ const FocusAreaCard = ({ area, progress, goalCount, to }) => {
           bgcolor: 'background.level1',
           '& .hover-arrow': { opacity: 1 }
         },
-        '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.outlinedBorder', outlineOffset: '2px' }
+        '&:focus-visible': { outline: '2px solid', outlineColor: 'var(--joy-palette-focusVisible)', outlineOffset: '2px' }
       }}
     >
       <Stack direction='row' alignItems='center' spacing={1} sx={{ mb: 0.5 }}>
