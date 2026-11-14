@@ -11,7 +11,8 @@
  * `nowry://harness`.
  */
 import { ScrollView, View } from 'react-native'
-import { ThemeProvider } from '../src/theme'
+import { ThemeProvider, useTheme } from '../src/theme'
+import { CompanionForm } from '../src/ui/patterns/CompanionForm'
 import { useState } from 'react'
 import {
   ActionSheet,
@@ -24,6 +25,8 @@ import {
   Divider,
   EvolutionReveal,
   FormField,
+  PetOrb,
+  resolveColor,
   Icon,
   IconButton,
   IdentityTile,
@@ -276,6 +279,12 @@ function Panel({ title }) {
             <EvolutionDemo />
           </Section>
         ) : null}
+        {/* The six forms at every size the app draws the companion (EVO-018). */}
+        {__DEV__ ? (
+          <Section label='Companion forms (EVO-018)'>
+            <CompanionSizes />
+          </Section>
+        ) : null}
       </Stack>
     </Box>
   )
@@ -297,6 +306,47 @@ function EvolutionDemo() {
       {pair ? (
         <EvolutionReveal fromStage={pair.from} toStage={pair.to} level={STAGE_LEVELS[pair.from - 1]} onClose={() => setPair(null)} />
       ) : null}
+    </Stack>
+  )
+}
+
+/** Where the app draws the companion: the session note, the chat, the bubble, and its own size in settings and the level-up row. */
+const COMPANION_SIZES = [24, 40, 44, null]
+
+/** The alternative for 24 px, for comparison only: the web's chat disc — paper, the form at 90 %, no rings or motes. */
+function DiscAlternative() {
+  const theme = useTheme()
+  return (
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
+      {[1, 2, 3, 4, 5, 6].map((stage) => (
+        <View
+          key={stage}
+          style={{
+            width: 24,
+            height: 24,
+            borderRadius: 12,
+            overflow: 'hidden',
+            backgroundColor: resolveColor(theme, 'background.surface')
+          }}
+        >
+          <CompanionForm stage={stage} size={24} fill={0.9} />
+        </View>
+      ))}
+    </View>
+  )
+}
+
+function CompanionSizes() {
+  return (
+    <Stack spacing={2}>
+      <DiscAlternative />
+      {COMPANION_SIZES.map((size) => (
+        <View key={String(size)} style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
+          {[1, 2, 3, 4, 5, 6].map((stage) => (
+            <PetOrb key={stage} stage={stage} size={size} still />
+          ))}
+        </View>
+      ))}
     </Stack>
   )
 }
