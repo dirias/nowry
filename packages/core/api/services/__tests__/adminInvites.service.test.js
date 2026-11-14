@@ -51,3 +51,12 @@ it('resends and revokes one invitation by its id', async () => {
   await adminInvitesService.revoke('abc')
   expect(apiClient.post).toHaveBeenLastCalledWith('/beta/admin/invites/abc/revoke', null, OWN_ERRORS)
 })
+
+it('sends waitlist rows by their ids, with no addresses and no language (WAIT-006)', async () => {
+  apiClient.post.mockResolvedValue({ data: { dry_run: false, results: [], invitations_left_today: 60 } })
+  await adminInvitesService.sendBatch({ waitlistIds: ['w1', 'w2'], cohort: 'c1-waitlist', expiresInDays: 14, dryRun: false })
+  const body = apiClient.post.mock.calls[0][1]
+  expect(body).toEqual({ waitlist_ids: ['w1', 'w2'], cohort: 'c1-waitlist', expires_in_days: 14, dry_run: false })
+  expect(Object.keys(body)).not.toContain('addresses')
+  expect(Object.keys(body)).not.toContain('locale')
+})

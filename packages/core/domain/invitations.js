@@ -113,3 +113,14 @@ export const apiErrorDetail = (error) => {
   const detail = error?.response?.data?.detail
   return detail && typeof detail === 'object' ? detail : {}
 }
+
+/**
+ * What a refused send says (board I): over today's budget, with what was asked
+ * and what is left (nothing was sent), or a failure.
+ * @returns {{kind: 'overBudget', needed: number, left: number} | {kind: 'failed'}}
+ */
+export const sendRefusal = (error) => {
+  if (apiErrorCode(error) !== 'over_budget') return { kind: 'failed' }
+  const { needed, left } = apiErrorDetail(error)
+  return { kind: 'overBudget', needed, left }
+}

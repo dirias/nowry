@@ -22,12 +22,11 @@ import {
   DEFAULT_LIFETIME_DAYS,
   INVITE_LOCALES,
   MAX_BATCH,
-  apiErrorCode,
-  apiErrorDetail,
   defaultInviteLocale,
   inviteCount,
   isValidCohort,
   parseAddresses,
+  sendRefusal,
   unsentEntries
 } from '@nowry/core/domain/invitations'
 import { focusRing } from '../../Common/Form/formStyles'
@@ -68,10 +67,7 @@ const useSend = ({ run, onSent }) => {
       onSent(data?.results)
     } catch (error) {
       if (isReauthCancelled(error)) return
-      if (apiErrorCode(error) === 'over_budget') {
-        const { needed, left } = apiErrorDetail(error)
-        setOutcome({ kind: 'overBudget', needed, left })
-      } else setOutcome({ kind: 'failed' })
+      setOutcome(sendRefusal(error))
     } finally {
       setSending(false)
     }

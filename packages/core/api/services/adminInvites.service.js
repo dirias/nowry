@@ -39,10 +39,19 @@ export const adminInvitesService = {
   /**
    * A dry run checks every address; a send emails the ones that can be invited.
    * Over today's budget a send is refused whole with 409 `over_budget`.
-   * @param {{addresses: string[], cohort: string, expiresInDays: number, locale: string, dryRun: boolean}} batch
+   * Waitlist rows go by their ids (WAIT-006), each in its own language, so
+   * `addresses` and `locale` may be left out.
+   * @param {{addresses?: string[], waitlistIds?: string[], cohort: string, expiresInDays: number, locale?: string, dryRun: boolean}} batch
    */
-  sendBatch: async ({ addresses, cohort, expiresInDays, locale, dryRun }) => {
-    const body = { addresses, cohort, expires_in_days: expiresInDays, locale, dry_run: Boolean(dryRun) }
+  sendBatch: async ({ addresses, waitlistIds, cohort, expiresInDays, locale, dryRun }) => {
+    const body = {
+      ...(addresses ? { addresses } : {}),
+      ...(waitlistIds ? { waitlist_ids: waitlistIds } : {}),
+      cohort,
+      expires_in_days: expiresInDays,
+      ...(locale ? { locale } : {}),
+      dry_run: Boolean(dryRun)
+    }
     const { data } = await apiClient.post('/beta/admin/invites/batch', body, OWN_ERRORS)
     return data
   },
