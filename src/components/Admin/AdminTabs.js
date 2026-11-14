@@ -4,6 +4,7 @@ import { Box, Button, Sheet } from '@mui/joy'
 import { useTranslation } from 'react-i18next'
 import { useWaitingCount } from '@nowry/core/hooks/useAdminWaitlist'
 import { useToReviewCount } from '@nowry/core/hooks/useAdminModeration'
+import { useNewBugCount } from '@nowry/core/hooks/useAdminBugs'
 import { segment, segmentedGroup } from '../Common/Form/formStyles'
 import { ADMIN_TABS } from './adminTabList'
 
@@ -16,7 +17,7 @@ import { ADMIN_TABS } from './adminTabList'
 export default function AdminTabs({ tabs = ADMIN_TABS }) {
   const { t } = useTranslation()
   const { pathname } = useLocation()
-  const counts = { waiting: useWaitingCount(), toReview: useToReviewCount() }
+  const counts = { waiting: useWaitingCount(), toReview: useToReviewCount(), newBugs: useNewBugCount() }
   return (
     <Sheet
       component='nav'

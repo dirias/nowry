@@ -62,9 +62,9 @@ const StudyCenter = lazy(() => import('./components/Study/StudyCenter'))
 const UserProfile = lazy(() => import('./components/User/Profile/UserProfile'))
 const AccountSettings = lazy(() => import('./components/User/Profile/AccountSettings'))
 const AgentSettings = lazy(() => import('./components/Agent/AgentSettings'))
-const BugDashboard = lazy(() => import('./components/Bugs/BugDashboard'))
 const AdminPage = lazy(() => import('./components/Admin/AdminPage'))
 const ModerationTab = lazy(() => import('./components/Admin/moderation/ModerationTab'))
+const BugsTab = lazy(() => import('./components/Admin/bugs/BugsTab'))
 const InvitationsTab = lazy(() => import('./components/Admin/invitations/InvitationsTab'))
 const WaitlistTab = lazy(() => import('./components/Admin/waitlist/WaitlistTab'))
 const News = lazy(() => import('./pages/News'))
@@ -352,19 +352,11 @@ const AppContent = () => {
               >
                 <Route index element={<Navigate to={ADMIN_HOME} replace />} />
                 <Route path='moderation' element={<ModerationTab />} />
+                <Route path='bugs' element={<BugsTab />} />
                 <Route path='invitations' element={<InvitationsTab />} />
                 <Route path='waitlist' element={<WaitlistTab />} />
                 <Route path='*' element={<Navigate to={ADMIN_HOME} replace />} />
               </Route>
-              {/* Behind the admin route until batch 4 removes them (ADMIN-007a). */}
-              <Route
-                path='/bugs/dashboard'
-                element={
-                  <AdminRoute>
-                    <BugDashboard />
-                  </AdminRoute>
-                }
-              />
               <Route
                 path='/onboarding'
                 element={

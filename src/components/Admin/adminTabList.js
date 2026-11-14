@@ -8,6 +8,7 @@
  */
 export const ADMIN_TABS = Object.freeze([
   { key: 'moderation', path: '/admin/moderation', labelKey: 'admin.tabs.moderation', count: 'toReview' },
+  { key: 'bugs', path: '/admin/bugs', labelKey: 'admin.tabs.bugs', count: 'newBugs' },
   { key: 'invitations', path: '/admin/invitations', labelKey: 'admin.tabs.invitations' },
   { key: 'waitlist', path: '/admin/waitlist', labelKey: 'admin.tabs.waitlist', count: 'waiting' }
 ])

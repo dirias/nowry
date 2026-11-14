@@ -91,13 +91,13 @@ test('[happy] the admin opens /admin from the account menu and lands on Invitati
   await expect(page.getByRole('heading', { name: 'Admin', level: 1 })).toBeVisible()
   await expect(page.getByText('Only you can see this')).toBeVisible()
   await expect(page.getByText('Invite people')).toBeVisible()
-  await page.goto('/bugs/dashboard')
-  await expect(page).toHaveURL(/\/bugs\/dashboard$/)
+  await page.goto('/admin/bugs')
+  await expect(page).toHaveURL(/\/admin\/bugs$/)
 })
 
 test('[edge] an ordinary account is sent Home from /admin and has no Admin in its menu', async ({ page }) => {
   await signIn(page, userEmail)
-  for (const path of ['/admin', '/admin/invitations', '/bugs/dashboard']) {
+  for (const path of ['/admin', '/admin/invitations', '/admin/bugs']) {
     await page.goto(path)
     await page.waitForURL((url) => url.pathname === '/', { timeout: 30000 })
   }
