@@ -222,6 +222,22 @@ export const userService = {
     return data
   },
 
+  /** Change the password: the API checks the current one (ADR-092, FR-044). */
+  async changePassword(currentPassword, newPassword, language) {
+    const { data } = await apiClient.post('/auth/password/change', {
+      current_password: currentPassword,
+      new_password: newPassword,
+      language
+    })
+    return data
+  },
+
+  /** Add a password to a Google-only account, after a fresh Google sign-in (ADR-092, FR-045). */
+  async setPassword(newPassword, language) {
+    const { data } = await apiClient.post('/auth/password/set', { new_password: newPassword, language })
+    return data
+  },
+
   /** The re-registration notice was read; it is not shown again (ADR-089, FR-041). */
   async dismissPreviousAccount() {
     await apiClient.post('/users/me/notices/previous-account/dismiss')

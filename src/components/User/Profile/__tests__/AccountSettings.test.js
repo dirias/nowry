@@ -23,12 +23,20 @@ const mockUserService = {
   exportData: jest.fn(),
   patchProfile: jest.fn(),
   updateNotifications: jest.fn(),
-  updateGeneralPreferences: jest.fn()
+  updateGeneralPreferences: jest.fn(),
+  changePassword: jest.fn(),
+  setPassword: jest.fn()
 }
 jest.mock('@nowry/core/api/services', () => ({ userService: mockUserService }))
 // The deletion dialog's hook reads these two directly (ADR-089).
 jest.mock('@nowry/core/api/services/user.service', () => ({ userService: mockUserService }))
-const mockAuthService = { signInTime: jest.fn(), signInProviders: () => ['password'], reauthenticate: jest.fn() }
+const mockAuthService = {
+  signInTime: jest.fn(),
+  signInProviders: () => ['password'],
+  reauthenticate: jest.fn(),
+  signInAgainWithPassword: jest.fn(),
+  reloadProviders: jest.fn()
+}
 jest.mock('@nowry/core/api/services/auth.service', () => ({ authService: mockAuthService }))
 jest.mock('@nowry/core/api/services/agent.service', () => ({ agentService: { updatePrefs: jest.fn() } }))
 jest.mock('@nowry/core/platform', () => ({ alerts: { toast: jest.fn(), confirm: jest.fn() } }))
@@ -145,35 +153,49 @@ describe('deleting the account', () => {
   })
 })
 
-describe('changing the password', () => {
+describe('changing the password (ADR-092)', () => {
   const openForm = () => fireEvent.click(screen.getByRole('button', { name: 'settings.security.changePasswordCta' }))
-  const typePasswords = (first, second) => {
-    fireEvent.change(screen.getByPlaceholderText('settings.security.newPassword'), { target: { value: first } })
-    fireEvent.change(screen.getByPlaceholderText('settings.security.confirmPassword'), { target: { value: second } })
+  const fill = (current, next, confirmation) => {
+    const form = screen.getByTestId('password-section')
+    fireEvent.change(form.querySelector('input[name="current-password"]'), { target: { value: current } })
+    fireEvent.change(form.querySelector('input[name="new-password"]'), { target: { value: next } })
+    fireEvent.change(form.querySelector('input[name="confirm-password"]'), { target: { value: confirmation } })
     fireEvent.click(screen.getByRole('button', { name: 'settings.security.save' }))
   }
 
-  it('refuses a mismatch before asking Firebase to re-authenticate', async () => {
+  it('asks for the current password with the new one and refuses a mismatch before asking the API', async () => {
     await renderPage()
     openForm()
-    typePasswords('long-enough-1', 'long-enough-2')
-    expect(screen.getByText('settings.security.passwordMismatch')).toBeInTheDocument()
-    expect(screen.queryByPlaceholderText('settings.security.currentPassword')).not.toBeInTheDocument()
-    expect(mockReauth).not.toHaveBeenCalled()
+    fill('Old-password-1', 'long-enough-1', 'long-enough-2')
+    expect(await screen.findByText('settings.security.passwordMismatch')).toBeInTheDocument()
+    expect(mockUserService.changePassword).not.toHaveBeenCalled()
   })
 
   it('refuses a short password', async () => {
     await renderPage()
     openForm()
-    typePasswords('short', 'short')
-    expect(screen.getByText('settings.security.passwordTooShort')).toBeInTheDocument()
-    expect(mockReauth).not.toHaveBeenCalled()
+    fill('Old-password-1', 'short', 'short')
+    expect(await screen.findByText('settings.security.passwordTooShort')).toBeInTheDocument()
+    expect(mockUserService.changePassword).not.toHaveBeenCalled()
   })
 
-  it('asks for the current password once the new one is valid', async () => {
+  it('a wrong current password is said plainly and changes nothing', async () => {
+    mockUserService.changePassword.mockRejectedValue({ response: { status: 400, data: { detail: { code: 'wrong_password' } } } })
     await renderPage()
     openForm()
-    typePasswords('long-enough-1', 'long-enough-1')
-    expect(screen.getByPlaceholderText('settings.security.currentPassword')).toBeInTheDocument()
+    fill('nope-nope', 'long-enough-1', 'long-enough-1')
+    expect(await screen.findByText('settings.security.wrongPassword')).toBeInTheDocument()
+    expect(mockAuthService.signInAgainWithPassword).not.toHaveBeenCalled()
+  })
+
+  it('the right one changes it through the API, signs in again with the new one and says other devices were signed out', async () => {
+    mockUserService.changePassword.mockResolvedValue({ status: 'changed' })
+    mockAuthService.signInAgainWithPassword.mockResolvedValue()
+    await renderPage()
+    openForm()
+    fill('Old-password-1', 'long-enough-1', 'long-enough-1')
+    expect(await screen.findByText('settings.security.passwordChanged')).toBeInTheDocument()
+    expect(mockUserService.changePassword).toHaveBeenCalledWith('Old-password-1', 'long-enough-1', 'en')
+    expect(mockAuthService.signInAgainWithPassword).toHaveBeenCalledWith('long-enough-1')
   })
 })

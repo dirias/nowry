@@ -444,6 +444,10 @@
       "invite": "Nowry está en beta privada. Necesitas una invitación para crear una cuenta.",
       "verifyEmail": "Primero confirma tu correo. Abre el enlace que te enviamos y vuelve a iniciar sesión.",
       "account": "Hay un problema con tu cuenta. Escríbenos a support@nowry.app."
+    },
+    "setPassword": {
+      "body": "Primero inicia sesión con Google. Después podrás crear una contraseña para entrar también con tu correo.",
+      "failed": "No se pudo completar. Inténtalo de nuevo en un momento."
     }
   },
   "landing": {
@@ -1018,10 +1022,10 @@
       "passwordMismatch": "Las contraseñas no coinciden",
       "passwordTooShort": "La contraseña debe tener al menos 8 caracteres",
       "passwordTooWeak": "La contraseña es demasiado débil",
-      "wrongPassword": "La contraseña actual es incorrecta",
+      "wrongPassword": "Esa no es tu contraseña actual.",
       "reauthRequired": "Introduce tu contraseña actual para continuar",
       "passwordChangeFailed": "Error al actualizar la contraseña. Inténtalo de nuevo.",
-      "passwordChanged": "Contraseña actualizada correctamente",
+      "passwordChanged": "Contraseña cambiada. Se cerró la sesión en tus otros dispositivos y te enviamos un aviso por correo.",
       "save": "Actualizar contraseña",
       "twoFactor": "Autenticación de dos factores",
       "twoFactorDesc": "Añade una capa extra de seguridad",
@@ -1029,7 +1033,17 @@
       "enable2FA": "Activar 2FA",
       "disable2FA": "Desactivar",
       "success2FA": "2FA activado. Códigos de respaldo:",
-      "disabled2FA": "2FA desactivado correctamente"
+      "disabled2FA": "2FA desactivado correctamente",
+      "setPassword": "Crear una contraseña",
+      "setPasswordBody": "Tu cuenta inicia sesión con Google. Una contraseña te permite entrar también con tu correo y contraseña. Primero confirmarás con Google.",
+      "setPasswordGoogle": "Confirmar con Google y crear la contraseña",
+      "googleConnected": "El inicio de sesión con Google también está conectado.",
+      "passwordSet": "Contraseña creada. Ahora también puedes entrar con tu correo y contraseña, y te enviamos un aviso por correo.",
+      "tooManyAttempts": "Demasiados intentos fallidos. Inténtalo de nuevo en {{minutes}} minutos.",
+      "reauthGoogle": "Confirma con Google para continuar.",
+      "currentRequired": "Escribe tu contraseña actual.",
+      "reload": "Recarga la página e inténtalo de nuevo.",
+      "otherDevices": "Cambiar la contraseña cierra la sesión en tus otros dispositivos."
     },
     "danger": {
       "title": "Zona de peligro",

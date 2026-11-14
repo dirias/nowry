@@ -207,3 +207,4 @@ DEBUG_*.md
 
 # The dev end-to-end suite's Vercel bypass secret (never committed)
 .env.e2e.local
+/packages/core/coverage/

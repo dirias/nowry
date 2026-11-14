@@ -519,6 +519,10 @@
       "invite": "Nowry est en bêta privée. Il vous faut une invitation pour créer un compte.",
       "verifyEmail": "Confirmez d'abord votre adresse e-mail. Ouvrez le lien que nous vous avons envoyé, puis reconnectez-vous.",
       "account": "Il y a un problème avec votre compte. Écrivez-nous à support@nowry.app."
+    },
+    "setPassword": {
+      "body": "Connectez-vous d'abord avec Google. Vous pourrez ensuite définir un mot de passe pour vous connecter aussi avec votre e-mail.",
+      "failed": "Cela n'a pas abouti. Réessayez dans un instant."
     }
   },
   "landing": {
@@ -1068,10 +1072,10 @@
       "passwordMismatch": "Les mots de passe ne correspondent pas",
       "passwordTooShort": "Le mot de passe doit contenir au moins 8 caractères",
       "passwordTooWeak": "Le mot de passe est trop faible",
-      "wrongPassword": "Le mot de passe actuel est incorrect",
+      "wrongPassword": "Ce n'est pas votre mot de passe actuel.",
       "reauthRequired": "Entrez votre mot de passe actuel pour continuer",
       "passwordChangeFailed": "Échec de la mise à jour du mot de passe. Réessayez.",
-      "passwordChanged": "Mot de passe mis à jour avec succès",
+      "passwordChanged": "Mot de passe modifié. Vos autres appareils ont été déconnectés, et nous vous avons envoyé un avis.",
       "save": "Mettre à jour le mot de passe",
       "twoFactor": "Authentification à deux facteurs",
       "twoFactorDesc": "Ajoutez une couche de sécurité supplémentaire",
@@ -1079,7 +1083,17 @@
       "enable2FA": "Activer 2FA",
       "disable2FA": "Désactiver",
       "success2FA": "2FA Activé ! Codes de secours :",
-      "disabled2FA": "2FA désactivé avec succès"
+      "disabled2FA": "2FA désactivé avec succès",
+      "setPassword": "Définir un mot de passe",
+      "setPasswordBody": "Votre compte se connecte avec Google. Un mot de passe vous permet de vous connecter aussi avec votre e-mail et votre mot de passe. Vous confirmerez d'abord avec Google.",
+      "setPasswordGoogle": "Confirmer avec Google et définir le mot de passe",
+      "googleConnected": "La connexion avec Google est aussi active.",
+      "passwordSet": "Mot de passe défini. Vous pouvez maintenant aussi vous connecter avec votre e-mail et votre mot de passe, et nous vous avons envoyé un avis.",
+      "tooManyAttempts": "Trop de tentatives incorrectes. Réessayez dans {{minutes}} minutes.",
+      "reauthGoogle": "Confirmez avec Google pour continuer.",
+      "currentRequired": "Saisissez votre mot de passe actuel.",
+      "reload": "Rechargez la page et réessayez.",
+      "otherDevices": "Changer de mot de passe déconnecte vos autres appareils."
     },
     "notifications": {
       "title": "Notifications",

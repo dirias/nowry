@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
-import { Link as RouterLink } from 'react-router-dom'
+import { Link as RouterLink, useLocation } from 'react-router-dom'
 
 import {
   Container,
@@ -14,7 +14,6 @@ import {
   Switch,
   Divider,
   Alert,
-  LinearProgress,
   Select,
   Option,
   Chip,
@@ -22,8 +21,6 @@ import {
   Avatar,
   IconButton,
   CircularProgress,
-  Modal,
-  ModalDialog,
   ModalClose,
   Sheet,
   Tooltip,
@@ -46,7 +43,6 @@ import {
   SaveRounded,
   CheckRounded,
   LockRounded,
-  VpnKeyRounded,
   PersonRounded,
   WarningAmberRounded
 } from '@mui/icons-material'
@@ -64,11 +60,11 @@ import { useColorScheme } from '@mui/joy/styles'
 import { useThemePreferences } from '../../../theme/DynamicThemeProvider'
 import DeleteConfirmationModal from '../../Common/DeleteConfirmationModal'
 import DeleteAccountDialog from './DeleteAccountDialog'
+import PasswordSection from './PasswordSection'
 import { useAuth } from '@nowry/core/context/AuthContext'
 import { usePet } from '@nowry/core/context/AgentContext'
 import { auth } from '../../../config/firebase.config'
 import { useQueryClient } from '@tanstack/react-query'
-import { EmailAuthProvider, reauthenticateWithCredential, updatePassword } from 'firebase/auth'
 import { useTranslation } from 'react-i18next'
 import { useBlockReminderSetting } from '@nowry/core/hooks/useBlockReminders'
 import LearningPreferencesSection from './LearningPreferencesSection'
@@ -215,6 +211,9 @@ export default function AccountSettings() {
   // concept was retired; username is unique and shown/editable everywhere.
   const [username, setUsername] = useState('')
   const [loadedUsername, setLoadedUsername] = useState('')
+  // Arrived from /set-password (FR-047): open Security → Set a password.
+  const location = useLocation()
+  const openPasswordOnArrival = new URLSearchParams(location.search).get('password') === 'set'
   const [usernameSaving, setUsernameSaving] = useState(false)
   const [usernameSaved, setUsernameSaved] = useState(false)
   const [usernameError, setUsernameError] = useState(null)
@@ -251,16 +250,6 @@ export default function AccountSettings() {
   const [agentSavedKey, setAgentSavedKey] = useState(null)
 
   // ── Security ────────────────────────────────────────────────────────────────
-  const [showPasswordForm, setShowPasswordForm] = useState(false)
-  const [newPassword, setNewPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [passwordSaving, setPasswordSaving] = useState(false)
-  const [passwordSuccess, setPasswordSuccess] = useState(false)
-  const [passwordError, setPasswordError] = useState(null)
-  const [showReauthModal, setShowReauthModal] = useState(false)
-  const [currentPassword, setCurrentPassword] = useState('')
-  const [reauthError, setReauthError] = useState(null)
-  const [reauthLoading, setReauthLoading] = useState(false)
 
   // ── Danger ──────────────────────────────────────────────────────────────────
   const [showDeleteModal, setShowDeleteModal] = useState(false)
@@ -423,73 +412,6 @@ export default function AccountSettings() {
   }
 
   // ── Handlers — Security ──────────────────────────────────────────────────────
-  const getPasswordStrength = (password) => {
-    if (!password) return { strength: 0, label: '', color: 'neutral' }
-    let strength = 0
-    if (password.length >= 8) strength += 25
-    if (password.length >= 12) strength += 25
-    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength += 25
-    if (/\d/.test(password)) strength += 15
-    if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) strength += 10
-    if (strength < 40) return { strength, label: t('auth.passwordStrength.weak'), color: 'danger' }
-    if (strength < 70) return { strength, label: t('auth.passwordStrength.fair'), color: 'warning' }
-    return { strength, label: t('auth.passwordStrength.strong'), color: 'success' }
-  }
-
-  const resetPasswordForm = () => {
-    setNewPassword('')
-    setConfirmPassword('')
-    setCurrentPassword('')
-    setPasswordError(null)
-    setReauthError(null)
-    setShowPasswordForm(false)
-  }
-
-  const handlePasswordChange = () => {
-    setPasswordError(null)
-    if (newPassword !== confirmPassword) {
-      setPasswordError(t('settings.security.passwordMismatch'))
-      return
-    }
-    if (newPassword.length < 8) {
-      setPasswordError(t('settings.security.passwordTooShort'))
-      return
-    }
-    setShowReauthModal(true)
-  }
-
-  const handleReauthAndUpdate = async () => {
-    setReauthLoading(true)
-    setReauthError(null)
-    try {
-      const credential = EmailAuthProvider.credential(user.email, currentPassword)
-      await reauthenticateWithCredential(auth.currentUser, credential)
-      setShowReauthModal(false)
-      setPasswordSaving(true)
-      await updatePassword(auth.currentUser, newPassword)
-      setPasswordSuccess(true)
-      setNewPassword('')
-      setConfirmPassword('')
-      setCurrentPassword('')
-      setShowPasswordForm(false)
-      setTimeout(() => setPasswordSuccess(false), 4000)
-    } catch (err) {
-      if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
-        setReauthError(t('settings.security.wrongPassword'))
-      } else if (err.code === 'auth/requires-recent-login') {
-        setReauthError(t('settings.security.reauthRequired'))
-      } else if (err.code === 'auth/weak-password') {
-        setPasswordError(t('settings.security.passwordTooWeak'))
-        setShowReauthModal(false)
-      } else {
-        setPasswordError(t('settings.security.passwordChangeFailed'))
-        setShowReauthModal(false)
-      }
-    } finally {
-      setReauthLoading(false)
-      setPasswordSaving(false)
-    }
-  }
 
   // ── Danger: the deletion dialog (DeleteAccountDialog, ADR-089) ───────────
 
@@ -514,6 +436,11 @@ export default function AccountSettings() {
   }
 
   // ── Scroll helper ─────────────────────────────────────────────────────────────
+  // Arrived from /set-password: bring the password form into view once the page has loaded (FR-047).
+  useEffect(() => {
+    if (openPasswordOnArrival && !pageLoading) document.getElementById('security-password')?.scrollIntoView({ block: 'center' })
+  }, [openPasswordOnArrival, pageLoading])
+
   const scrollToSection = (sectionId) => {
     setActiveSection(sectionId)
     const el = document.getElementById(sectionId)
@@ -521,9 +448,6 @@ export default function AccountSettings() {
     const block = sectionId === 'section-danger' ? 'end' : 'start'
     el.scrollIntoView({ behavior: 'smooth', block })
   }
-
-  // ── Derived ──────────────────────────────────────────────────────────────────
-  const passwordStrength = getPasswordStrength(newPassword)
 
   return (
     <Container maxWidth='lg' sx={{ pt: { xs: 2, md: 4 }, pb: { xs: 8, md: 12 }, px: { xs: 1.5, md: 3 } }}>
@@ -1021,104 +945,8 @@ export default function AccountSettings() {
             <SectionBlock id='section-security' title={t('settings.security.title')} loading={pageLoading}>
               <Stack spacing={3}>
                 <EmailVerificationNotice />
-                {/* Success / error alerts */}
-                {passwordSuccess && (
-                  <Alert color='success' variant='soft' size='sm'>
-                    {t('settings.security.passwordChanged')}
-                  </Alert>
-                )}
-                {passwordError && (
-                  <Alert
-                    color='danger'
-                    variant='soft'
-                    size='sm'
-                    endDecorator={
-                      <IconButton
-                        size='sm'
-                        variant='plain'
-                        color='danger'
-                        onClick={() => setPasswordError(null)}
-                        aria-label={t('common.close')}
-                      >
-                        ×
-                      </IconButton>
-                    }
-                  >
-                    {passwordError}
-                  </Alert>
-                )}
-
-                {/* Change password */}
-                <Box>
-                  <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: showPasswordForm ? 2 : 0 }}>
-                    <Box>
-                      <Typography level='title-sm'>{t('settings.security.changePassword')}</Typography>
-                    </Box>
-                    {!showPasswordForm && (
-                      <Button
-                        variant='outlined'
-                        size='sm'
-                        startDecorator={<VpnKeyRounded sx={{ fontSize: 16 }} />}
-                        onClick={() => setShowPasswordForm(true)}
-                      >
-                        {t('settings.security.changePasswordCta')}
-                      </Button>
-                    )}
-                  </Stack>
-
-                  {showPasswordForm && (
-                    <Stack spacing={2}>
-                      <FormControl>
-                        <FormLabel>{t('settings.security.newPassword')}</FormLabel>
-                        <Input
-                          type='password'
-                          value={newPassword}
-                          onChange={(e) => setNewPassword(e.target.value)}
-                          placeholder={t('settings.security.newPassword')}
-                        />
-                        {newPassword && (
-                          <Box sx={{ mt: 1 }}>
-                            <Stack direction='row' spacing={1} alignItems='center' sx={{ mb: 0.5 }}>
-                              <Typography level='body-xs' color={passwordStrength.color}>
-                                {passwordStrength.label}
-                              </Typography>
-                            </Stack>
-                            <LinearProgress
-                              determinate
-                              value={passwordStrength.strength}
-                              color={passwordStrength.color}
-                              sx={{ height: 4, borderRadius: 'sm' }}
-                            />
-                          </Box>
-                        )}
-                      </FormControl>
-
-                      <FormControl>
-                        <FormLabel>{t('settings.security.confirmPassword')}</FormLabel>
-                        <Input
-                          type='password'
-                          value={confirmPassword}
-                          onChange={(e) => setConfirmPassword(e.target.value)}
-                          placeholder={t('settings.security.confirmPassword')}
-                        />
-                      </FormControl>
-
-                      <Stack direction='row' spacing={1}>
-                        <Button
-                          size='sm'
-                          loading={passwordSaving}
-                          onClick={handlePasswordChange}
-                          disabled={!newPassword || !confirmPassword}
-                        >
-                          {t('settings.security.save')}
-                        </Button>
-                        <Button size='sm' variant='plain' color='neutral' onClick={resetPasswordForm}>
-                          {t('common.cancel')}
-                        </Button>
-                      </Stack>
-                    </Stack>
-                  )}
-                </Box>
+                {/* The password: change, or set on a Google-only account (ADR-092) */}
+                <PasswordSection openOnArrival={openPasswordOnArrival} />
 
                 <Divider />
 
@@ -1261,93 +1089,6 @@ export default function AccountSettings() {
           </List>
         </Sheet>
       </Drawer>
-
-      {/* ── Re-auth Modal ─────────────────────────────────────────────────────── */}
-      <Modal
-        open={showReauthModal}
-        onClose={() => {
-          setShowReauthModal(false)
-          setReauthError(null)
-        }}
-      >
-        <ModalDialog
-          sx={{
-            width: { xs: '95%', sm: 420 },
-            p: 0
-          }}
-        >
-          <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'background.level1' }}>
-            <Stack direction='row' spacing={1.5} alignItems='center'>
-              <Box
-                sx={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: '50%',
-                  bgcolor: 'primary.softBg',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                <LockRounded sx={{ fontSize: 20, color: 'primary.plainColor' }} />
-              </Box>
-              <Typography level='title-lg'>{t('settings.security.changePassword')}</Typography>
-            </Stack>
-            <ModalClose sx={{ top: 12, right: 12 }} />
-          </Box>
-
-          <Box sx={{ p: 3 }}>
-            <Typography level='body-sm' sx={{ color: 'text.secondary', mb: 2 }}>
-              {t('settings.security.reauthRequired')}
-            </Typography>
-
-            {reauthError && (
-              <Alert color='danger' variant='soft' size='sm' sx={{ mb: 2 }}>
-                {reauthError}
-              </Alert>
-            )}
-
-            <FormControl>
-              <FormLabel>{t('settings.security.currentPassword')}</FormLabel>
-              <Input
-                type='password'
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleReauthAndUpdate()}
-                placeholder={t('settings.security.currentPassword')}
-                autoFocus
-              />
-            </FormControl>
-          </Box>
-
-          <Box
-            sx={{
-              p: 2,
-              borderTop: '1px solid',
-              borderColor: 'divider',
-              bgcolor: 'background.surface',
-              display: 'flex',
-              justifyContent: 'flex-end',
-              gap: 1
-            }}
-          >
-            <Button
-              variant='outlined'
-              color='neutral'
-              size='sm'
-              onClick={() => {
-                setShowReauthModal(false)
-                setReauthError(null)
-              }}
-            >
-              {t('common.cancel')}
-            </Button>
-            <Button size='sm' loading={reauthLoading} disabled={!currentPassword} onClick={handleReauthAndUpdate}>
-              {t('settings.security.save')}
-            </Button>
-          </Box>
-        </ModalDialog>
-      </Modal>
 
       {/* ── Delete Account: email, then a fresh sign-in when needed (ADR-089) ── */}
       <DeleteAccountDialog open={showDeleteModal} onClose={() => setShowDeleteModal(false)} email={user?.email} />

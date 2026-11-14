@@ -444,6 +444,10 @@
       "invite": "Nowry is in private beta. You need an invitation to make an account.",
       "verifyEmail": "Confirm your email first. Open the link we sent you, then sign in again.",
       "account": "There's a problem with your account. Write to support@nowry.app."
+    },
+    "setPassword": {
+      "body": "Sign in with Google first. Then you can set a password, so you can also sign in with your email.",
+      "failed": "That didn't go through. Try again in a moment."
     }
   },
   "landing": {
@@ -1059,10 +1063,10 @@
       "passwordMismatch": "Passwords do not match",
       "passwordTooShort": "Password must be at least 8 characters",
       "passwordTooWeak": "Password is too weak",
-      "wrongPassword": "Current password is incorrect",
+      "wrongPassword": "That isn't your current password.",
       "reauthRequired": "Enter your current password to continue",
       "passwordChangeFailed": "Failed to update password. Please try again.",
-      "passwordChanged": "Password updated successfully",
+      "passwordChanged": "Password changed. Your other devices were signed out, and we emailed you a notice.",
       "save": "Update password",
       "twoFactor": "Two-factor authentication",
       "twoFactorDesc": "Add an extra layer of security",
@@ -1070,7 +1074,17 @@
       "enable2FA": "Enable 2FA",
       "disable2FA": "Disable",
       "success2FA": "2FA Enabled! Backup codes:",
-      "disabled2FA": "2FA disabled successfully"
+      "disabled2FA": "2FA disabled successfully",
+      "setPassword": "Set a password",
+      "setPasswordBody": "Your account signs in with Google. A password lets you also sign in with your email and password. You'll confirm with Google first.",
+      "setPasswordGoogle": "Confirm with Google and set password",
+      "googleConnected": "Google sign-in is also connected.",
+      "passwordSet": "Password set. You can now also sign in with your email and password, and we emailed you a notice.",
+      "tooManyAttempts": "Too many wrong attempts. Try again in {{minutes}} minutes.",
+      "reauthGoogle": "Confirm with Google to continue.",
+      "currentRequired": "Enter your current password.",
+      "reload": "Reload the page and try again.",
+      "otherDevices": "Changing your password signs out your other devices."
     },
     "danger": {
       "title": "Danger Zone",

@@ -508,6 +508,10 @@
       "invite": "Nowry ist in einer privaten Beta. Du brauchst eine Einladung, um ein Konto zu erstellen.",
       "verifyEmail": "Bestätige zuerst deine E-Mail-Adresse. Öffne den Link, den wir dir geschickt haben, und melde dich dann erneut an.",
       "account": "Mit deinem Konto stimmt etwas nicht. Schreib uns an support@nowry.app."
+    },
+    "setPassword": {
+      "body": "Melde dich zuerst mit Google an. Danach kannst du ein Passwort festlegen, um dich auch mit deiner E-Mail anzumelden.",
+      "failed": "Das hat nicht geklappt. Versuch es gleich noch einmal."
     }
   },
   "landing": {
@@ -1057,10 +1061,10 @@
       "passwordMismatch": "Passwörter stimmen nicht überein",
       "passwordTooShort": "Das Passwort muss mindestens 8 Zeichen haben",
       "passwordTooWeak": "Das Passwort ist zu schwach",
-      "wrongPassword": "Das aktuelle Passwort ist falsch",
+      "wrongPassword": "Das ist nicht dein aktuelles Passwort.",
       "reauthRequired": "Gib dein aktuelles Passwort ein, um fortzufahren",
       "passwordChangeFailed": "Passwort konnte nicht aktualisiert werden. Bitte erneut versuchen.",
-      "passwordChanged": "Passwort erfolgreich aktualisiert",
+      "passwordChanged": "Passwort geändert. Deine anderen Geräte wurden abgemeldet, und wir haben dir eine Mitteilung geschickt.",
       "save": "Passwort aktualisieren",
       "twoFactor": "Zwei-Faktor-Authentifizierung",
       "twoFactorDesc": "Füge deinem Konto eine zusätzliche Sicherheitsebene hinzu",
@@ -1068,7 +1072,17 @@
       "enable2FA": "2FA Aktivieren",
       "disable2FA": "Deaktivieren",
       "success2FA": "2FA Aktiviert! Backup-Codes:",
-      "disabled2FA": "2FA erfolgreich deaktiviert"
+      "disabled2FA": "2FA erfolgreich deaktiviert",
+      "setPassword": "Passwort festlegen",
+      "setPasswordBody": "Dein Konto meldet sich mit Google an. Mit einem Passwort kannst du dich auch mit deiner E-Mail und einem Passwort anmelden. Du bestätigst zuerst mit Google.",
+      "setPasswordGoogle": "Mit Google bestätigen und Passwort festlegen",
+      "googleConnected": "Die Anmeldung mit Google ist ebenfalls verbunden.",
+      "passwordSet": "Passwort festgelegt. Du kannst dich jetzt auch mit deiner E-Mail und deinem Passwort anmelden, und wir haben dir eine Mitteilung geschickt.",
+      "tooManyAttempts": "Zu viele falsche Versuche. Versuch es in {{minutes}} Minuten noch einmal.",
+      "reauthGoogle": "Bestätige mit Google, um fortzufahren.",
+      "currentRequired": "Gib dein aktuelles Passwort ein.",
+      "reload": "Lade die Seite neu und versuch es noch einmal.",
+      "otherDevices": "Eine Passwortänderung meldet deine anderen Geräte ab."
     },
     "notifications": {
       "title": "Benachrichtigungen",

@@ -47,6 +47,7 @@ import { MAX_TOPICS, STUDY_GOALS, TOPICS } from '@nowry/core/constants/learningT
 import { queryClient } from '@nowry/core/api/queryClient'
 import { userService } from '@nowry/core/api/services'
 import { useAccountDeletion } from '@nowry/core/hooks/useAccountDeletion'
+import { PasswordSettings } from './PasswordSettings'
 import { requestNotificationPermission } from '../platform/alerts'
 import { useBlockReminderSetting } from '@nowry/core/hooks/useBlockReminders'
 import { useAppearance, MODES } from '../theme/AppearanceProvider'
@@ -256,6 +257,11 @@ export function Settings() {
         >
           <Switch value={blockReminders.enabled} />
         </SettingRow>
+
+        <Divider />
+
+        {/* The password: change, or set on a Google-only account (ADR-092). */}
+        <PasswordSettings />
 
         <Divider />
 
