@@ -85,10 +85,15 @@ test('[happy] unpublish from the Moderation tab: the public copy goes, the priva
   await page.getByRole('button', { name: 'Unpublish 2 items' }).click()
   await expect(page.getByText(/Unpublished 2 items/)).toBeVisible({ timeout: 30000 })
 
-  expect((await client.get(`/public/decks/${original}`)).status(), 'the original is no longer public').toBe(404)
-  expect((await client.get(`/public/decks/${publicCopy}`)).status(), 'the public copy went with it').toBe(404)
+  // The public page answers an item that is not public with an empty body (it did before ADR-087).
+  expect(await (await client.get(`/public/decks/${original}`)).json(), 'the original is no longer public').toBeNull()
+  expect(await (await client.get(`/public/decks/${publicCopy}`)).json(), 'the public copy went with it').toBeNull()
+  const ownDeck = async (who, id) => (await client.get(`/decks/${id}`, { headers: bearer(who.token) })).json()
+  expect((await ownDeck(owner, original)).is_public).toBe(false)
+  expect((await ownDeck(copier, publicCopy)).is_public).toBe(false)
   const kept = await client.get(`/decks/${privateCopy}`, { headers: bearer(keeper.token) })
   expect(kept.status(), 'the private copy stays').toBe(200)
+  expect((await kept.json()).removal ?? null, 'the private copy carries no removal').toBeNull()
 
   const [toOwner] = await waitForEmails(owner.email, 'content.removed', { since: started })
   expect(toOwner.text).toContain(title)
