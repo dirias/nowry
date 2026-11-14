@@ -1,0 +1,820 @@
+
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Code coverage report for core/domain/board/ops.js</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../../prettify.css" />
+    <link rel="stylesheet" href="../../../base.css" />
+    <link rel="shortcut icon" type="image/x-icon" href="../../../favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+    
+<body>
+<div class='wrapper'>
+    <div class='pad1'>
+        <h1><a href="../../../index.html">All files</a> / <a href="index.html">core/domain/board</a> ops.js</h1>
+        <div class='clearfix'>
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">95.23% </span>
+                <span class="quiet">Statements</span>
+                <span class='fraction'>140/147</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">81.13% </span>
+                <span class="quiet">Branches</span>
+                <span class='fraction'>86/106</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">91.66% </span>
+                <span class="quiet">Functions</span>
+                <span class='fraction'>44/48</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">97.36% </span>
+                <span class="quiet">Lines</span>
+                <span class='fraction'>111/114</span>
+            </div>
+        
+            
+        </div>
+        <p class="quiet">
+            Press <em>n</em> or <em>j</em> to go to the next uncovered block, <em>b</em>, <em>p</em> or <em>k</em> for the previous block.
+        </p>
+        <template id="filterTemplate">
+            <div class="quiet">
+                Filter:
+                <input type="search" id="fileSearch">
+            </div>
+        </template>
+    </div>
+    <div class='status-line high'></div>
+    <pre><table class="coverage">
+<tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
+<a name='L2'></a><a href='#L2'>2</a>
+<a name='L3'></a><a href='#L3'>3</a>
+<a name='L4'></a><a href='#L4'>4</a>
+<a name='L5'></a><a href='#L5'>5</a>
+<a name='L6'></a><a href='#L6'>6</a>
+<a name='L7'></a><a href='#L7'>7</a>
+<a name='L8'></a><a href='#L8'>8</a>
+<a name='L9'></a><a href='#L9'>9</a>
+<a name='L10'></a><a href='#L10'>10</a>
+<a name='L11'></a><a href='#L11'>11</a>
+<a name='L12'></a><a href='#L12'>12</a>
+<a name='L13'></a><a href='#L13'>13</a>
+<a name='L14'></a><a href='#L14'>14</a>
+<a name='L15'></a><a href='#L15'>15</a>
+<a name='L16'></a><a href='#L16'>16</a>
+<a name='L17'></a><a href='#L17'>17</a>
+<a name='L18'></a><a href='#L18'>18</a>
+<a name='L19'></a><a href='#L19'>19</a>
+<a name='L20'></a><a href='#L20'>20</a>
+<a name='L21'></a><a href='#L21'>21</a>
+<a name='L22'></a><a href='#L22'>22</a>
+<a name='L23'></a><a href='#L23'>23</a>
+<a name='L24'></a><a href='#L24'>24</a>
+<a name='L25'></a><a href='#L25'>25</a>
+<a name='L26'></a><a href='#L26'>26</a>
+<a name='L27'></a><a href='#L27'>27</a>
+<a name='L28'></a><a href='#L28'>28</a>
+<a name='L29'></a><a href='#L29'>29</a>
+<a name='L30'></a><a href='#L30'>30</a>
+<a name='L31'></a><a href='#L31'>31</a>
+<a name='L32'></a><a href='#L32'>32</a>
+<a name='L33'></a><a href='#L33'>33</a>
+<a name='L34'></a><a href='#L34'>34</a>
+<a name='L35'></a><a href='#L35'>35</a>
+<a name='L36'></a><a href='#L36'>36</a>
+<a name='L37'></a><a href='#L37'>37</a>
+<a name='L38'></a><a href='#L38'>38</a>
+<a name='L39'></a><a href='#L39'>39</a>
+<a name='L40'></a><a href='#L40'>40</a>
+<a name='L41'></a><a href='#L41'>41</a>
+<a name='L42'></a><a href='#L42'>42</a>
+<a name='L43'></a><a href='#L43'>43</a>
+<a name='L44'></a><a href='#L44'>44</a>
+<a name='L45'></a><a href='#L45'>45</a>
+<a name='L46'></a><a href='#L46'>46</a>
+<a name='L47'></a><a href='#L47'>47</a>
+<a name='L48'></a><a href='#L48'>48</a>
+<a name='L49'></a><a href='#L49'>49</a>
+<a name='L50'></a><a href='#L50'>50</a>
+<a name='L51'></a><a href='#L51'>51</a>
+<a name='L52'></a><a href='#L52'>52</a>
+<a name='L53'></a><a href='#L53'>53</a>
+<a name='L54'></a><a href='#L54'>54</a>
+<a name='L55'></a><a href='#L55'>55</a>
+<a name='L56'></a><a href='#L56'>56</a>
+<a name='L57'></a><a href='#L57'>57</a>
+<a name='L58'></a><a href='#L58'>58</a>
+<a name='L59'></a><a href='#L59'>59</a>
+<a name='L60'></a><a href='#L60'>60</a>
+<a name='L61'></a><a href='#L61'>61</a>
+<a name='L62'></a><a href='#L62'>62</a>
+<a name='L63'></a><a href='#L63'>63</a>
+<a name='L64'></a><a href='#L64'>64</a>
+<a name='L65'></a><a href='#L65'>65</a>
+<a name='L66'></a><a href='#L66'>66</a>
+<a name='L67'></a><a href='#L67'>67</a>
+<a name='L68'></a><a href='#L68'>68</a>
+<a name='L69'></a><a href='#L69'>69</a>
+<a name='L70'></a><a href='#L70'>70</a>
+<a name='L71'></a><a href='#L71'>71</a>
+<a name='L72'></a><a href='#L72'>72</a>
+<a name='L73'></a><a href='#L73'>73</a>
+<a name='L74'></a><a href='#L74'>74</a>
+<a name='L75'></a><a href='#L75'>75</a>
+<a name='L76'></a><a href='#L76'>76</a>
+<a name='L77'></a><a href='#L77'>77</a>
+<a name='L78'></a><a href='#L78'>78</a>
+<a name='L79'></a><a href='#L79'>79</a>
+<a name='L80'></a><a href='#L80'>80</a>
+<a name='L81'></a><a href='#L81'>81</a>
+<a name='L82'></a><a href='#L82'>82</a>
+<a name='L83'></a><a href='#L83'>83</a>
+<a name='L84'></a><a href='#L84'>84</a>
+<a name='L85'></a><a href='#L85'>85</a>
+<a name='L86'></a><a href='#L86'>86</a>
+<a name='L87'></a><a href='#L87'>87</a>
+<a name='L88'></a><a href='#L88'>88</a>
+<a name='L89'></a><a href='#L89'>89</a>
+<a name='L90'></a><a href='#L90'>90</a>
+<a name='L91'></a><a href='#L91'>91</a>
+<a name='L92'></a><a href='#L92'>92</a>
+<a name='L93'></a><a href='#L93'>93</a>
+<a name='L94'></a><a href='#L94'>94</a>
+<a name='L95'></a><a href='#L95'>95</a>
+<a name='L96'></a><a href='#L96'>96</a>
+<a name='L97'></a><a href='#L97'>97</a>
+<a name='L98'></a><a href='#L98'>98</a>
+<a name='L99'></a><a href='#L99'>99</a>
+<a name='L100'></a><a href='#L100'>100</a>
+<a name='L101'></a><a href='#L101'>101</a>
+<a name='L102'></a><a href='#L102'>102</a>
+<a name='L103'></a><a href='#L103'>103</a>
+<a name='L104'></a><a href='#L104'>104</a>
+<a name='L105'></a><a href='#L105'>105</a>
+<a name='L106'></a><a href='#L106'>106</a>
+<a name='L107'></a><a href='#L107'>107</a>
+<a name='L108'></a><a href='#L108'>108</a>
+<a name='L109'></a><a href='#L109'>109</a>
+<a name='L110'></a><a href='#L110'>110</a>
+<a name='L111'></a><a href='#L111'>111</a>
+<a name='L112'></a><a href='#L112'>112</a>
+<a name='L113'></a><a href='#L113'>113</a>
+<a name='L114'></a><a href='#L114'>114</a>
+<a name='L115'></a><a href='#L115'>115</a>
+<a name='L116'></a><a href='#L116'>116</a>
+<a name='L117'></a><a href='#L117'>117</a>
+<a name='L118'></a><a href='#L118'>118</a>
+<a name='L119'></a><a href='#L119'>119</a>
+<a name='L120'></a><a href='#L120'>120</a>
+<a name='L121'></a><a href='#L121'>121</a>
+<a name='L122'></a><a href='#L122'>122</a>
+<a name='L123'></a><a href='#L123'>123</a>
+<a name='L124'></a><a href='#L124'>124</a>
+<a name='L125'></a><a href='#L125'>125</a>
+<a name='L126'></a><a href='#L126'>126</a>
+<a name='L127'></a><a href='#L127'>127</a>
+<a name='L128'></a><a href='#L128'>128</a>
+<a name='L129'></a><a href='#L129'>129</a>
+<a name='L130'></a><a href='#L130'>130</a>
+<a name='L131'></a><a href='#L131'>131</a>
+<a name='L132'></a><a href='#L132'>132</a>
+<a name='L133'></a><a href='#L133'>133</a>
+<a name='L134'></a><a href='#L134'>134</a>
+<a name='L135'></a><a href='#L135'>135</a>
+<a name='L136'></a><a href='#L136'>136</a>
+<a name='L137'></a><a href='#L137'>137</a>
+<a name='L138'></a><a href='#L138'>138</a>
+<a name='L139'></a><a href='#L139'>139</a>
+<a name='L140'></a><a href='#L140'>140</a>
+<a name='L141'></a><a href='#L141'>141</a>
+<a name='L142'></a><a href='#L142'>142</a>
+<a name='L143'></a><a href='#L143'>143</a>
+<a name='L144'></a><a href='#L144'>144</a>
+<a name='L145'></a><a href='#L145'>145</a>
+<a name='L146'></a><a href='#L146'>146</a>
+<a name='L147'></a><a href='#L147'>147</a>
+<a name='L148'></a><a href='#L148'>148</a>
+<a name='L149'></a><a href='#L149'>149</a>
+<a name='L150'></a><a href='#L150'>150</a>
+<a name='L151'></a><a href='#L151'>151</a>
+<a name='L152'></a><a href='#L152'>152</a>
+<a name='L153'></a><a href='#L153'>153</a>
+<a name='L154'></a><a href='#L154'>154</a>
+<a name='L155'></a><a href='#L155'>155</a>
+<a name='L156'></a><a href='#L156'>156</a>
+<a name='L157'></a><a href='#L157'>157</a>
+<a name='L158'></a><a href='#L158'>158</a>
+<a name='L159'></a><a href='#L159'>159</a>
+<a name='L160'></a><a href='#L160'>160</a>
+<a name='L161'></a><a href='#L161'>161</a>
+<a name='L162'></a><a href='#L162'>162</a>
+<a name='L163'></a><a href='#L163'>163</a>
+<a name='L164'></a><a href='#L164'>164</a>
+<a name='L165'></a><a href='#L165'>165</a>
+<a name='L166'></a><a href='#L166'>166</a>
+<a name='L167'></a><a href='#L167'>167</a>
+<a name='L168'></a><a href='#L168'>168</a>
+<a name='L169'></a><a href='#L169'>169</a>
+<a name='L170'></a><a href='#L170'>170</a>
+<a name='L171'></a><a href='#L171'>171</a>
+<a name='L172'></a><a href='#L172'>172</a>
+<a name='L173'></a><a href='#L173'>173</a>
+<a name='L174'></a><a href='#L174'>174</a>
+<a name='L175'></a><a href='#L175'>175</a>
+<a name='L176'></a><a href='#L176'>176</a>
+<a name='L177'></a><a href='#L177'>177</a>
+<a name='L178'></a><a href='#L178'>178</a>
+<a name='L179'></a><a href='#L179'>179</a>
+<a name='L180'></a><a href='#L180'>180</a>
+<a name='L181'></a><a href='#L181'>181</a>
+<a name='L182'></a><a href='#L182'>182</a>
+<a name='L183'></a><a href='#L183'>183</a>
+<a name='L184'></a><a href='#L184'>184</a>
+<a name='L185'></a><a href='#L185'>185</a>
+<a name='L186'></a><a href='#L186'>186</a>
+<a name='L187'></a><a href='#L187'>187</a>
+<a name='L188'></a><a href='#L188'>188</a>
+<a name='L189'></a><a href='#L189'>189</a>
+<a name='L190'></a><a href='#L190'>190</a>
+<a name='L191'></a><a href='#L191'>191</a>
+<a name='L192'></a><a href='#L192'>192</a>
+<a name='L193'></a><a href='#L193'>193</a>
+<a name='L194'></a><a href='#L194'>194</a>
+<a name='L195'></a><a href='#L195'>195</a>
+<a name='L196'></a><a href='#L196'>196</a>
+<a name='L197'></a><a href='#L197'>197</a>
+<a name='L198'></a><a href='#L198'>198</a>
+<a name='L199'></a><a href='#L199'>199</a>
+<a name='L200'></a><a href='#L200'>200</a>
+<a name='L201'></a><a href='#L201'>201</a>
+<a name='L202'></a><a href='#L202'>202</a>
+<a name='L203'></a><a href='#L203'>203</a>
+<a name='L204'></a><a href='#L204'>204</a>
+<a name='L205'></a><a href='#L205'>205</a>
+<a name='L206'></a><a href='#L206'>206</a>
+<a name='L207'></a><a href='#L207'>207</a>
+<a name='L208'></a><a href='#L208'>208</a>
+<a name='L209'></a><a href='#L209'>209</a>
+<a name='L210'></a><a href='#L210'>210</a>
+<a name='L211'></a><a href='#L211'>211</a>
+<a name='L212'></a><a href='#L212'>212</a>
+<a name='L213'></a><a href='#L213'>213</a>
+<a name='L214'></a><a href='#L214'>214</a>
+<a name='L215'></a><a href='#L215'>215</a>
+<a name='L216'></a><a href='#L216'>216</a>
+<a name='L217'></a><a href='#L217'>217</a>
+<a name='L218'></a><a href='#L218'>218</a>
+<a name='L219'></a><a href='#L219'>219</a>
+<a name='L220'></a><a href='#L220'>220</a>
+<a name='L221'></a><a href='#L221'>221</a>
+<a name='L222'></a><a href='#L222'>222</a>
+<a name='L223'></a><a href='#L223'>223</a>
+<a name='L224'></a><a href='#L224'>224</a>
+<a name='L225'></a><a href='#L225'>225</a>
+<a name='L226'></a><a href='#L226'>226</a>
+<a name='L227'></a><a href='#L227'>227</a>
+<a name='L228'></a><a href='#L228'>228</a>
+<a name='L229'></a><a href='#L229'>229</a>
+<a name='L230'></a><a href='#L230'>230</a>
+<a name='L231'></a><a href='#L231'>231</a>
+<a name='L232'></a><a href='#L232'>232</a>
+<a name='L233'></a><a href='#L233'>233</a>
+<a name='L234'></a><a href='#L234'>234</a>
+<a name='L235'></a><a href='#L235'>235</a>
+<a name='L236'></a><a href='#L236'>236</a>
+<a name='L237'></a><a href='#L237'>237</a>
+<a name='L238'></a><a href='#L238'>238</a>
+<a name='L239'></a><a href='#L239'>239</a>
+<a name='L240'></a><a href='#L240'>240</a>
+<a name='L241'></a><a href='#L241'>241</a>
+<a name='L242'></a><a href='#L242'>242</a>
+<a name='L243'></a><a href='#L243'>243</a>
+<a name='L244'></a><a href='#L244'>244</a>
+<a name='L245'></a><a href='#L245'>245</a>
+<a name='L246'></a><a href='#L246'>246</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">1124x</span>
+<span class="cline-any cline-yes">1124x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">18x</span>
+<span class="cline-any cline-yes">17x</span>
+<span class="cline-any cline-yes">17x</span>
+<span class="cline-any cline-yes">17x</span>
+<span class="cline-any cline-yes">17x</span>
+<span class="cline-any cline-yes">17x</span>
+<span class="cline-any cline-yes">1873x</span>
+<span class="cline-any cline-yes">1873x</span>
+<span class="cline-any cline-yes">1873x</span>
+<span class="cline-any cline-yes">1873x</span>
+<span class="cline-any cline-yes">1873x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">17x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">38x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">192x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">61478x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">54x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1302x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">17x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">399x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">395x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">22x</span>
+<span class="cline-any cline-yes">12x</span>
+<span class="cline-any cline-yes">31x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">12x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">12x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">11x</span>
+<span class="cline-any cline-yes">11x</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">8x</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">12x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">14x</span>
+<span class="cline-any cline-yes">14x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">18x</span>
+<span class="cline-any cline-yes">14x</span>
+<span class="cline-any cline-yes">14x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">11x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">/**
+ * Pure board edits the canvas calls (PRD D3). Each takes a board `{ nodes,
+ * links, … }` and returns a new one; nothing is mutated. A node made by an
+ * edit is the LAST node of the returned board, and its id can be chosen by
+ * the caller (`{ id }`) when it must be known before the edit, to select it
+ * or start typing in it. Positions are top-left corners.
+ */
+import { CHILD_GAP_X, CHILD_GAP_Y, DEFAULT_NOTE_COLOR, DEFAULT_SIZES, FRAME_PADDING, FRAME_TITLE_BAND, NODE_GAP, layoutSize } from './kinds'
+&nbsp;
+let counter = 0
+&nbsp;
+/** A fresh id: a counter, the time and a little randomness; no crypto global needed. */
+export const nextId = (prefix = <span class="branch-0 cbranch-no" title="branch not covered" >'n')</span> =&gt; {
+  counter = (counter + 1) % 1679616
+  return `${prefix}-${Date.now().toString(36)}-${counter.toString(36)}-${Math.random().toString(36).slice(2, 7)}`
+}
+&nbsp;
+/** The box around some nodes, or null for none. */
+export const bounds = (nodes) =&gt; {
+  if (!nodes?.length) return null
+  let minX = Infinity
+  let minY = Infinity
+  let maxX = -Infinity
+  let maxY = -Infinity
+  nodes.forEach((node) =&gt; {
+    const { w, h } = layoutSize(node)
+    minX = Math.min(minX, node.x)
+    minY = Math.min(minY, node.y)
+    maxX = Math.max(maxX, node.x + w)
+    maxY = Math.max(maxY, node.y + h)
+  })
+  return { x: minX, y: minY, w: maxX - minX, h: maxY - minY, minX, minY, maxX, maxY }
+}
+&nbsp;
+const rectOf = (node) =&gt; ({ x: node.x, y: node.y, ...layoutSize(node) })
+&nbsp;
+export const overlaps = (a, b) =&gt; a.x &lt; b.x + b.w &amp;&amp; b.x &lt; a.x + a.w &amp;&amp; a.y &lt; b.y + b.h &amp;&amp; b.y &lt; a.y + a.h
+&nbsp;
+const topZ = (board) =&gt; board.nodes.filter((n) =&gt; n.kind !== 'frame').reduce((z, n) =&gt; Math.max(z, n.z ?? <span class="branch-1 cbranch-no" title="branch not covered" >0)</span>, 0)
+&nbsp;
+const findNode = (board, id) =&gt; board.nodes.find((n) =&gt; n.id === id) ?? null
+&nbsp;
+export const makeNote = ({ id, x = <span class="branch-0 cbranch-no" title="branch not covered" >0,</span> y = <span class="branch-0 cbranch-no" title="branch not covered" >0,</span> color = DEFAULT_NOTE_COLOR, text = '', z = 0 } = <span class="branch-0 cbranch-no" title="branch not covered" >{})</span> =&gt; ({
+  id: id ?? nextId('n'),
+  kind: 'note',
+  x,
+  y,
+  w: null,
+  h: null,
+  z,
+  text,
+  color,
+  size: null,
+  title: null,
+  ref: null,
+  cardIds: []
+})
+&nbsp;
+export const makeLink = ({ id, from, to, label = '' }) =&gt; ({ id: id ?? nextId('l'), from, to, label })
+&nbsp;
+/** Adds nodes and links made elsewhere (an import, a paste). */
+export const insert = (board, { nodes = <span class="branch-0 cbranch-no" title="branch not covered" >[],</span> links = [] }) =&gt; ({
+  ...board,
+  nodes: [...board.nodes, ...nodes],
+  links: [...board.links, ...links]
+})
+&nbsp;
+export const addNote = (board, { id, x = 0, y = 0, color = DEFAULT_NOTE_COLOR, text = '' } = <span class="branch-0 cbranch-no" title="branch not covered" >{})</span> =&gt;
+  insert(board, { nodes: [makeNote({ id, x, y, color, text, z: topZ(board) + 1 })] })
+&nbsp;
+/**
+ * Steps a rectangle along `step` until it overlaps no node other than a frame
+ * (frames sit behind) or one of `ignore`.
+ */
+const freeSpot = (board, rect, step, ignore = []) =&gt; {
+  const others = board.nodes.filter((n) =&gt; n.kind !== 'frame' &amp;&amp; !ignore.includes(n.id)).map(rectOf)
+  const spot = { ...rect }
+  for (let i = 0; i &lt; 500 &amp;&amp; others.some((o) =&gt; overlaps(spot, o)); i += 1) {
+    spot.x += step.x
+    spot.y += step.y
+  }
+  return spot
+}
+&nbsp;
+const noteSize = DEFAULT_SIZES.note
+&nbsp;
+const besideParent = (parent, side) =&gt; {
+  const p = rectOf(parent)
+  const { w, h } = noteSize
+  switch (side) {
+    case 'left':
+      return { x: p.x - CHILD_GAP_X - w, y: p.y, w, h }
+    case 'top':
+      return { x: p.x, y: p.y - CHILD_GAP_Y - h, w, h }
+    case 'bottom':
+      return { x: p.x, y: p.y + p.h + CHILD_GAP_Y, w, h }
+    default:
+      return { x: p.x + p.w + CHILD_GAP_X, y: p.y, w, h }
+  }
+}
+&nbsp;
+const colorFrom = (node, color) =&gt; color ?? (node?.kind === 'note' &amp;&amp; node.color ? node.color : <span class="branch-1 cbranch-no" title="branch not covered" >DEFAULT_NOTE_COLOR)</span>
+&nbsp;
+/**
+ * A new note linked from `parentId`, on that side of it (Tab, the "+").
+ * Siblings already there push it down (left, right) or along (top, bottom)
+ * by a note and a gap.
+ */
+export const addChild = (board, parentId, { side = 'right', id, text = '', color, linkId } = {}) =&gt; {
+  const parent = findNode(board, parentId)
+  if (!parent) return board
+  const vertical = side === 'top' || side === 'bottom'
+  const step = vertical ? { x: noteSize.w + NODE_GAP, y: 0 } : { x: 0, y: noteSize.h + NODE_GAP }
+  const spot = freeSpot(board, besideParent(parent, side), step)
+  const withNote = addNote(board, { id, x: spot.x, y: spot.y, color: colorFrom(parent, color), text })
+  const child = withNote.nodes[withNote.nodes.length - 1]
+  return { ...withNote, links: [...withNote.links, makeLink({ id: linkId, from: parentId, to: child.id })] }
+}
+&nbsp;
+/**
+ * A new note below `nodeId` (⌘ Enter), linked from the node's parent when it
+ * has exactly one incoming link, else standing alone.
+ */
+export const addSibling = (board, nodeId, { id, text = '', color, linkId } = <span class="branch-0 cbranch-no" title="branch not covered" >{})</span> =&gt; {
+  const node = findNode(board, nodeId)
+  <span class="missing-if-branch" title="if path not taken" >I</span>if (!node) <span class="cstat-no" title="statement not covered" >return board</span>
+  const r = rectOf(node)
+  const spot = freeSpot(board, { x: r.x, y: r.y + r.h + NODE_GAP, ...noteSize }, { x: 0, y: noteSize.h + NODE_GAP })
+  const next = addNote(board, { id, x: spot.x, y: spot.y, color: colorFrom(node, color), text })
+  const incoming = board.links.filter((l) =&gt; l.to === nodeId)
+  if (incoming.length !== 1) return next
+  const sibling = next.nodes[next.nodes.length - 1]
+  return { ...next, links: [...next.links, makeLink({ id: linkId, from: incoming[0].from, to: sibling.id })] }
+}
+&nbsp;
+/** Links two nodes; a self-link, a missing end or a link already there leaves the board as it is. */
+export const connect = (board, from, to, { id, label = '' } = {}) =&gt; {
+  if (from === to || !findNode(board, from) || !findNode(board, to)) return board
+  if (board.links.some((l) =&gt; l.from === from &amp;&amp; l.to === to)) return board
+  return { ...board, links: [...board.links, makeLink({ id, from, to, label })] }
+}
+&nbsp;
+/** Removes nodes and every link that touches one of them. */
+export const removeNodes = (board, ids) =&gt; {
+  const gone = new Set(ids)
+  return {
+    ...board,
+    nodes: board.nodes.filter((n) =&gt; !gone.has(n.id)),
+    links: board.links.filter((l) =&gt; !gone.has(l.from) &amp;&amp; !gone.has(l.to))
+  }
+}
+&nbsp;
+export const removeLinks = <span class="fstat-no" title="function not covered" >(b</span>oard, ids) =&gt; {
+  const gone = <span class="cstat-no" title="statement not covered" >new Set(ids)</span>
+<span class="cstat-no" title="statement not covered" >  return { ...board, links: board.links.filter(<span class="fstat-no" title="function not covered" >(l</span>) =&gt; <span class="cstat-no" title="statement not covered" >!gone.has(l.id))</span> }</span>
+}
+&nbsp;
+/** Changes the fields of one node (text, colour, size, position…). */
+export const updateNode = (board, id, patch) =&gt; ({
+  ...board,
+  nodes: board.nodes.map((n) =&gt; (n.id === id ? { ...n, ...patch } : n))
+})
+&nbsp;
+export const updateLink = <span class="fstat-no" title="function not covered" >(b</span>oard, id, patch) =&gt; (<span class="cstat-no" title="statement not covered" >{</span>
+  ...board,
+  links: board.links.map(<span class="fstat-no" title="function not covered" >(l</span>) =&gt; (<span class="cstat-no" title="statement not covered" >l.id === id ? { ...l, ...patch } : l)</span>)
+})
+&nbsp;
+const centreOf = (node) =&gt; {
+  const { w, h } = layoutSize(node)
+  return { x: node.x + w / 2, y: node.y + h / 2 }
+}
+&nbsp;
+/** The nodes whose centre lies inside the frame. */
+export const nodesInFrame = (board, frameId) =&gt; {
+  const frame = findNode(board, frameId)
+  <span class="missing-if-branch" title="if path not taken" >I</span>if (!frame) <span class="cstat-no" title="statement not covered" >return []</span>
+  const f = rectOf(frame)
+  return board.nodes.filter((n) =&gt; {
+    if (n.id === frameId) return false
+    const c = centreOf(n)
+    return c.x &gt;= f.x &amp;&amp; c.x &lt;= f.x + f.w &amp;&amp; c.y &gt;= f.y &amp;&amp; c.y &lt;= f.y + f.h
+  })
+}
+&nbsp;
+/**
+ * Moves nodes by `{ dx, dy }`; a frame carries what it holds (PRD D3, "frames
+ * move what they hold").
+ */
+export const moveNodes = (board, ids, { dx = <span class="branch-0 cbranch-no" title="branch not covered" >0,</span> dy = <span class="branch-0 cbranch-no" title="branch not covered" >0 </span>}) =&gt; {
+  const moving = new Set(ids)
+  ids.forEach((id) =&gt; {
+    <span class="missing-if-branch" title="else path not taken" >E</span>if (findNode(board, id)?.kind === 'frame') nodesInFrame(board, id).forEach((n) =&gt; moving.add(n.id))
+  })
+  return { ...board, nodes: board.nodes.map((n) =&gt; (moving.has(n.id) ? { ...n, x: n.x + dx, y: n.y + dy } : n)) }
+}
+&nbsp;
+/**
+ * Copies nodes (⌘ D), offset by `{ dx, dy }`, with the links among them. The
+ * copies are the last nodes of the returned board; cards stay with the
+ * originals.
+ */
+export const duplicateNodes = (board, ids, { dx = 24, dy = 24, idPrefix = 'n' } = {}) =&gt; {
+  const chosen = new Set(ids)
+  const map = new Map()
+  const z = topZ(board)
+  const copies = board.nodes
+    .filter((n) =&gt; chosen.has(n.id))
+    .map((n, i) =&gt; {
+      const id = nextId(idPrefix)
+      map.set(n.id, id)
+      return { ...n, id, x: n.x + dx, y: n.y + dy, z: n.kind === 'frame' ? <span class="branch-0 cbranch-no" title="branch not covered" >n.z </span>: z + 1 + i, cardIds: [] }
+    })
+  const links = board.links
+    .filter((l) =&gt; map.has(l.from) &amp;&amp; map.has(l.to))
+    .map((l) =&gt; makeLink({ from: map.get(l.from), to: map.get(l.to), label: l.label }))
+  return insert(board, { nodes: copies, links })
+}
+&nbsp;
+/**
+ * A frame around the selected nodes (⌘ G): their box with 32 px of room on
+ * every side and the title band above, drawn behind the lowest of them.
+ */
+export const frameSelection = (board, ids, title = <span class="branch-0 cbranch-no" title="branch not covered" >'',</span> { id } = {}) =&gt; {
+  const chosen = board.nodes.filter((n) =&gt; ids.includes(n.id))
+  const box = bounds(chosen)
+  if (!box) return board
+  const lowest = chosen.reduce((z, n) =&gt; Math.min(z, n.z ?? <span class="branch-1 cbranch-no" title="branch not covered" >0)</span>, Infinity)
+  const frame = {
+    id: id ?? <span class="branch-1 cbranch-no" title="branch not covered" >nextId('f'),</span>
+    kind: 'frame',
+    x: box.x - FRAME_PADDING,
+    y: box.y - FRAME_PADDING - FRAME_TITLE_BAND,
+    w: box.w + FRAME_PADDING * 2,
+    h: box.h + FRAME_PADDING * 2 + FRAME_TITLE_BAND,
+    z: lowest - 1,
+    text: null,
+    color: null,
+    size: null,
+    title,
+    ref: null,
+    cardIds: []
+  }
+  return insert(board, { nodes: [frame] })
+}
+&nbsp;</pre></td></tr></table></pre>
+
+                <div class='push'></div><!-- for sticky footer -->
+            </div><!-- /wrapper -->
+            <div class='footer quiet pad2 space-top1 center small'>
+                Code coverage generated by
+                <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
+                at 2026-11-12T06:56:34.923Z
+            </div>
+        <script src="../../../prettify.js"></script>
+        <script>
+            window.onload = function () {
+                prettyPrint();
+            };
+        </script>
+        <script src="../../../sorter.js"></script>
+        <script src="../../../block-navigation.js"></script>
+    </body>
+</html>
+    

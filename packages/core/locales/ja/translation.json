@@ -472,6 +472,10 @@
       "invite": "Nowry は非公開ベータ中です。アカウントを作成するには招待が必要です。",
       "verifyEmail": "まずメールアドレスを確認してください。お送りしたリンクを開いてから、もう一度サインインしてください。",
       "account": "アカウントに問題があります。support@nowry.app までご連絡ください。"
+    },
+    "setPassword": {
+      "body": "まず Google でログインしてください。その後、メールアドレスでもログインできるようにパスワードを設定できます。",
+      "failed": "うまくいきませんでした。少ししてからもう一度お試しください。"
     }
   },
   "landing": {
@@ -1248,10 +1252,10 @@
       "passwordMismatch": "パスワードが一致しません",
       "passwordTooShort": "パスワードは8文字以上必要です",
       "passwordTooWeak": "パスワードが弱すぎます",
-      "wrongPassword": "現在のパスワードが正しくありません",
+      "wrongPassword": "現在のパスワードが正しくありません。",
       "reauthRequired": "続行するには現在のパスワードを入力してください",
       "passwordChangeFailed": "パスワードの更新に失敗しました。もう一度お試しください。",
-      "passwordChanged": "パスワードが正常に更新されました",
+      "passwordChanged": "パスワードを変更しました。ほかの端末はログアウトされ、お知らせのメールを送りました。",
       "save": "パスワードを更新",
       "twoFactor": "2要素認証",
       "twoFactorDesc": "アカウントにセキュリティレイヤーを追加",
@@ -1259,7 +1263,17 @@
       "enable2FA": "2FAを有効化",
       "disable2FA": "無効化",
       "success2FA": "2FAが有効になりました！バックアップコード：",
-      "disabled2FA": "2FAが正常に無効化されました"
+      "disabled2FA": "2FAが正常に無効化されました",
+      "setPassword": "パスワードを設定する",
+      "setPasswordBody": "このアカウントは Google でログインしています。パスワードを設定すると、メールアドレスとパスワードでもログインできます。最初に Google で確認します。",
+      "setPasswordGoogle": "Google で確認してパスワードを設定",
+      "googleConnected": "Google ログインも接続されています。",
+      "passwordSet": "パスワードを設定しました。メールアドレスとパスワードでもログインできます。お知らせのメールを送りました。",
+      "tooManyAttempts": "誤った試行が多すぎます。{{minutes}} 分後にもう一度お試しください。",
+      "reauthGoogle": "続けるには Google で確認してください。",
+      "currentRequired": "現在のパスワードを入力してください。",
+      "reload": "ページを再読み込みして、もう一度お試しください。",
+      "otherDevices": "パスワードを変更すると、ほかの端末はログアウトされます。"
     },
     "notifications": {
       "title": "通知",

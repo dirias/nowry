@@ -508,6 +508,24 @@ export const authService = {
   },
 
   /**
+   * After the API changed the password (ADR-092): every older session was cut,
+   * this one included, so sign in again with the new password.
+   */
+  async signInAgainWithPassword(newPassword) {
+    const user = authPort.currentUser()
+    if (!user?.email) throw Object.assign(new Error('Nobody is signed in'), { code: 'auth/no-current-user' })
+    await signInWithEmailAndPassword(firebaseAuth(), user.email, newPassword)
+    const idToken = await authPort.getIdToken(true)
+    storage.set('firebase_token', idToken)
+  },
+
+  /** After the API added a password (ADR-092): read the account's sign-in methods again. */
+  async reloadProviders() {
+    const user = authPort.currentUser()
+    if (user) await user.reload()
+  },
+
+  /**
    * Prove the sign-in again before a deletion (ADR-089, FR-038): the password
    * for a password account, Google otherwise. The token is refreshed after, so
    * the next API call carries the new `auth_time`.

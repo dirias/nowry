@@ -50,6 +50,7 @@ const WaitlistLeave = lazy(() => import('./components/Public/WaitlistLeave'))
 const DeleteAccountInfo = lazy(() => import('./components/HomePage/DeleteAccountInfo'))
 const OnboardingRoute = lazy(() => import('./components/User/OnboardingRoute'))
 const Home = lazy(() => import('./components/User/Home/Home'))
+const SetPassword = lazy(() => import('./components/User/SetPassword'))
 const EditorHome = lazy(() => import('./components/Books/EditorHome'))
 const BookHome = lazy(() => import('./components/Books/BookHome'))
 const BoardsPage = lazy(() => import('./components/Boards/BoardsPage'))
@@ -218,6 +219,8 @@ const AppContent = () => {
 
               {/* Where a link in a Nowry email lands; open to a signed-in person too (ADR-078). */}
               <Route path='/auth/action' element={<EmailAction />} />
+              {/* The Google-only reset email's link: Google first, then Set a password (ADR-092, FR-047). */}
+              <Route path='/set-password' element={<SetPassword />} />
 
               {/* Where the leave link in a waitlist email lands; signed out or in (ADR-080). */}
               <Route path='/waitlist/leave/:token' element={<WaitlistLeave />} />
