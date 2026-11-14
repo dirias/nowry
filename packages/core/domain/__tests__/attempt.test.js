@@ -23,33 +23,13 @@ describe('attemptTimings', () => {
 describe('attemptPayload', () => {
   it("writes the API's names from the clients' words", () => {
     const body = attemptPayload({
-      clientSessionId: 's1',
-      showing: 'practice',
-      side: 'front',
-      thinkMs: 1800,
-      judgeMs: 900,
-      help: { companion: 'chat', audio: 2 },
-      position: 3,
-      total: 16,
-      scope: 'deck',
-      localHour: 23,
-      client: 'phone'
+      clientSessionId: 's1', showing: 'practice', side: 'front', thinkMs: 1800, judgeMs: 900,
+      help: { companion: 'chat', audio: 2 }, position: 3, total: 16, scope: 'deck', localHour: 23, client: 'phone'
     })
     expect(body).toEqual({
-      client_session_id: 's1',
-      showing: 'practice',
-      side: 'front',
-      think_ms: 1800,
-      judge_ms: 900,
-      confidence: null,
-      chosen_option: null,
-      help: { companion: 'chat', audio: 2, hint: false, source: false },
-      position: 3,
-      total: 16,
-      scope: 'deck',
-      block_id: null,
-      local_hour: 23,
-      client: 'phone'
+      client_session_id: 's1', showing: 'practice', side: 'front', think_ms: 1800, judge_ms: 900, confidence: null,
+      chosen_option: null, help: { companion: 'chat', audio: 2, hint: false, source: false },
+      position: 3, total: 16, scope: 'deck', block_id: null, local_hour: 23, client: 'phone'
     })
   })
 

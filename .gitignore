@@ -209,3 +209,4 @@ DEBUG_*.md
 .env.e2e.local
 /e2e-dev/out/
 !/e2e-dev/lib/
+/packages/core/coverage/
