@@ -32,6 +32,7 @@ export default function InviteConfirm({ invite, action, busy, onCancel, onConfir
       </Typography>
       <Typography level='body-sm' sx={{ color: 'text.secondary' }}>
         {t(`admin.inv.confirm.${action}.body`, values)}
+        {danger ? null : ` ${t('admin.inv.confirm.lifetime', { count: invite.lifetime_days ?? 14 })}`}
       </Typography>
       <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent='space-between' gap={1.5}>
         <Button variant='plain' color='neutral' onClick={onCancel} disabled={busy} sx={{ width: { xs: '100%', sm: 'auto' } }}>

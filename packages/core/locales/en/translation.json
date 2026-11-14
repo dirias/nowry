@@ -5121,7 +5121,9 @@
           "title": "Revoke the invitation for {{email}}?",
           "body": "The link stops working at once. Nothing is emailed. They can still join the waitlist.",
           "confirm": "Revoke"
-        }
+        },
+        "lifetime_one": "The new link works for {{count}} day.",
+        "lifetime_other": "The new link works for {{count}} days."
       },
       "notice": {
         "resent": "A new link went to {{email}}.",

@@ -4586,7 +4586,9 @@
           "title": "Die Einladung für {{email}} widerrufen?",
           "body": "Der Link funktioniert sofort nicht mehr. Es wird keine E-Mail gesendet. Die Person kann sich weiter auf die Warteliste setzen.",
           "confirm": "Widerrufen"
-        }
+        },
+        "lifetime_one": "Der neue Link gilt {{count}} Tag.",
+        "lifetime_other": "Der neue Link gilt {{count}} Tage."
       },
       "notice": {
         "resent": "Ein neuer Link ging an {{email}}.",

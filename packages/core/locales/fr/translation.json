@@ -4597,7 +4597,9 @@
           "title": "Révoquer l'invitation de {{email}} ?",
           "body": "Le lien cesse de fonctionner immédiatement. Aucun e-mail n'est envoyé. La personne peut toujours rejoindre la liste d'attente.",
           "confirm": "Révoquer"
-        }
+        },
+        "lifetime_one": "Le nouveau lien fonctionne pendant {{count}} jour.",
+        "lifetime_other": "Le nouveau lien fonctionne pendant {{count}} jours."
       },
       "notice": {
         "resent": "Un nouveau lien a été envoyé à {{email}}.",

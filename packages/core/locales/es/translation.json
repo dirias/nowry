@@ -5121,7 +5121,9 @@
           "title": "¿Revocar la invitación de {{email}}?",
           "body": "El enlace deja de funcionar de inmediato. No se envía ningún correo. Puede seguir uniéndose a la lista de espera.",
           "confirm": "Revocar"
-        }
+        },
+        "lifetime_one": "El enlace nuevo funciona durante {{count}} día.",
+        "lifetime_other": "El enlace nuevo funciona durante {{count}} días."
       },
       "notice": {
         "resent": "Se envió un enlace nuevo a {{email}}.",
