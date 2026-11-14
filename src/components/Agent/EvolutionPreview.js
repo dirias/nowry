@@ -3,6 +3,7 @@ import { Box, Button, Checkbox, Container, Stack, Typography } from '@mui/joy'
 import { useColorScheme } from '@mui/joy/styles'
 import { generateColorScheme, getColorPresets, contrastRatio } from '@nowry/core/tokens/colorSchemeGenerator'
 import { EVOLUTION_KIND, spiralPath } from '@nowry/core/domain/petEvolution'
+import { resolveColor } from '@nowry/core/utils/petColor'
 import { CompanionArt } from './CompanionArt'
 import EvolutionReveal, { FRAME_PX } from './EvolutionReveal'
 
@@ -26,18 +27,36 @@ const PRIMARY_KEYS = ['plainColor', 'solidBg', 'solidHoverBg', 'solidActiveBg', 
 const TILE = 120
 const NON_TEXT_CONTRAST = 3
 
+/**
+ * The level each stage after the first is reached at: the API's
+ * STAGE_LEVEL_THRESHOLDS (app/routers/agent.py), which the app reads from
+ * the server. Kept here so the replay says the level the app would say.
+ */
+const STAGE_LEVELS = [3, 6, 10, 14, 18]
+
 const REPLAYS = [
   ...[1, 2, 3, 4, 5].map((from) => ({
     label: `Stage ${from} → ${from + 1}`,
     kind: EVOLUTION_KIND.stage,
     fromStage: from,
     toStage: from + 1,
-    level: (from + 1) * 3
+    level: STAGE_LEVELS[from - 1]
   })),
-  { label: 'New portrait · 2 left', kind: EVOLUTION_KIND.generated, fromStage: 3, toStage: 4, generationsRemaining: 2 },
-  { label: 'New portrait · the last one', kind: EVOLUTION_KIND.generated, fromStage: 3, toStage: 4, generationsRemaining: 0 },
-  { label: 'Worn portrait (short)', kind: EVOLUTION_KIND.worn, fromStage: 3, toStage: 4 }
+  // A portrait's two sides belong to one stage, as in PortraitReveal.
+  { label: 'New portrait · 2 left', kind: EVOLUTION_KIND.generated, fromStage: 2, toStage: 2, generationsRemaining: 2 },
+  { label: 'New portrait · the last one', kind: EVOLUTION_KIND.generated, fromStage: 2, toStage: 2, generationsRemaining: 0 },
+  { label: 'Worn portrait (short)', kind: EVOLUTION_KIND.worn, fromStage: 2, toStage: 2 }
 ]
+
+/**
+ * Two portraits to replay the portrait variants with, from `?portraits=<from>,<to>`
+ * (already generated ones; this page never generates). Without them each side
+ * is the stage's form, as PortraitReveal draws a side that has no portrait.
+ */
+const portraitsFromAddress = () => {
+  const [from = null, to = null] = (new URLSearchParams(window.location.search).get('portraits') || '').split(',').filter(Boolean)
+  return { from, to }
+}
 
 /** The spiral as the reveal draws it, still, on one accent and one mode's dialog ground. */
 const ContrastTile = ({ preset, mode }) => {
@@ -86,6 +105,7 @@ const EvolutionPreview = () => {
   const [accent, setAccent] = useState(PRESETS[0])
   const [reducedMotion, setReducedMotion] = useState(false)
   const [playing, setPlaying] = useState(null)
+  const portraits = useMemo(portraitsFromAddress, [])
 
   // The dialog renders in a portal, so the accent goes on the document for as long as this page is open.
   useEffect(() => {
@@ -183,7 +203,19 @@ const EvolutionPreview = () => {
           generationsRemaining={playing.generationsRemaining}
           reducedMotion={reducedMotion}
           onClose={() => setPlaying(null)}
-          renderForm={(stage) => <CompanionArt stage={stage} accent={accent.color} size={FRAME_PX} />}
+          // Each form shaded from the accent by its stage, as the companion panel draws it.
+          renderForm={(stage, side) => {
+            const url = playing.kind === EVOLUTION_KIND.stage ? null : portraits[side]
+            if (!url) return <CompanionArt stage={stage} accent={resolveColor(accent.color, stage)} size={FRAME_PX} />
+            return (
+              <Box
+                component='img'
+                src={url}
+                alt=''
+                sx={{ width: FRAME_PX, height: FRAME_PX, borderRadius: 'full', objectFit: 'cover', display: 'block' }}
+              />
+            )
+          }}
         />
       )}
     </Container>

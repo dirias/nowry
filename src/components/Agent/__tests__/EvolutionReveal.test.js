@@ -36,8 +36,8 @@ const playThrough = (variant) => {
   for (const { ms } of evolutionBeats(variant)) act(() => jest.advanceTimersByTime(ms))
 }
 
-// jsdom paints no frames, so an exit would never finish and `mode='wait'` would
-// hold the next form back forever. The sequence is the component's; the
+// jsdom paints no frames, so an exit would never finish and an exiting form
+// would stay in the cell for ever. The sequence is the component's; the
 // tweening is framer's.
 beforeAll(() => {
   MotionGlobalConfig.skipAnimations = true
@@ -77,6 +77,20 @@ describe('EvolutionReveal — a stage earned by level (EVO-003, ADR-075)', () =>
     expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('pet.stage.3.name')
     expect(screen.getByRole('button', { name: 'pet.evolution.continue' })).toBeInTheDocument()
     expect(screen.queryByTestId('evolution-generations-left')).not.toBeInTheDocument()
+  })
+
+  it('lights the gold flash the moment its beat starts, over the old form as it fades, not after it has gone', () => {
+    renderReveal()
+    act(() => jest.advanceTimersByTime(beatMs('full', 'anticipation')))
+    act(() => jest.advanceTimersByTime(beatMs('full', 'transformation')))
+    expect(phase()).toBe('flash')
+    // No promise is let settle here: the flash may not wait for the old form's exit.
+    const flash = document.querySelector('[data-evolution-flash]')
+    expect(flash).not.toBeNull()
+    // The old form is still there, fading, and the flash is drawn after it, over it.
+    const from = document.querySelector('[data-evolution-side="from"]')
+    expect(from).not.toBeNull()
+    expect(from.compareDocumentPosition(flash) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
 
   it('is a dialog named by its heading', () => {

@@ -116,7 +116,14 @@ const EvolutionReveal = ({
         </Typography>
 
         <Box sx={{ position: 'relative', width: FRAME_PX, height: FRAME_PX, display: 'grid', placeItems: 'center' }}>
-          <AnimatePresence mode='wait' initial={false}>
+          {/*
+            The forms and the flash share one cell and cross: the flash lights as
+            the old form fades, and the new form arrives as it goes, so the swap
+            happens under the gold (ADR-075). The flash follows the old form in the
+            cell, so it paints over it. Waiting for each exit dropped the flash,
+            whose beat is shorter than the old form's exit.
+          */}
+          <AnimatePresence initial={false}>
             {!newForm && beat !== 'flash' && (
               <Box
                 key='from'
@@ -135,6 +142,7 @@ const EvolutionReveal = ({
                 key='flash'
                 component={motion.div}
                 aria-hidden='true'
+                data-evolution-flash=''
                 initial={{ opacity: 0, scale: 0.6 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0 }}
