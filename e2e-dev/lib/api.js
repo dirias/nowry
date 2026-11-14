@@ -32,6 +32,9 @@ async function api() {
 
 const bearer = (token, extra = {}) => ({ Authorization: `Bearer ${token}`, ...extra })
 
+/** The suite's own request on development (E2E-007): exempt from the per-network limit for suite aliases only. */
+const asSuite = (headers = {}) => ({ ...headers, 'X-Dev-Outbox-Key': secrets().outboxKey })
+
 /** A complete password account made without the browser: Firebase, then the API with the dev code. */
 async function makeAccount(email, { code = CODE } = {}) {
   const auth = await firebaseSignUp(email)
@@ -44,4 +47,4 @@ async function makeAccount(email, { code = CODE } = {}) {
   return auth
 }
 
-module.exports = { api, bearer, firebaseSignUp, firebaseSignIn, applyOobCode, makeAccount }
+module.exports = { api, bearer, asSuite, firebaseSignUp, firebaseSignIn, applyOobCode, makeAccount }

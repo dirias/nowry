@@ -5,10 +5,10 @@
  */
 const base = require('@playwright/test')
 const { secrets } = require('./secrets')
-const { SITE_HOSTS } = require('./env')
+const { SITE_HOSTS, API_HOST } = require('./env')
 
 async function withBypass(context) {
-  const { bypass } = secrets()
+  const { bypass, outboxKey } = secrets()
   await context.route('**/*', async (route) => {
     const request = route.request()
     let host = ''
@@ -17,10 +17,16 @@ async function withBypass(context) {
     } catch {
       // a data: or blob: URL
     }
-    if (!SITE_HOSTS.has(host)) return route.continue()
-    return route.continue({
-      headers: { ...request.headers(), 'x-vercel-protection-bypass': bypass, 'x-vercel-set-bypass-cookie': 'true' }
-    })
+    if (SITE_HOSTS.has(host)) {
+      return route.continue({
+        headers: { ...request.headers(), 'x-vercel-protection-bypass': bypass, 'x-vercel-set-bypass-cookie': 'true' }
+      })
+    }
+    // The development API alone hears the outbox key: the suite's requests skip the per-network limit (E2E-007).
+    if (host === API_HOST && request.method() !== 'OPTIONS') {
+      return route.continue({ headers: { ...request.headers(), 'x-dev-outbox-key': outboxKey } })
+    }
+    return route.continue()
   })
   return context
 }

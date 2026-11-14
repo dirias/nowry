@@ -5,7 +5,7 @@
 const { test, expect } = require('../lib/fixtures')
 const { alias } = require('../lib/run')
 const { signUp, verifyEmail } = require('../lib/ui')
-const { api, bearer, makeAccount, firebaseSignUp, firebaseSignIn, applyOobCode } = require('../lib/api')
+const { api, bearer, asSuite, makeAccount, firebaseSignUp, firebaseSignIn, applyOobCode } = require('../lib/api')
 const { waitForEmails, linkIn } = require('../lib/outbox')
 const { db } = require('../lib/db')
 
@@ -67,7 +67,7 @@ test('[edge] an invitation used by its owner no longer works', async () => {
   const { token } = await invite(email)
   const auth = await firebaseSignUp(email)
   const client = await api()
-  await client.post('/auth/email/verification', { headers: bearer(auth.idToken), data: { language: 'en' } })
+  await client.post('/auth/email/verification', { headers: asSuite(bearer(auth.idToken)), data: { language: 'en' } })
   const [message] = await waitForEmails(email, 'account.verify')
   await applyOobCode(new URL(linkIn(message, '/auth/action')).searchParams.get('oobCode'))
   const fresh = (await firebaseSignIn(email)).idToken
@@ -81,7 +81,7 @@ test('[edge] an invitation for another address is refused after that address is 
   const other = alias('inv-other')
   const auth = await firebaseSignUp(other)
   const client = await api()
-  await client.post('/auth/email/verification', { headers: bearer(auth.idToken), data: { language: 'en' } })
+  await client.post('/auth/email/verification', { headers: asSuite(bearer(auth.idToken)), data: { language: 'en' } })
   const [message] = await waitForEmails(other, 'account.verify')
   await applyOobCode(new URL(linkIn(message, '/auth/action')).searchParams.get('oobCode'))
   const fresh = (await firebaseSignIn(other)).idToken
