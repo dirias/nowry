@@ -14,6 +14,7 @@
  */
 
 import { dateOf } from './blocks/dates'
+import { apiInstant } from './apiInstant'
 
 /**
  * Flagged first (ADR-046: a priority is a flag). The legacy `priority` level
@@ -121,18 +122,7 @@ export const dueTodayCount = (tasks, now = new Date()) => tasksDueToday(tasks, {
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
-/**
- * An instant from the API. Its datetimes are UTC written without a zone
- * ("2026-10-17T20:00:00"), which a JavaScript engine reads as local time; one
- * without a zone is read as UTC here.
- */
-const instantOf = (value) => {
-  if (!value) return null
-  const text = String(value)
-  const zoned = /[zZ]|[+-]\d{2}:?\d{2}$/.test(text) || !text.includes('T') ? text : `${text}Z`
-  const date = new Date(zoned)
-  return Number.isNaN(date.getTime()) ? null : date
-}
+const instantOf = apiInstant
 
 /**
  * Open tasks not due by today: dated soonest first, undated last, flagged first

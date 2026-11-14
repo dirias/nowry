@@ -4,6 +4,7 @@
  */
 import { newestReport } from '@nowry/core/domain/moderation'
 import { shortDate } from '../invitations/inviteDates'
+import { apiTime } from '@nowry/core/domain/apiInstant'
 
 const SEP = ' · '
 const UNITS = [
@@ -14,7 +15,7 @@ const UNITS = [
 
 /** "3 h ago" / "hace 3 h": how long ago, in the largest whole unit; empty for no date. */
 export const timeAgo = (value, language, now = Date.now()) => {
-  const ms = value ? Date.parse(value) : NaN
+  const ms = apiTime(value)
   if (Number.isNaN(ms)) return ''
   const seconds = Math.max(0, Math.round((now - ms) / 1000))
   const [unit, size] = UNITS.find(([, length]) => seconds >= length) ?? UNITS[UNITS.length - 1]

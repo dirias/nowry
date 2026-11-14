@@ -1,3 +1,4 @@
+import { apiTime } from './apiInstant'
 /**
  * The admin Moderation tab's rules (ADMIN-003, FR-004, FR-011 Moderation, board B).
  *
@@ -25,7 +26,7 @@ export const itemKey = (item) => (item ? `${item.content_type}:${item.content_id
 export const publicPath = (item) => `/public/${item.content_type === 'book' ? 'books' : 'decks'}/${item.content_id}`
 
 const time = (value) => {
-  const ms = value ? Date.parse(value) : NaN
+  const ms = apiTime(value)
   return Number.isNaN(ms) ? -Infinity : ms
 }
 

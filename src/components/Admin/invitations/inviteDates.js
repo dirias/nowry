@@ -1,11 +1,11 @@
+import { apiInstant } from '@nowry/core/domain/apiInstant'
 /**
  * Dates on the Invitations tab, in the admin's language and local time zone.
  * Every helper answers an empty string for a missing or unreadable date.
  */
 const format = (value, language, options) => {
-  if (!value) return ''
-  const date = value instanceof Date ? value : new Date(value)
-  if (Number.isNaN(date.getTime())) return ''
+  const date = apiInstant(value)
+  if (!date) return ''
   try {
     return new Intl.DateTimeFormat(language || undefined, options).format(date)
   } catch {
