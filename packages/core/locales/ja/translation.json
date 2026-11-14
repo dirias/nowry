@@ -4328,6 +4328,7 @@
     "loading": "管理画面を開いています",
     "tryAgain": "もう一度試す",
     "tabs": {
+      "overview": "概要",
       "invitations": "招待",
       "waitlist": "ウェイトリスト",
       "moderation": "モデレーション",
@@ -4633,6 +4634,154 @@
         "nothing": "まだ保存するものはありません",
         "notFound": "この報告はもうありません。",
         "failed": "保存できませんでした。もう一度お試しください。"
+      }
+    },
+    "overview": {
+      "label": "概要",
+      "loading": "概要を読み込み中",
+      "error": "概要を読み込めませんでした。",
+      "needs": {
+        "title": "対応が必要",
+        "things_other": "{{count}} 件",
+        "none": "待機中のものはありません",
+        "rowLabel": "{{title}}：{{count}} 件",
+        "reports": {
+          "title": "確認待ちの報告",
+          "oldest": "最も古いもの {{when}}",
+          "go": "確認する"
+        },
+        "bugs": {
+          "title": "新しいバグ報告",
+          "critical_other": "{{count}} 件が報告者により重大とされています",
+          "noCritical": "重大とされたものはありません",
+          "go": "仕分ける"
+        },
+        "invitations": {
+          "title": "3 日以内に期限切れの招待",
+          "unused": "未使用",
+          "go": "見る"
+        },
+        "waiting": {
+          "title": "リストで待機中",
+          "since_other": "前回の一括招待以降 {{count}} 人が登録",
+          "sinceNone": "前回の一括招待以降の登録はありません",
+          "go": "リストを開く"
+        }
+      },
+      "emails": {
+        "title": "本日のメール",
+        "resets": "{{time}} UTC にリセット",
+        "invitations": "招待",
+        "confirmations": "ウェイトリストの確認メール",
+        "of": "{{share}} 件中 {{sent}} 件"
+      },
+      "recent": {
+        "title": "管理者の操作",
+        "period": "過去 7 日間",
+        "empty": "まだ何も起きていません",
+        "fullLog": "ログ全体",
+        "by": "{{what}}（{{name}}）",
+        "byScript": "{{what}}（スクリプト）",
+        "bySomeone": "{{what}}（不明なユーザー）",
+        "reason": {
+          "copyright": "著作権の報告",
+          "inappropriate": "不適切なコンテンツの報告",
+          "spam": "スパムの報告",
+          "misinformation": "誤情報の報告",
+          "other": "その他の理由の報告"
+        }
+      },
+      "when": {
+        "now": "たった今",
+        "yesterday": "昨日"
+      }
+    },
+    "log": {
+      "title": "管理ログ",
+      "crumbLabel": "現在地",
+      "kept": "24 か月保存",
+      "filtersLabel": "操作の種類で絞り込む",
+      "kinds": {
+        "all": "すべて",
+        "invitations": "招待",
+        "moderation": "モデレーション",
+        "bugs": "バグ報告",
+        "access": "管理者権限"
+      },
+      "head": {
+        "when": "日時",
+        "who": "実行者",
+        "what": "内容",
+        "reason": "理由"
+      },
+      "actor": {
+        "you": "あなた",
+        "script": "スクリプト",
+        "someone": "不明なユーザー"
+      },
+      "when": {
+        "today": "今日 {{time}}",
+        "yesterday": "昨日 {{time}}"
+      },
+      "older": "さらに表示",
+      "loading": "管理ログを読み込み中",
+      "empty": "まだ何も起きていません",
+      "filterEmpty": "この種類の操作はまだありません",
+      "error": "管理ログを読み込めませんでした。",
+      "withNote": "{{what}}（メモ付き）",
+      "what": {
+        "inviteSend": "{{email}} に招待を送信（{{cohort}}）",
+        "inviteSendPlain": "{{email}} に招待を送信",
+        "inviteCreate": "{{email}} の招待を作成（{{cohort}}）",
+        "inviteGroup_other": "{{cohort}} に {{count}} 件のアドレスを招待",
+        "inviteResend": "{{email}} に新しいリンクを送信",
+        "inviteRevoke": "{{email}} の招待を取り消し",
+        "adminGrant": "{{email}} を管理者に設定",
+        "adminRevoke": "{{email}} の管理者権限を解除",
+        "removeDeck": "デッキ「{{title}}」を非公開に",
+        "removeDeckCopies_other": "デッキ「{{title}}」と公開コピー {{count}} 件を非公開に",
+        "removeBook": "本「{{title}}」を非公開に",
+        "removeBookCopies_other": "本「{{title}}」と公開コピー {{count}} 件を非公開に",
+        "removeItem": "「{{title}}」を非公開に",
+        "removeItemCopies_other": "「{{title}}」と公開コピー {{count}} 件を非公開に",
+        "reportKept": "「{{title}}」を公開のまま維持",
+        "reportRemoved": "「{{title}}」への報告を認定",
+        "curationReview": "公式デッキ「{{title}}」を確認",
+        "bugStatus": {
+          "new": "「{{title}}」を新規に設定",
+          "in_progress": "「{{title}}」を対応中に設定",
+          "fixed": "「{{title}}」を修正済みに設定",
+          "wont_fix": "「{{title}}」を対応しないに設定"
+        },
+        "bugNote": "「{{title}}」にメモを追加",
+        "other": "「{{title}}」に {{action}}"
+      },
+      "you": {
+        "inviteSend": "{{email}} に招待を送信しました（{{cohort}}）",
+        "inviteSendPlain": "{{email}} に招待を送信しました",
+        "inviteCreate": "{{email}} の招待を作成しました（{{cohort}}）",
+        "inviteGroup_other": "{{cohort}} に {{count}} 件のアドレスを招待しました",
+        "inviteResend": "{{email}} に新しいリンクを送信しました",
+        "inviteRevoke": "{{email}} の招待を取り消しました",
+        "adminGrant": "{{email}} を管理者にしました",
+        "adminRevoke": "{{email}} の管理者権限を解除しました",
+        "removeDeck": "デッキ「{{title}}」を非公開にしました",
+        "removeDeckCopies_other": "デッキ「{{title}}」と公開コピー {{count}} 件を非公開にしました",
+        "removeBook": "本「{{title}}」を非公開にしました",
+        "removeBookCopies_other": "本「{{title}}」と公開コピー {{count}} 件を非公開にしました",
+        "removeItem": "「{{title}}」を非公開にしました",
+        "removeItemCopies_other": "「{{title}}」と公開コピー {{count}} 件を非公開にしました",
+        "reportKept": "「{{title}}」を公開のまま維持しました",
+        "reportRemoved": "「{{title}}」への報告を認定しました",
+        "curationReview": "公式デッキ「{{title}}」を確認しました",
+        "bugStatus": {
+          "new": "「{{title}}」を新規にしました",
+          "in_progress": "「{{title}}」を対応中にしました",
+          "fixed": "「{{title}}」を修正済みにしました",
+          "wont_fix": "「{{title}}」を対応しないにしました"
+        },
+        "bugNote": "「{{title}}」にメモを追加しました",
+        "other": "「{{title}}」に {{action}} を実行しました"
       }
     }
   },

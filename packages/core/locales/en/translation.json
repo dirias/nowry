@@ -4967,6 +4967,7 @@
     "loading": "Opening the admin area",
     "tryAgain": "Try again",
     "tabs": {
+      "overview": "Overview",
       "invitations": "Invitations",
       "waitlist": "Waitlist",
       "moderation": "Moderation",
@@ -5305,6 +5306,165 @@
         "nothing": "Nothing to save yet",
         "notFound": "This report is no longer there.",
         "failed": "Couldn’t save. Try again."
+      }
+    },
+    "overview": {
+      "label": "Overview",
+      "loading": "Loading the overview",
+      "error": "Couldn’t load the overview.",
+      "needs": {
+        "title": "Needs you",
+        "things_one": "{{count}} thing",
+        "things_other": "{{count}} things",
+        "none": "Nothing waiting",
+        "rowLabel": "{{title}}: {{count}}",
+        "reports": {
+          "title": "Reports to review",
+          "oldest": "Oldest {{when}}",
+          "go": "Review"
+        },
+        "bugs": {
+          "title": "New bug reports",
+          "critical_one": "{{count}} marked critical by the reporter",
+          "critical_other": "{{count}} marked critical by their reporters",
+          "noCritical": "None marked critical",
+          "go": "Triage"
+        },
+        "invitations": {
+          "title": "Invitations ending in 3 days",
+          "unused": "Not used yet",
+          "go": "See them"
+        },
+        "waiting": {
+          "title": "Waiting on the list",
+          "since_one": "{{count}} joined since your last batch",
+          "since_other": "{{count}} joined since your last batch",
+          "sinceNone": "None joined since your last batch",
+          "go": "Open list"
+        }
+      },
+      "emails": {
+        "title": "Emails today",
+        "resets": "resets {{time}} UTC",
+        "invitations": "Invitations",
+        "confirmations": "Waitlist confirmations",
+        "of": "{{sent}} of {{share}}"
+      },
+      "recent": {
+        "title": "What admins did",
+        "period": "last 7 days",
+        "empty": "Nothing has happened yet",
+        "fullLog": "Full log",
+        "by": "{{what}} — by {{name}}",
+        "byScript": "{{what}} — by the script",
+        "bySomeone": "{{what}} — by someone",
+        "reason": {
+          "copyright": "copyright report",
+          "inappropriate": "inappropriate-content report",
+          "spam": "spam report",
+          "misinformation": "misinformation report",
+          "other": "report for another reason"
+        }
+      },
+      "when": {
+        "now": "now",
+        "yesterday": "Yest."
+      }
+    },
+    "log": {
+      "title": "Admin log",
+      "crumbLabel": "Where you are",
+      "kept": "kept 24 months",
+      "filtersLabel": "Show one kind of action",
+      "kinds": {
+        "all": "All",
+        "invitations": "Invitations",
+        "moderation": "Moderation",
+        "bugs": "Bug reports",
+        "access": "Admin access"
+      },
+      "head": {
+        "when": "When",
+        "who": "Who",
+        "what": "What",
+        "reason": "Reason"
+      },
+      "actor": {
+        "you": "You",
+        "script": "Script",
+        "someone": "Someone"
+      },
+      "when": {
+        "today": "Today {{time}}",
+        "yesterday": "Yest. {{time}}"
+      },
+      "older": "Show older",
+      "loading": "Loading the admin log",
+      "empty": "Nothing has happened yet",
+      "filterEmpty": "Nothing of this kind yet",
+      "error": "Couldn’t load the admin log.",
+      "withNote": "{{what}}, with a note",
+      "what": {
+        "inviteSend": "Sent an invitation to {{email}} ({{cohort}})",
+        "inviteSendPlain": "Sent an invitation to {{email}}",
+        "inviteCreate": "Created an invitation for {{email}} ({{cohort}})",
+        "inviteGroup_one": "Invited {{count}} address to {{cohort}}",
+        "inviteGroup_other": "Invited {{count}} addresses to {{cohort}}",
+        "inviteResend": "Sent a new link to {{email}}",
+        "inviteRevoke": "Revoked the invitation for {{email}}",
+        "adminGrant": "Made {{email}} an admin",
+        "adminRevoke": "Took admin away from {{email}}",
+        "removeDeck": "Unpublished the deck {{title}}",
+        "removeDeckCopies_one": "Unpublished the deck {{title}} and {{count}} public copy",
+        "removeDeckCopies_other": "Unpublished the deck {{title}} and {{count}} public copies",
+        "removeBook": "Unpublished the book {{title}}",
+        "removeBookCopies_one": "Unpublished the book {{title}} and {{count}} public copy",
+        "removeBookCopies_other": "Unpublished the book {{title}} and {{count}} public copies",
+        "removeItem": "Unpublished {{title}}",
+        "removeItemCopies_one": "Unpublished {{title}} and {{count}} public copy",
+        "removeItemCopies_other": "Unpublished {{title}} and {{count}} public copies",
+        "reportKept": "Kept {{title}} public",
+        "reportRemoved": "Upheld a report on {{title}}",
+        "curationReview": "Reviewed the official deck {{title}}",
+        "bugStatus": {
+          "new": "Marked {{title}} new",
+          "in_progress": "Marked {{title}} in progress",
+          "fixed": "Marked {{title}} fixed",
+          "wont_fix": "Marked {{title}} won’t fix"
+        },
+        "bugNote": "Added a note to {{title}}",
+        "other": "{{action}} on {{title}}"
+      },
+      "you": {
+        "inviteSend": "You sent an invitation to {{email}} ({{cohort}})",
+        "inviteSendPlain": "You sent an invitation to {{email}}",
+        "inviteCreate": "You created an invitation for {{email}} ({{cohort}})",
+        "inviteGroup_one": "You invited {{count}} address to {{cohort}}",
+        "inviteGroup_other": "You invited {{count}} addresses to {{cohort}}",
+        "inviteResend": "You sent a new link to {{email}}",
+        "inviteRevoke": "You revoked the invitation for {{email}}",
+        "adminGrant": "You made {{email}} an admin",
+        "adminRevoke": "You took admin away from {{email}}",
+        "removeDeck": "You unpublished the deck {{title}}",
+        "removeDeckCopies_one": "You unpublished the deck {{title}} and {{count}} public copy",
+        "removeDeckCopies_other": "You unpublished the deck {{title}} and {{count}} public copies",
+        "removeBook": "You unpublished the book {{title}}",
+        "removeBookCopies_one": "You unpublished the book {{title}} and {{count}} public copy",
+        "removeBookCopies_other": "You unpublished the book {{title}} and {{count}} public copies",
+        "removeItem": "You unpublished {{title}}",
+        "removeItemCopies_one": "You unpublished {{title}} and {{count}} public copy",
+        "removeItemCopies_other": "You unpublished {{title}} and {{count}} public copies",
+        "reportKept": "You kept {{title}} public",
+        "reportRemoved": "You upheld a report on {{title}}",
+        "curationReview": "You reviewed the official deck {{title}}",
+        "bugStatus": {
+          "new": "You marked {{title}} new",
+          "in_progress": "You marked {{title}} in progress",
+          "fixed": "You marked {{title}} fixed",
+          "wont_fix": "You marked {{title}} won’t fix"
+        },
+        "bugNote": "You added a note to {{title}}",
+        "other": "You did {{action}} on {{title}}"
       }
     }
   },

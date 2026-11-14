@@ -4466,6 +4466,7 @@
     "loading": "Verwaltung wird geöffnet",
     "tryAgain": "Erneut versuchen",
     "tabs": {
+      "overview": "Übersicht",
       "invitations": "Einladungen",
       "waitlist": "Warteliste",
       "moderation": "Moderation",
@@ -4804,6 +4805,165 @@
         "nothing": "Noch nichts zu speichern",
         "notFound": "Diese Meldung gibt es nicht mehr.",
         "failed": "Speichern fehlgeschlagen. Versuch es noch einmal."
+      }
+    },
+    "overview": {
+      "label": "Übersicht",
+      "loading": "Übersicht wird geladen",
+      "error": "Die Übersicht konnte nicht geladen werden.",
+      "needs": {
+        "title": "Wartet auf dich",
+        "things_one": "{{count}} Punkt",
+        "things_other": "{{count}} Punkte",
+        "none": "Nichts offen",
+        "rowLabel": "{{title}}: {{count}} offen",
+        "reports": {
+          "title": "Zu prüfende Meldungen",
+          "oldest": "Älteste {{when}}",
+          "go": "Prüfen"
+        },
+        "bugs": {
+          "title": "Neue Fehlerberichte",
+          "critical_one": "{{count}} von der meldenden Person als kritisch markiert",
+          "critical_other": "{{count}} von den meldenden Personen als kritisch markiert",
+          "noCritical": "Keiner als kritisch markiert",
+          "go": "Sichten"
+        },
+        "invitations": {
+          "title": "Einladungen, die in 3 Tagen ablaufen",
+          "unused": "Noch nicht genutzt",
+          "go": "Ansehen"
+        },
+        "waiting": {
+          "title": "Auf der Warteliste",
+          "since_one": "{{count}} seit deinem letzten Schwung beigetreten",
+          "since_other": "{{count}} seit deinem letzten Schwung beigetreten",
+          "sinceNone": "Niemand seit deinem letzten Schwung beigetreten",
+          "go": "Liste öffnen"
+        }
+      },
+      "emails": {
+        "title": "E-Mails heute",
+        "resets": "setzt um {{time}} UTC zurück",
+        "invitations": "Einladungen",
+        "confirmations": "Wartelisten-Bestätigungen",
+        "of": "{{sent}} von {{share}}"
+      },
+      "recent": {
+        "title": "Was Admins getan haben",
+        "period": "letzte 7 Tage",
+        "empty": "Noch ist nichts passiert",
+        "fullLog": "Ganzes Protokoll",
+        "by": "{{what}} — von {{name}}",
+        "byScript": "{{what}} — vom Skript",
+        "bySomeone": "{{what}} — von jemandem",
+        "reason": {
+          "copyright": "Urheberrechtsmeldung",
+          "inappropriate": "Meldung wegen unangemessener Inhalte",
+          "spam": "Spam-Meldung",
+          "misinformation": "Meldung wegen Falschinformation",
+          "other": "Meldung aus anderem Grund"
+        }
+      },
+      "when": {
+        "now": "jetzt",
+        "yesterday": "Gest."
+      }
+    },
+    "log": {
+      "title": "Admin-Protokoll",
+      "crumbLabel": "Wo du bist",
+      "kept": "24 Monate aufbewahrt",
+      "filtersLabel": "Eine Art von Aktion zeigen",
+      "kinds": {
+        "all": "Alle",
+        "invitations": "Einladungen",
+        "moderation": "Moderation",
+        "bugs": "Fehlerberichte",
+        "access": "Admin-Zugang"
+      },
+      "head": {
+        "when": "Wann",
+        "who": "Wer",
+        "what": "Was",
+        "reason": "Grund"
+      },
+      "actor": {
+        "you": "Du",
+        "script": "Skript",
+        "someone": "Jemand"
+      },
+      "when": {
+        "today": "Heute {{time}}",
+        "yesterday": "Gest. {{time}}"
+      },
+      "older": "Ältere zeigen",
+      "loading": "Admin-Protokoll wird geladen",
+      "empty": "Noch ist nichts passiert",
+      "filterEmpty": "Davon gibt es noch nichts",
+      "error": "Das Admin-Protokoll konnte nicht geladen werden.",
+      "withNote": "{{what}}, mit Notiz",
+      "what": {
+        "inviteSend": "Einladung an {{email}} gesendet ({{cohort}})",
+        "inviteSendPlain": "Einladung an {{email}} gesendet",
+        "inviteCreate": "Einladung für {{email}} erstellt ({{cohort}})",
+        "inviteGroup_one": "{{count}} Adresse zu {{cohort}} eingeladen",
+        "inviteGroup_other": "{{count}} Adressen zu {{cohort}} eingeladen",
+        "inviteResend": "Neuen Link an {{email}} gesendet",
+        "inviteRevoke": "Einladung für {{email}} widerrufen",
+        "adminGrant": "{{email}} zum Admin gemacht",
+        "adminRevoke": "{{email}} die Admin-Rechte entzogen",
+        "removeDeck": "Das Deck {{title}} depubliziert",
+        "removeDeckCopies_one": "Das Deck {{title}} und {{count}} öffentliche Kopie depubliziert",
+        "removeDeckCopies_other": "Das Deck {{title}} und {{count}} öffentliche Kopien depubliziert",
+        "removeBook": "Das Buch {{title}} depubliziert",
+        "removeBookCopies_one": "Das Buch {{title}} und {{count}} öffentliche Kopie depubliziert",
+        "removeBookCopies_other": "Das Buch {{title}} und {{count}} öffentliche Kopien depubliziert",
+        "removeItem": "{{title}} depubliziert",
+        "removeItemCopies_one": "{{title}} und {{count}} öffentliche Kopie depubliziert",
+        "removeItemCopies_other": "{{title}} und {{count}} öffentliche Kopien depubliziert",
+        "reportKept": "{{title}} öffentlich gelassen",
+        "reportRemoved": "Einer Meldung zu {{title}} stattgegeben",
+        "curationReview": "Das offizielle Deck {{title}} geprüft",
+        "bugStatus": {
+          "new": "{{title}} als neu markiert",
+          "in_progress": "{{title}} als in Arbeit markiert",
+          "fixed": "{{title}} als behoben markiert",
+          "wont_fix": "{{title}} als „wird nicht behoben“ markiert"
+        },
+        "bugNote": "Eine Notiz zu {{title}} hinzugefügt",
+        "other": "{{action}} bei {{title}}"
+      },
+      "you": {
+        "inviteSend": "Du hast eine Einladung an {{email}} gesendet ({{cohort}})",
+        "inviteSendPlain": "Du hast eine Einladung an {{email}} gesendet",
+        "inviteCreate": "Du hast eine Einladung für {{email}} erstellt ({{cohort}})",
+        "inviteGroup_one": "Du hast {{count}} Adresse zu {{cohort}} eingeladen",
+        "inviteGroup_other": "Du hast {{count}} Adressen zu {{cohort}} eingeladen",
+        "inviteResend": "Du hast einen neuen Link an {{email}} gesendet",
+        "inviteRevoke": "Du hast die Einladung für {{email}} widerrufen",
+        "adminGrant": "Du hast {{email}} zum Admin gemacht",
+        "adminRevoke": "Du hast {{email}} die Admin-Rechte entzogen",
+        "removeDeck": "Du hast das Deck {{title}} depubliziert",
+        "removeDeckCopies_one": "Du hast das Deck {{title}} und {{count}} öffentliche Kopie depubliziert",
+        "removeDeckCopies_other": "Du hast das Deck {{title}} und {{count}} öffentliche Kopien depubliziert",
+        "removeBook": "Du hast das Buch {{title}} depubliziert",
+        "removeBookCopies_one": "Du hast das Buch {{title}} und {{count}} öffentliche Kopie depubliziert",
+        "removeBookCopies_other": "Du hast das Buch {{title}} und {{count}} öffentliche Kopien depubliziert",
+        "removeItem": "Du hast {{title}} depubliziert",
+        "removeItemCopies_one": "Du hast {{title}} und {{count}} öffentliche Kopie depubliziert",
+        "removeItemCopies_other": "Du hast {{title}} und {{count}} öffentliche Kopien depubliziert",
+        "reportKept": "Du hast {{title}} öffentlich gelassen",
+        "reportRemoved": "Du hast einer Meldung zu {{title}} stattgegeben",
+        "curationReview": "Du hast das offizielle Deck {{title}} geprüft",
+        "bugStatus": {
+          "new": "Du hast {{title}} als neu markiert",
+          "in_progress": "Du hast {{title}} als in Arbeit markiert",
+          "fixed": "Du hast {{title}} als behoben markiert",
+          "wont_fix": "Du hast {{title}} als „wird nicht behoben“ markiert"
+        },
+        "bugNote": "Du hast eine Notiz zu {{title}} hinzugefügt",
+        "other": "Du hast {{action}} bei {{title}} ausgeführt"
       }
     }
   },

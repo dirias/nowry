@@ -4477,6 +4477,7 @@
     "loading": "Ouverture de l'administration",
     "tryAgain": "Réessayer",
     "tabs": {
+      "overview": "Vue d’ensemble",
       "invitations": "Inviter",
       "waitlist": "Liste d'attente",
       "moderation": "Modération",
@@ -4815,6 +4816,165 @@
         "nothing": "Rien à enregistrer pour l’instant",
         "notFound": "Ce signalement n’existe plus.",
         "failed": "Impossible d’enregistrer. Réessayez."
+      }
+    },
+    "overview": {
+      "label": "Vue d’ensemble",
+      "loading": "Chargement de la vue d’ensemble",
+      "error": "Impossible de charger la vue d’ensemble.",
+      "needs": {
+        "title": "À traiter",
+        "things_one": "{{count}} point",
+        "things_other": "{{count}} points",
+        "none": "Rien en attente",
+        "rowLabel": "{{title}} : {{count}}",
+        "reports": {
+          "title": "Signalements à examiner",
+          "oldest": "Le plus ancien {{when}}",
+          "go": "Examiner"
+        },
+        "bugs": {
+          "title": "Nouveaux rapports de bug",
+          "critical_one": "{{count}} marqué critique par son auteur",
+          "critical_other": "{{count}} marqués critiques par leurs auteurs",
+          "noCritical": "Aucun marqué critique",
+          "go": "Trier"
+        },
+        "invitations": {
+          "title": "Invitations qui expirent dans 3 jours",
+          "unused": "Pas encore utilisées",
+          "go": "Les voir"
+        },
+        "waiting": {
+          "title": "En attente sur la liste",
+          "since_one": "{{count}} inscrit depuis votre dernier lot",
+          "since_other": "{{count}} inscrits depuis votre dernier lot",
+          "sinceNone": "Aucune inscription depuis votre dernier lot",
+          "go": "Ouvrir la liste"
+        }
+      },
+      "emails": {
+        "title": "E-mails du jour",
+        "resets": "remise à zéro à {{time}} UTC",
+        "invitations": "Invitations",
+        "confirmations": "Confirmations de la liste d’attente",
+        "of": "{{sent}} sur {{share}}"
+      },
+      "recent": {
+        "title": "Ce qu’ont fait les admins",
+        "period": "7 derniers jours",
+        "empty": "Rien ne s’est encore passé",
+        "fullLog": "Journal complet",
+        "by": "{{what}} — par {{name}}",
+        "byScript": "{{what}} — par le script",
+        "bySomeone": "{{what}} — par quelqu’un",
+        "reason": {
+          "copyright": "signalement pour droits d’auteur",
+          "inappropriate": "signalement pour contenu inapproprié",
+          "spam": "signalement pour spam",
+          "misinformation": "signalement pour désinformation",
+          "other": "signalement pour un autre motif"
+        }
+      },
+      "when": {
+        "now": "à l’instant",
+        "yesterday": "Hier"
+      }
+    },
+    "log": {
+      "title": "Journal admin",
+      "crumbLabel": "Où vous êtes",
+      "kept": "conservé 24 mois",
+      "filtersLabel": "Afficher un type d’action",
+      "kinds": {
+        "all": "Tout",
+        "invitations": "Invitations",
+        "moderation": "Modération",
+        "bugs": "Rapports de bug",
+        "access": "Accès admin"
+      },
+      "head": {
+        "when": "Quand",
+        "who": "Qui",
+        "what": "Quoi",
+        "reason": "Motif"
+      },
+      "actor": {
+        "you": "Vous",
+        "script": "Le script",
+        "someone": "Quelqu’un"
+      },
+      "when": {
+        "today": "Aujourd’hui {{time}}",
+        "yesterday": "Hier {{time}}"
+      },
+      "older": "Voir plus ancien",
+      "loading": "Chargement du journal admin",
+      "empty": "Rien ne s’est encore passé",
+      "filterEmpty": "Rien de ce type pour l’instant",
+      "error": "Impossible de charger le journal admin.",
+      "withNote": "{{what}}, avec une note",
+      "what": {
+        "inviteSend": "A envoyé une invitation à {{email}} ({{cohort}})",
+        "inviteSendPlain": "A envoyé une invitation à {{email}}",
+        "inviteCreate": "A créé une invitation pour {{email}} ({{cohort}})",
+        "inviteGroup_one": "A invité {{count}} adresse dans {{cohort}}",
+        "inviteGroup_other": "A invité {{count}} adresses dans {{cohort}}",
+        "inviteResend": "A envoyé un nouveau lien à {{email}}",
+        "inviteRevoke": "A révoqué l’invitation de {{email}}",
+        "adminGrant": "A fait de {{email}} un admin",
+        "adminRevoke": "A retiré l’accès admin à {{email}}",
+        "removeDeck": "A dépublié le paquet {{title}}",
+        "removeDeckCopies_one": "A dépublié le paquet {{title}} et {{count}} copie publique",
+        "removeDeckCopies_other": "A dépublié le paquet {{title}} et {{count}} copies publiques",
+        "removeBook": "A dépublié le livre {{title}}",
+        "removeBookCopies_one": "A dépublié le livre {{title}} et {{count}} copie publique",
+        "removeBookCopies_other": "A dépublié le livre {{title}} et {{count}} copies publiques",
+        "removeItem": "A dépublié {{title}}",
+        "removeItemCopies_one": "A dépublié {{title}} et {{count}} copie publique",
+        "removeItemCopies_other": "A dépublié {{title}} et {{count}} copies publiques",
+        "reportKept": "A laissé {{title}} public",
+        "reportRemoved": "A donné suite à un signalement sur {{title}}",
+        "curationReview": "A vérifié le paquet officiel {{title}}",
+        "bugStatus": {
+          "new": "A marqué {{title}} comme nouveau",
+          "in_progress": "A marqué {{title}} comme en cours",
+          "fixed": "A marqué {{title}} comme corrigé",
+          "wont_fix": "A marqué {{title}} comme non corrigé"
+        },
+        "bugNote": "A ajouté une note à {{title}}",
+        "other": "{{action}} sur {{title}}"
+      },
+      "you": {
+        "inviteSend": "Vous avez envoyé une invitation à {{email}} ({{cohort}})",
+        "inviteSendPlain": "Vous avez envoyé une invitation à {{email}}",
+        "inviteCreate": "Vous avez créé une invitation pour {{email}} ({{cohort}})",
+        "inviteGroup_one": "Vous avez invité {{count}} adresse dans {{cohort}}",
+        "inviteGroup_other": "Vous avez invité {{count}} adresses dans {{cohort}}",
+        "inviteResend": "Vous avez envoyé un nouveau lien à {{email}}",
+        "inviteRevoke": "Vous avez révoqué l’invitation de {{email}}",
+        "adminGrant": "Vous avez fait de {{email}} un admin",
+        "adminRevoke": "Vous avez retiré l’accès admin à {{email}}",
+        "removeDeck": "Vous avez dépublié le paquet {{title}}",
+        "removeDeckCopies_one": "Vous avez dépublié le paquet {{title}} et {{count}} copie publique",
+        "removeDeckCopies_other": "Vous avez dépublié le paquet {{title}} et {{count}} copies publiques",
+        "removeBook": "Vous avez dépublié le livre {{title}}",
+        "removeBookCopies_one": "Vous avez dépublié le livre {{title}} et {{count}} copie publique",
+        "removeBookCopies_other": "Vous avez dépublié le livre {{title}} et {{count}} copies publiques",
+        "removeItem": "Vous avez dépublié {{title}}",
+        "removeItemCopies_one": "Vous avez dépublié {{title}} et {{count}} copie publique",
+        "removeItemCopies_other": "Vous avez dépublié {{title}} et {{count}} copies publiques",
+        "reportKept": "Vous avez laissé {{title}} public",
+        "reportRemoved": "Vous avez donné suite à un signalement sur {{title}}",
+        "curationReview": "Vous avez vérifié le paquet officiel {{title}}",
+        "bugStatus": {
+          "new": "Vous avez marqué {{title}} comme nouveau",
+          "in_progress": "Vous avez marqué {{title}} comme en cours",
+          "fixed": "Vous avez marqué {{title}} comme corrigé",
+          "wont_fix": "Vous avez marqué {{title}} comme non corrigé"
+        },
+        "bugNote": "Vous avez ajouté une note à {{title}}",
+        "other": "Vous avez fait {{action}} sur {{title}}"
       }
     }
   },

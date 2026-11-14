@@ -189,6 +189,8 @@ const IDENTICAL_BY_DESIGN = {
     'agent.ready.field.general',
     // ADMIN-003: "Spam" is the word Spanish moderation uses for it, as in the report form's "Spam o baja calidad".
     'admin.mod.reasons.spam',
+    // ADMIN-007c: "script" is the word Spanish uses for a program like set_admin.py.
+    'admin.log.actor.script',
     // "General" and "Plan" are the Spanish words for the chat subject labels (CHAT-010).
     'agent.subject.general',
     'agent.subject.plan',
@@ -235,6 +237,9 @@ const IDENTICAL_BY_DESIGN = {
   // "Portrait(s)" is the French word, so both the heading and the numbered
   // option label land on English by coincidence rather than by neglect.
   fr: [
+    // ADMIN-007c: "Invitations" is the French word, the log's filter and the email meter alike.
+    'admin.log.kinds.invitations',
+    'admin.overview.emails.invitations',
     // ADMIN-007b: "Notes" is the French word for the admin's notes on a bug report.
     'admin.bugs.item.notes',
     // MEDIA-005: the phone reader's accessible name for an image with no alt text is the French word.
@@ -347,6 +352,8 @@ const IDENTICAL_BY_DESIGN = {
     // ADMIN-003: "Moderation" and "Spam" are the German words, spelled as in English.
     'admin.tabs.moderation',
     'admin.mod.reasons.spam',
+    // ADMIN-007c: the log's Moderation filter is the same German word as the tab.
+    'admin.log.kinds.moderation',
     ...BETA_MARK,
     'taxonomy.topics.design',
     'news.categories.design',

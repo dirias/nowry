@@ -4967,6 +4967,7 @@
     "loading": "Abriendo la administración",
     "tryAgain": "Intentar de nuevo",
     "tabs": {
+      "overview": "Resumen",
       "invitations": "Invitaciones",
       "waitlist": "Lista de espera",
       "moderation": "Moderación",
@@ -5305,6 +5306,165 @@
         "nothing": "Todavía no hay nada que guardar",
         "notFound": "Este informe ya no existe.",
         "failed": "No se pudo guardar. Vuelve a intentarlo."
+      }
+    },
+    "overview": {
+      "label": "Resumen",
+      "loading": "Cargando el resumen",
+      "error": "No se pudo cargar el resumen.",
+      "needs": {
+        "title": "Te necesita",
+        "things_one": "{{count}} asunto",
+        "things_other": "{{count}} asuntos",
+        "none": "Nada pendiente",
+        "rowLabel": "{{title}}: {{count}} pendientes",
+        "reports": {
+          "title": "Denuncias por revisar",
+          "oldest": "La más antigua {{when}}",
+          "go": "Revisar"
+        },
+        "bugs": {
+          "title": "Errores nuevos",
+          "critical_one": "{{count}} marcado como crítico por quien lo reportó",
+          "critical_other": "{{count}} marcados como críticos por quienes los reportaron",
+          "noCritical": "Ninguno marcado como crítico",
+          "go": "Clasificar"
+        },
+        "invitations": {
+          "title": "Invitaciones que vencen en 3 días",
+          "unused": "Aún sin usar",
+          "go": "Verlas"
+        },
+        "waiting": {
+          "title": "Esperando en la lista",
+          "since_one": "{{count}} se unió desde tu último lote",
+          "since_other": "{{count}} se unieron desde tu último lote",
+          "sinceNone": "Nadie se unió desde tu último lote",
+          "go": "Abrir lista"
+        }
+      },
+      "emails": {
+        "title": "Correos de hoy",
+        "resets": "se reinicia a las {{time}} UTC",
+        "invitations": "Invitaciones",
+        "confirmations": "Confirmaciones de la lista de espera",
+        "of": "{{sent}} de {{share}}"
+      },
+      "recent": {
+        "title": "Lo que hicieron los admins",
+        "period": "últimos 7 días",
+        "empty": "Aún no ha pasado nada",
+        "fullLog": "Registro completo",
+        "by": "{{what}} — por {{name}}",
+        "byScript": "{{what}} — por el script",
+        "bySomeone": "{{what}} — por alguien",
+        "reason": {
+          "copyright": "denuncia por derechos de autor",
+          "inappropriate": "denuncia por contenido inapropiado",
+          "spam": "denuncia por spam",
+          "misinformation": "denuncia por desinformación",
+          "other": "denuncia por otro motivo"
+        }
+      },
+      "when": {
+        "now": "ahora",
+        "yesterday": "Ayer"
+      }
+    },
+    "log": {
+      "title": "Registro de admin",
+      "crumbLabel": "Dónde estás",
+      "kept": "se guarda 24 meses",
+      "filtersLabel": "Mostrar un tipo de acción",
+      "kinds": {
+        "all": "Todo",
+        "invitations": "Invitaciones",
+        "moderation": "Moderación",
+        "bugs": "Errores",
+        "access": "Acceso de admin"
+      },
+      "head": {
+        "when": "Cuándo",
+        "who": "Quién",
+        "what": "Qué",
+        "reason": "Motivo"
+      },
+      "actor": {
+        "you": "Tú",
+        "script": "Script",
+        "someone": "Alguien"
+      },
+      "when": {
+        "today": "Hoy {{time}}",
+        "yesterday": "Ayer {{time}}"
+      },
+      "older": "Ver anteriores",
+      "loading": "Cargando el registro de admin",
+      "empty": "Aún no ha pasado nada",
+      "filterEmpty": "Aún no hay nada de este tipo",
+      "error": "No se pudo cargar el registro de admin.",
+      "withNote": "{{what}}, con una nota",
+      "what": {
+        "inviteSend": "Envió una invitación a {{email}} ({{cohort}})",
+        "inviteSendPlain": "Envió una invitación a {{email}}",
+        "inviteCreate": "Creó una invitación para {{email}} ({{cohort}})",
+        "inviteGroup_one": "Invitó a {{count}} dirección a {{cohort}}",
+        "inviteGroup_other": "Invitó a {{count}} direcciones a {{cohort}}",
+        "inviteResend": "Envió un enlace nuevo a {{email}}",
+        "inviteRevoke": "Revocó la invitación de {{email}}",
+        "adminGrant": "Hizo admin a {{email}}",
+        "adminRevoke": "Quitó el acceso de admin a {{email}}",
+        "removeDeck": "Despublicó el mazo {{title}}",
+        "removeDeckCopies_one": "Despublicó el mazo {{title}} y {{count}} copia pública",
+        "removeDeckCopies_other": "Despublicó el mazo {{title}} y {{count}} copias públicas",
+        "removeBook": "Despublicó el libro {{title}}",
+        "removeBookCopies_one": "Despublicó el libro {{title}} y {{count}} copia pública",
+        "removeBookCopies_other": "Despublicó el libro {{title}} y {{count}} copias públicas",
+        "removeItem": "Despublicó {{title}}",
+        "removeItemCopies_one": "Despublicó {{title}} y {{count}} copia pública",
+        "removeItemCopies_other": "Despublicó {{title}} y {{count}} copias públicas",
+        "reportKept": "Mantuvo {{title}} público",
+        "reportRemoved": "Dio por buena una denuncia sobre {{title}}",
+        "curationReview": "Revisó el mazo oficial {{title}}",
+        "bugStatus": {
+          "new": "Marcó {{title}} como nuevo",
+          "in_progress": "Marcó {{title}} como en curso",
+          "fixed": "Marcó {{title}} como resuelto",
+          "wont_fix": "Marcó {{title}} como no se corregirá"
+        },
+        "bugNote": "Añadió una nota a {{title}}",
+        "other": "{{action}} en {{title}}"
+      },
+      "you": {
+        "inviteSend": "Enviaste una invitación a {{email}} ({{cohort}})",
+        "inviteSendPlain": "Enviaste una invitación a {{email}}",
+        "inviteCreate": "Creaste una invitación para {{email}} ({{cohort}})",
+        "inviteGroup_one": "Invitaste a {{count}} dirección a {{cohort}}",
+        "inviteGroup_other": "Invitaste a {{count}} direcciones a {{cohort}}",
+        "inviteResend": "Enviaste un enlace nuevo a {{email}}",
+        "inviteRevoke": "Revocaste la invitación de {{email}}",
+        "adminGrant": "Hiciste admin a {{email}}",
+        "adminRevoke": "Quitaste el acceso de admin a {{email}}",
+        "removeDeck": "Despublicaste el mazo {{title}}",
+        "removeDeckCopies_one": "Despublicaste el mazo {{title}} y {{count}} copia pública",
+        "removeDeckCopies_other": "Despublicaste el mazo {{title}} y {{count}} copias públicas",
+        "removeBook": "Despublicaste el libro {{title}}",
+        "removeBookCopies_one": "Despublicaste el libro {{title}} y {{count}} copia pública",
+        "removeBookCopies_other": "Despublicaste el libro {{title}} y {{count}} copias públicas",
+        "removeItem": "Despublicaste {{title}}",
+        "removeItemCopies_one": "Despublicaste {{title}} y {{count}} copia pública",
+        "removeItemCopies_other": "Despublicaste {{title}} y {{count}} copias públicas",
+        "reportKept": "Mantuviste {{title}} público",
+        "reportRemoved": "Diste por buena una denuncia sobre {{title}}",
+        "curationReview": "Revisaste el mazo oficial {{title}}",
+        "bugStatus": {
+          "new": "Marcaste {{title}} como nuevo",
+          "in_progress": "Marcaste {{title}} como en curso",
+          "fixed": "Marcaste {{title}} como resuelto",
+          "wont_fix": "Marcaste {{title}} como no se corregirá"
+        },
+        "bugNote": "Añadiste una nota a {{title}}",
+        "other": "Hiciste {{action}} en {{title}}"
       }
     }
   },
