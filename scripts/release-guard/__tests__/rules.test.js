@@ -3,7 +3,7 @@
  * suite run tested and where each repository's `main` and `dev` stand, may
  * `main` fast-forward to the tested commit?
  *
- *   node --test scripts/release-guard/__tests__
+ *   npm run test:release-guard
  */
 const { test } = require('node:test')
 const assert = require('node:assert/strict')

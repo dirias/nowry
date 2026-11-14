@@ -81,7 +81,7 @@
     "e2e:dev": "node e2e-dev/run.js",
     "e2e:prod": "node e2e-dev/run.js prod",
     "release:guard": "node scripts/release-guard.js",
-    "test:release-guard": "node --test scripts/release-guard/__tests__"
+    "test:release-guard": "node --test scripts/release-guard/__tests__/rules.test.js"
   },
   "eslintConfig": {
     "extends": [
